@@ -1,0 +1,93 @@
+import { VALID_DECISION_KEYS, type Section } from "@/types";
+
+// Tool declarations for Gemini Flash Live
+export const willBuddyTools = [
+  {
+    functionDeclarations: [
+      {
+        name: "recordDecision",
+        description:
+          "Record a structured estate planning decision from the conversation.",
+        parameters: {
+          type: "OBJECT" as const,
+          properties: {
+            section: {
+              type: "STRING" as const,
+              description:
+                "Section: family, guardianship, assets, healthcare, executor",
+            },
+            key: {
+              type: "STRING" as const,
+              description:
+                "Decision key, e.g. primary_guardian, inheritance_age",
+            },
+            value: {
+              type: "STRING" as const,
+              description:
+                "The decision value as plain text (e.g. 'Anya Petrov', '25 years old')",
+            },
+            confidence: {
+              type: "STRING" as const,
+              description: "decisive, needs_discussion, or flagged",
+            },
+          },
+          required: ["section", "key", "value"],
+        },
+      },
+      {
+        name: "updateProgress",
+        description:
+          "Mark a section as complete and advance to the next section.",
+        parameters: {
+          type: "OBJECT" as const,
+          properties: {
+            section: {
+              type: "STRING" as const,
+              description: "The section just completed",
+            },
+            nextSection: {
+              type: "STRING" as const,
+              description: "The next section to begin",
+            },
+          },
+          required: ["section"],
+        },
+      },
+      {
+        name: "flagForReview",
+        description:
+          "Flag a topic that needs more discussion or is unresolved.",
+        parameters: {
+          type: "OBJECT" as const,
+          properties: {
+            topic: {
+              type: "STRING" as const,
+              description: "What needs review",
+            },
+            reason: {
+              type: "STRING" as const,
+              description: "Why it was flagged",
+            },
+          },
+          required: ["topic", "reason"],
+        },
+      },
+    ],
+  },
+];
+
+/**
+ * Validate a tool call against the whitelist of valid section/key pairs.
+ * Returns true if the call is valid, false otherwise.
+ */
+export function validateToolCall(
+  section: string,
+  key: string,
+  value: string
+): boolean {
+  const validKeys = VALID_DECISION_KEYS[section as Section];
+  if (!validKeys) return false;
+  if (!validKeys.includes(key)) return false;
+  if (value.length > 2000) return false;
+  return true;
+}

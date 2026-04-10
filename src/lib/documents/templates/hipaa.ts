@@ -1,0 +1,167 @@
+import type { Decision } from "@/types";
+
+function d(decisions: Decision[], section: string, key: string): string {
+  const found = decisions.find((dec) => dec.section === section && dec.key === key);
+  return found?.value ?? "[NOT SPECIFIED]";
+}
+
+/**
+ * Generate a plain-English HIPAA Authorization document from
+ * the user's decisions.
+ */
+export function generateHipaaText(decisions: Decision[]): string {
+  const testatorName = d(decisions, "family", "full_name");
+  const partnerName = d(decisions, "family", "partner_name");
+  const medicalPoa = d(decisions, "healthcare", "medical_poa");
+  const partnerMedicalPoa = d(decisions, "healthcare", "partner_medical_poa");
+
+  const hasPartner = partnerName !== "[NOT SPECIFIED]";
+
+  // Build the list of authorized persons
+  const authorizedPersons: string[] = [];
+  if (hasPartner) authorizedPersons.push(partnerName);
+  if (medicalPoa !== "[NOT SPECIFIED]" && medicalPoa !== partnerName) {
+    authorizedPersons.push(medicalPoa);
+  }
+  const authorizedList =
+    authorizedPersons.length > 0
+      ? authorizedPersons.map((name, i) => `  ${i + 1}. ${name}`).join("\n")
+      : "  [NO AUTHORIZED PERSONS SPECIFIED]";
+
+  // For partner's authorization
+  const partnerAuthorizedPersons: string[] = [];
+  partnerAuthorizedPersons.push(testatorName);
+  if (
+    partnerMedicalPoa !== "[NOT SPECIFIED]" &&
+    partnerMedicalPoa !== testatorName
+  ) {
+    partnerAuthorizedPersons.push(partnerMedicalPoa);
+  }
+  const partnerAuthorizedList = partnerAuthorizedPersons
+    .map((name, i) => `  ${i + 1}. ${name}`)
+    .join("\n");
+
+  return `
+================================================================================
+              DRAFT DOCUMENT - FOR ATTORNEY REVIEW ONLY
+================================================================================
+
+              HIPAA AUTHORIZATION
+         FOR RELEASE OF MEDICAL INFORMATION
+
+State of Texas
+
+
+AUTHORIZATION BY ${testatorName.toUpperCase()}
+${"=".repeat(60)}
+
+I, ${testatorName}, hereby authorize any healthcare provider, health plan,
+hospital, clinic, laboratory, pharmacy, or other covered entity to release
+my protected health information (PHI) to the following persons:
+
+AUTHORIZED PERSONS:
+
+${authorizedList}
+
+SCOPE OF AUTHORIZATION
+-----------------------
+
+This authorization covers ALL of my protected health information, including
+but not limited to:
+
+  - Medical records and history
+  - Diagnoses, test results, and lab work
+  - Treatment plans and medications
+  - Mental health records
+  - Billing and insurance information
+  - Any other health information maintained by a covered entity
+
+The authorized persons listed above may:
+
+  - Request and receive copies of my medical records
+  - Discuss my health status and treatment with my healthcare providers
+  - Make inquiries on my behalf regarding my care
+  - Receive information by phone, mail, email, or in person
+
+PURPOSE
+--------
+
+This authorization is given so that my designated persons can help manage my
+healthcare, make informed decisions on my behalf (especially in conjunction
+with the Medical Power of Attorney), and ensure continuity of care.
+
+DURATION
+---------
+
+This authorization remains in effect until I revoke it in writing. I understand
+that I may revoke this authorization at any time by providing written notice to
+my healthcare providers.
+
+UNDERSTANDING
+--------------
+
+I understand that:
+
+  1. I have the right to refuse to sign this authorization and that my
+     healthcare or benefits will not be affected by my refusal.
+
+  2. Information disclosed under this authorization may be subject to
+     re-disclosure by the recipients and may no longer be protected by
+     federal privacy regulations.
+
+  3. I may inspect or receive a copy of the information described in this
+     authorization.
+
+
+SIGNATURE
+
+________________________________________
+${testatorName}
+Date: ____________________
+
+${hasPartner ? `
+
+AUTHORIZATION BY ${partnerName.toUpperCase()}
+${"=".repeat(60)}
+
+I, ${partnerName}, hereby authorize any healthcare provider, health plan,
+hospital, clinic, laboratory, pharmacy, or other covered entity to release
+my protected health information (PHI) to the following persons:
+
+AUTHORIZED PERSONS:
+
+${partnerAuthorizedList}
+
+The scope, purpose, duration, and understanding provisions stated above
+apply equally to this authorization.
+
+
+SIGNATURE
+
+________________________________________
+${partnerName}
+Date: ____________________
+` : ""}
+
+
+WITNESS 1:
+
+Signature: ________________________________________
+Printed name: ________________________________________
+Date: ____________________
+
+
+WITNESS 2:
+
+Signature: ________________________________________
+Printed name: ________________________________________
+Date: ____________________
+
+================================================================================
+              DRAFT DOCUMENT - FOR ATTORNEY REVIEW ONLY
+  This document was generated by WillBuddy as a starting point for your
+  estate plan. It is NOT legal advice. Please have a licensed Texas estate
+  planning attorney review and finalize this document before signing.
+================================================================================
+`.trim();
+}
