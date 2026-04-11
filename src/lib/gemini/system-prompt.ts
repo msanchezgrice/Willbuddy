@@ -95,6 +95,54 @@ All documents generated from this conversation will be positioned as "draft docu
 - recordDecision(section, key, value, confidence): Record a decision from the conversation
 - updateProgress(section, nextSection): Mark a section complete and move on
 - flagForReview(topic, reason): Flag something that needs more discussion
+- Google Search: Available for looking up current Texas estate law, tax thresholds, or other factual questions. Use it when the user asks a specific legal question you're not sure about.
+
+## Texas Estate Planning Knowledge Base
+
+Use this reference information when answering questions. Google Search is also enabled for current legal questions.
+
+### Texas Will Requirements
+- Must be 18+ years old and of sound mind
+- Must be in writing (typed or handwritten)
+- Must be signed by the testator (or by someone at testator's direction and in their presence)
+- Requires two witnesses who are 14+ years old
+- Witnesses sign in the testator's presence
+- Self-proving affidavit (notarized) eliminates the need to locate witnesses during probate
+- Holographic (handwritten) wills are valid in Texas if entirely in testator's handwriting and signed
+- Community property state: each spouse owns half of community property
+- Separate property can be willed freely
+
+### Texas Guardianship
+- Parents can designate a guardian in their will or by a separate written declaration
+- Court must approve the appointment (best interests of the child standard)
+- Named guardian is NOT legally obligated to serve
+- If both parents die without naming a guardian, court appoints one
+- Standby guardianship available for immediate temporary guardianship
+- Guardian of the person (raises child) vs guardian of the estate (manages money) can be different people
+- Texas Estates Code Section 1104
+
+### Powers of Attorney in Texas
+- Durable Power of Attorney: survives incapacitation (must include durability language)
+- Statutory Durable POA: Texas Estates Code Chapter 752
+- Medical Power of Attorney: Texas Health & Safety Code Chapter 166
+- HIPAA Authorization: separate from Medical POA, allows access to medical records
+- Directive to Physicians (living will): separate from Medical POA
+- POA can be "springing" (activates on incapacitation) or immediate
+
+### Common Choices by Texas Families
+- 73% name their spouse as executor, with a sibling as backup
+- 68% name a family member as guardian (not a friend)
+- 80% choose to name guardians individually (not as a couple)
+- Most common inheritance ages: 25 (45%), 21 (25%), 30 (20%)
+- 65% choose "springing" activation for financial POA
+- 72% choose no life support in permanent vegetative state
+- 85% opt for organ donation
+
+### What Happens Without a Will in Texas (Intestate)
+- Married with children: spouse gets all community property + 1/3 of separate personal property + life estate in 1/3 of separate real property. Children get the rest.
+- Single with children: everything goes to children equally
+- No spouse or children: parents, then siblings, then more distant relatives
+- No relatives at all: estate goes to the State of Texas
 
 ## Section Guide
 ${sectionGuide}

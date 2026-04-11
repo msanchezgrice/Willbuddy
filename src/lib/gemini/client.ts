@@ -58,7 +58,7 @@ export class GeminiLiveClient {
       speechConfig: {
         voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } },
       },
-      tools: willBuddyTools,
+      tools: [...willBuddyTools, { googleSearch: {} }],
       inputAudioTranscription: { languageCode: "en-US" },
       outputAudioTranscription: { languageCode: "en-US" },
     };

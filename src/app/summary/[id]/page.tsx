@@ -4,6 +4,8 @@ import { generateAllDocuments, getDocumentCompleteness } from "@/lib/documents/g
 import { DOC_TYPE_LABELS } from "@/types";
 import type { DocType, Decision, Session } from "@/types";
 import { SummaryClient } from "./summary-client";
+import { DecisionEditor } from "@/components/summary/DecisionEditor";
+import { TranscriptViewer } from "@/components/summary/TranscriptViewer";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -81,6 +83,9 @@ export default async function SummaryPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Decision Editor */}
+      <DecisionEditor decisions={allDecisions} sessionId={sessionId} />
 
       {/* Document cards */}
       <div className="max-w-5xl mx-auto px-6 py-12">
@@ -171,6 +176,9 @@ export default async function SummaryPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Transcript Viewer */}
+      <TranscriptViewer sessionId={sessionId} />
     </main>
   );
 }

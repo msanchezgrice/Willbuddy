@@ -248,6 +248,16 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       gemini.onToolCall = handleToolCall;
       gemini.onSectionChange = (section: Section) => setCurrentSection(section);
       gemini.onAudioData = (base64Audio: string) => player.play(base64Audio);
+      gemini.onSessionHandle = (handle: string) => {
+        // Save Gemini resume handle for session continuity
+        if (sid) {
+          void fetch('/api/session', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: sid, geminiResumeHandle: handle }),
+          });
+        }
+      };
 
       recorder.onData = (base64Pcm: string) => {
         if (!isMicMuted) gemini.sendAudio(base64Pcm);
