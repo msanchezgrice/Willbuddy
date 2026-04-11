@@ -1,8 +1,15 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  typescript: true,
-});
+let _stripe: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+      typescript: true,
+    });
+  }
+  return _stripe;
+}
 
 const PRICE_AMOUNT_CENTS = 4900; // $49 one-time
 const CURRENCY = "usd";
@@ -15,7 +22,7 @@ export async function createCheckoutSession(
   sessionId: string,
   userEmail: string
 ): Promise<string> {
-  const checkoutSession = await stripe.checkout.sessions.create({
+  const checkoutSession = await getStripe().checkout.sessions.create({
     mode: "payment",
     customer_email: userEmail,
     line_items: [
