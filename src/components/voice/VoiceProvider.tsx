@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { useRouter } from 'next/navigation';
 import type {
   Decision,
   Section,
@@ -56,6 +57,7 @@ interface VoiceProviderProps {
 }
 
 export default function VoiceProvider({ children, sessionId: initialSessionId }: VoiceProviderProps) {
+  const router = useRouter();
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [currentSection, setCurrentSection] = useState<Section>('family');
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
@@ -249,12 +251,25 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       gemini.onSectionChange = (section: Section) => setCurrentSection(section);
       gemini.onAudioData = (base64Audio: string) => player.play(base64Audio);
       gemini.onSessionHandle = (handle: string) => {
-        // Save Gemini resume handle for session continuity
         if (sid) {
           void fetch('/api/session', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId: sid, geminiResumeHandle: handle }),
+          });
+        }
+      };
+      gemini.onSessionComplete = () => {
+        // Mark session complete and redirect to summary
+        if (sid) {
+          void fetch('/api/session', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: sid, status: 'completed' }),
+          }).then(() => {
+            recorderRef.current?.stop();
+            clientRef.current?.disconnect();
+            router.push(`/summary/${sid}`);
           });
         }
       };

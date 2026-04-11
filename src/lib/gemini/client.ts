@@ -38,6 +38,7 @@ export class GeminiLiveClient {
   onSectionChange: ((section: Section) => void) | null = null;
   onAudioData: ((base64Audio: string) => void) | null = null;
   onSessionHandle: ((handle: string) => void) | null = null;
+  onSessionComplete: (() => void) | null = null;
 
   constructor(options: GeminiLiveClientOptions) {
     this.options = options;
@@ -235,8 +236,13 @@ export class GeminiLiveClient {
       this.onToolCall?.(name, args);
 
       // Handle section changes
-      if (name === "updateProgress" && args.nextSection) {
-        this.onSectionChange?.(args.nextSection as Section);
+      if (name === "updateProgress") {
+        if (args.nextSection) {
+          this.onSectionChange?.(args.nextSection as Section);
+        } else if (args.section === "executor") {
+          // Last section completed, session is done
+          this.onSessionComplete?.();
+        }
       }
 
       functionResponses.push({

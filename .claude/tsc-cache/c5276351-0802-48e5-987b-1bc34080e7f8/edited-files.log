@@ -108,3 +108,10 @@
 1775867399:/Users/miguel/Willbuddy/src/app/api/share/route.ts:src
 1775867411:/Users/miguel/Willbuddy/src/app/api/stripe/checkout/route.ts:src
 1775867433:/Users/miguel/Willbuddy/.env.local:root
+1775867476:/Users/miguel/Willbuddy/.env.local:root
+1775868099:/Users/miguel/Willbuddy/src/lib/gemini/client.ts:src
+1775868109:/Users/miguel/Willbuddy/src/lib/gemini/client.ts:src
+1775868123:/Users/miguel/Willbuddy/src/components/voice/VoiceProvider.tsx:src
+1775868142:/Users/miguel/Willbuddy/src/components/voice/VoiceProvider.tsx:src
+1775868165:/Users/miguel/Willbuddy/src/components/voice/VoiceProvider.tsx:src
+1775868194:/Users/miguel/Willbuddy/src/app/summary/[id]/page.tsx:src

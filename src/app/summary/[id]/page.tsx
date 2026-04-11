@@ -1,8 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { createServiceClient } from "@/lib/supabase/server";
 import { generateAllDocuments, getDocumentCompleteness } from "@/lib/documents/generator";
 import { DOC_TYPE_LABELS } from "@/types";
-import type { DocType, Decision, Session } from "@/types";
+import type { DocType, Decision } from "@/types";
 import { SummaryClient } from "./summary-client";
 import { DecisionEditor } from "@/components/summary/DecisionEditor";
 import { TranscriptViewer } from "@/components/summary/TranscriptViewer";
@@ -13,16 +14,13 @@ interface Props {
 
 export default async function SummaryPage({ params }: Props) {
   const { id: sessionId } = await params;
-  const supabase = await createClient();
+  const { userId } = await auth();
 
-  // Auth check
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
+  if (!userId) {
+    redirect("/sign-in");
   }
+
+  const supabase = createServiceClient();
 
   // Load session
   const { data: session } = await supabase
