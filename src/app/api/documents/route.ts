@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { generateAllDocuments } from "@/lib/documents/generator";
 
 /**
@@ -10,16 +11,13 @@ import { generateAllDocuments } from "@/lib/documents/generator";
  * Returns: { documents: Record<DocType, string> }
  */
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
+  const { userId } = await auth();
 
-  // Require authentication
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const supabase = createServiceClient();
 
   // Parse body
   let body: { sessionId?: string };
@@ -40,11 +38,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Load the session (RLS ensures the user owns it)
+  // Load the session and verify ownership
   const { data: session, error: sessionError } = await supabase
     .from("sessions")
     .select("*")
     .eq("id", sessionId)
+    .eq("user_id", userId)
     .single();
 
   if (sessionError || !session) {

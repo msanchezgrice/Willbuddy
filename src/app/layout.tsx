@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const libreBaskerville = Libre_Baskerville({
@@ -21,10 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${libreBaskerville.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#2D2A26]">
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${libreBaskerville.variable} h-full antialiased`}>
+        <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#2D2A26]">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

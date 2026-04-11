@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export async function createClient() {
@@ -25,5 +26,17 @@ export async function createClient() {
         },
       },
     }
+  );
+}
+
+/**
+ * Create a Supabase client with the service role key.
+ * Use this when Clerk handles authentication and you need
+ * to bypass RLS for DB operations with a verified user ID.
+ */
+export function createServiceClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 }

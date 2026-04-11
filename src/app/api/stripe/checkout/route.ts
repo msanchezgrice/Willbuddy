@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { createCheckoutSession } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const { userId } = await auth();
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const user = await currentUser();
+    const email = user?.emailAddresses?.[0]?.emailAddress;
+
+    const supabase = createServiceClient();
 
     const body = await request.json();
     const { sessionId } = body as { sessionId?: string };
@@ -39,11 +40,11 @@ export async function POST(request: Request) {
       );
     }
 
-    if (session.user_id !== user.id) {
+    if (session.user_id !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const url = await createCheckoutSession(sessionId, user.email!);
+    const url = await createCheckoutSession(sessionId, email ?? "");
 
     return NextResponse.json({ url });
   } catch (err) {

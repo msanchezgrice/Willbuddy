@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export async function POST() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { userId } = await auth();
 
-  if (!user) {
+  if (!userId) {
     console.error("[gemini/token] No authenticated user found");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  console.log("[gemini/token] Authenticated user:", user.email);
+  console.log("[gemini/token] Authenticated user:", userId);
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -22,17 +20,19 @@ export async function POST() {
     );
   }
 
+  const supabase = createServiceClient();
+
   // Ensure profile exists (required FK for sessions)
   const { data: existingProfile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
 
   if (!existingProfile) {
     const { error: profileError } = await supabase
       .from("profiles")
-      .insert({ id: user.id, full_name: user.user_metadata?.full_name ?? null });
+      .insert({ id: userId, full_name: null });
     if (profileError) {
       console.error("[gemini/token] Failed to create profile:", profileError);
       return NextResponse.json(
@@ -46,7 +46,7 @@ export async function POST() {
   const { data: existingSession } = await supabase
     .from("sessions")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("status", "in_progress")
     .order("started_at", { ascending: false })
     .limit(1)
@@ -59,7 +59,7 @@ export async function POST() {
   } else {
     const { data: newSession, error: sessionError } = await supabase
       .from("sessions")
-      .insert({ user_id: user.id })
+      .insert({ user_id: userId })
       .select("id")
       .single();
 

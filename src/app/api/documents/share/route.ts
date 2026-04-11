@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
 
 /**
@@ -10,15 +11,13 @@ import { randomUUID } from "crypto";
  * Returns: { token: string }
  */
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
+  const { userId } = await auth();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const supabase = createServiceClient();
 
   let body: { sessionId?: string };
   try {
@@ -43,6 +42,7 @@ export async function POST(request: NextRequest) {
     .from("sessions")
     .select("id")
     .eq("id", sessionId)
+    .eq("user_id", userId)
     .single();
 
   if (!session) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { DocType } from "@/types";
 
 const DOC_TYPES: DocType[] = [
@@ -14,16 +15,13 @@ const SHARE_EXPIRY_DAYS = 30;
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const { userId } = await auth();
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const supabase = createServiceClient();
 
     const body = await request.json();
     const { sessionId } = body as { sessionId?: string };
@@ -49,7 +47,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (session.user_id !== user.id) {
+    if (session.user_id !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -109,7 +107,7 @@ export async function GET(request: Request) {
     }
 
     // No auth required — public access via share token
-    const supabase = await createClient();
+    const supabase = createServiceClient();
 
     // Find any document with this share token
     const { data: doc, error: docError } = await supabase

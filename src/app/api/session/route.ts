@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { Section } from "@/types";
 
 /**
@@ -7,15 +8,13 @@ import type { Section } from "@/types";
  * GET /api/session?id=xxx - Get a specific session with decisions + recent transcript
  */
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { userId } = await auth();
 
-  if (!user) {
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const supabase = createServiceClient();
   const sessionId = request.nextUrl.searchParams.get("id");
 
   if (sessionId) {
@@ -64,7 +63,7 @@ export async function GET(request: NextRequest) {
   const { data: activeSession } = await supabase
     .from("sessions")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("status", "in_progress")
     .order("started_at", { ascending: false })
     .limit(1)
@@ -77,32 +76,31 @@ export async function GET(request: NextRequest) {
  * POST /api/session - Create a new session
  */
 export async function POST() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { userId } = await auth();
 
-  if (!user) {
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const supabase = createServiceClient();
 
   // Ensure profile exists
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
 
   if (!profile) {
     await supabase.from("profiles").insert({
-      id: user.id,
-      full_name: user.user_metadata?.full_name ?? null,
+      id: userId,
+      full_name: null,
     });
   }
 
   const { data: session, error } = await supabase
     .from("sessions")
-    .insert({ user_id: user.id })
+    .insert({ user_id: userId })
     .select("*")
     .single();
 
@@ -121,15 +119,13 @@ export async function POST() {
  * Body: { sessionId, currentSection?, sectionsCompleted?, status?, geminiResumeHandle?, userConfirmed? }
  */
 export async function PATCH(request: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { userId } = await auth();
 
-  if (!user) {
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const supabase = createServiceClient();
   const body = await request.json();
   const { sessionId, ...updates } = body;
 
