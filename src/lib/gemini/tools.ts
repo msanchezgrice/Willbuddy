@@ -26,12 +26,36 @@ export const willBuddyTools = [
               description:
                 "The decision value as plain text (e.g. 'Anya Petrov', '25 years old')",
             },
+            reasoning: {
+              type: "STRING" as const,
+              description:
+                "WHY the user chose this — their own reasoning in 1-2 sentences. Critical for the couple comparison view so partners can understand each other. Leave blank only if the user truly had no reason.",
+            },
             confidence: {
               type: "STRING" as const,
               description: "decisive, needs_discussion, or flagged",
             },
           },
           required: ["section", "key", "value"],
+        },
+      },
+      {
+        name: "explainTopic",
+        description:
+          "When the user is uncertain or asks for more information, use this to signal that you are going deeper on a topic with stats, legal implications, and tradeoffs. Pass the topic and depth ('brief', 'detailed', 'comprehensive'). After calling this tool, deliver the explanation conversationally, then ask if they want more or are ready to decide.",
+        parameters: {
+          type: "OBJECT" as const,
+          properties: {
+            topic: {
+              type: "STRING" as const,
+              description: "The estate planning topic being explained",
+            },
+            depth: {
+              type: "STRING" as const,
+              description: "brief, detailed, or comprehensive",
+            },
+          },
+          required: ["topic"],
         },
       },
       {

@@ -110,8 +110,16 @@ function Spinner() {
 // VoiceControls
 // ---------------------------------------------------------------------------
 export default function VoiceControls() {
-  const { voiceState, connect, disconnect, toggleMic, sendTextMessage, isConnected, isMicMuted } =
-    useVoice();
+  const {
+    voiceState,
+    connect,
+    disconnect,
+    toggleMic,
+    sendTextMessage,
+    isConnected,
+    isMicMuted,
+    pauseSession,
+  } = useVoice();
 
   const [showTextInput, setShowTextInput] = useState(false);
   const [textValue, setTextValue] = useState('');
@@ -219,15 +227,25 @@ export default function VoiceControls() {
         {stateLabel()}
       </span>
 
-      {/* ---- Disconnect when connected ---- */}
+      {/* ---- Pause / end row (when connected) ---- */}
       {isConnected && (
-        <button
-          type="button"
-          onClick={disconnect}
-          className="text-xs text-[#9B8E7E] hover:text-[#2D2A26] underline underline-offset-2 transition-colors"
-        >
-          End session
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={pauseSession}
+            className="text-xs font-medium text-[#5B7A5E] hover:text-[#4a6a4e] underline underline-offset-2 transition-colors"
+          >
+            Pause session
+          </button>
+          <span className="text-[#E8E0D6]">·</span>
+          <button
+            type="button"
+            onClick={disconnect}
+            className="text-xs text-[#9B8E7E] hover:text-[#2D2A26] underline underline-offset-2 transition-colors"
+          >
+            End session
+          </button>
+        </div>
       )}
 
       {/* ---- Type instead toggle ---- */}

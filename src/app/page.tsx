@@ -35,7 +35,8 @@ function HeroSection() {
           Start Your Estate Plan
         </Link>
         <p className="text-sm text-[#9B8E7E] mt-5">
-          About 45 minutes for a couple. Free to start.
+          About 45 minutes together — or do it separately (25 min each) and
+          compare answers after.
         </p>
       </div>
     </section>

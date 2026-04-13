@@ -37,6 +37,14 @@ interface VoiceContextValue {
   sendTextMessage: (text: string) => void;
   updateDecision: (decisionId: string, newValue: string) => Promise<void>;
   isMicMuted: boolean;
+  // Pause / section-breakpoint state
+  isPaused: boolean;
+  pauseReason: 'section' | 'user' | null;
+  completedSection: Section | null;
+  pendingNextSection: Section | null;
+  resumeFromPause: () => Promise<void>;
+  saveAndExit: () => void;
+  pauseSession: () => void;
 }
 
 const VoiceContext = createContext<VoiceContextValue | null>(null);
@@ -65,6 +73,10 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(initialSessionId ?? null);
   const [isMicMuted, setIsMicMuted] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [pauseReason, setPauseReason] = useState<'section' | 'user' | null>(null);
+  const [completedSection, setCompletedSection] = useState<Section | null>(null);
+  const [pendingNextSection, setPendingNextSection] = useState<Section | null>(null);
 
   const clientRef = useRef<GeminiLiveClient | null>(null);
   const recorderRef = useRef<AudioRecorder | null>(null);
@@ -106,6 +118,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
             section: decision.section,
             key: decision.key,
             value: decision.value,
+            reasoning: decision.reasoning,
             user_confirmed: decision.user_confirmed,
             confidence: decision.confidence,
             created_at: decision.created_at,
@@ -130,6 +143,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
           section: (args.section as string) as Decision['section'],
           key: args.key as string,
           value: args.value as string,
+          reasoning: (args.reasoning as string | undefined) ?? null,
           user_confirmed: false,
           confidence: (args.confidence as string as Decision['confidence']) ?? 'decisive',
           created_at: now,
@@ -150,9 +164,9 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       }
 
       if (name === 'updateProgress') {
-        const section = args.section as string;
-        const nextSection = args.nextSection as string | undefined;
-        // Update session state via API
+        const section = args.section as Section;
+        const nextSection = args.nextSection as Section | undefined;
+        // Persist section-complete to Supabase immediately
         if (sessionId) {
           void fetch('/api/session', {
             method: 'PATCH',
@@ -164,8 +178,21 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
             }),
           });
         }
+        // Show the section breakpoint instead of advancing immediately.
+        // Disconnect audio so the user can read in peace.
         if (nextSection) {
-          setCurrentSection(nextSection as Section);
+          setCompletedSection(section);
+          setPendingNextSection(nextSection);
+          setPauseReason('section');
+          setIsPaused(true);
+          // Stop audio + WS but keep state in provider for resume.
+          recorderRef.current?.stop();
+          playerRef.current?.stop();
+          clientRef.current?.disconnect();
+          clientRef.current = null;
+          recorderRef.current = null;
+          playerRef.current = null;
+          setVoiceState('idle');
         }
       }
 
@@ -363,6 +390,67 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   );
 
   // -----------------------------------------------------------------------
+  // Resume from a section breakpoint: advance to next section, reconnect.
+  // -----------------------------------------------------------------------
+  const resumeFromPause = useCallback(async () => {
+    if (pendingNextSection) {
+      setCurrentSection(pendingNextSection);
+    }
+    setIsPaused(false);
+    setPauseReason(null);
+    setCompletedSection(null);
+    setPendingNextSection(null);
+    await connect();
+  }, [connect, pendingNextSection]);
+
+  // -----------------------------------------------------------------------
+  // Save current progress and redirect to home (section-break or user pause).
+  // State is already persisted on each tool call; this just exits cleanly.
+  // -----------------------------------------------------------------------
+  const saveAndExit = useCallback(() => {
+    // If we were mid-section, advance the section pointer so resume lands
+    // on the next section rather than replaying the just-finished one.
+    if (pendingNextSection && sessionId) {
+      void fetch('/api/session', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          currentSection: pendingNextSection,
+        }),
+      });
+    }
+    recorderRef.current?.stop();
+    playerRef.current?.stop();
+    clientRef.current?.disconnect();
+    clientRef.current = null;
+    recorderRef.current = null;
+    playerRef.current = null;
+    setVoiceState('idle');
+    setIsPaused(false);
+    setPauseReason(null);
+    setCompletedSection(null);
+    setPendingNextSection(null);
+    router.push('/');
+  }, [pendingNextSection, router, sessionId]);
+
+  // -----------------------------------------------------------------------
+  // Explicit user-initiated pause (button in VoiceControls).
+  // Cleanly disconnects and redirects home.
+  // -----------------------------------------------------------------------
+  const pauseSession = useCallback(() => {
+    recorderRef.current?.stop();
+    playerRef.current?.stop();
+    clientRef.current?.disconnect();
+    clientRef.current = null;
+    recorderRef.current = null;
+    playerRef.current = null;
+    setVoiceState('idle');
+    setPauseReason('user');
+    router.push('/');
+  }, [router]);
+
+  // -----------------------------------------------------------------------
   // Auto-reconnect on unexpected disconnect
   // -----------------------------------------------------------------------
   useEffect(() => {
@@ -406,6 +494,13 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         sendTextMessage,
         updateDecision,
         isMicMuted,
+        isPaused,
+        pauseReason,
+        completedSection,
+        pendingNextSection,
+        resumeFromPause,
+        saveAndExit,
+        pauseSession,
       }}
     >
       {children}

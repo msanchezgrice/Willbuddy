@@ -106,6 +106,8 @@ export interface Profile {
   created_at: string;
 }
 
+export type SessionMode = "solo" | "couple_together" | "couple_async";
+
 export interface Session {
   id: string;
   user_id: string;
@@ -116,6 +118,8 @@ export interface Session {
   started_at: string;
   completed_at: string | null;
   user_confirmed: boolean;
+  mode: SessionMode;
+  couple_session_id: string | null;
 }
 
 export interface Decision {
@@ -124,8 +128,27 @@ export interface Decision {
   section: Section;
   key: string;
   value: string;
+  reasoning: string | null;
   user_confirmed: boolean;
   confidence: Confidence;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CoupleSessionStatus =
+  | "awaiting_partner"
+  | "comparing"
+  | "resolved"
+  | "completed";
+
+export interface CoupleSession {
+  id: string;
+  primary_session_id: string;
+  partner_session_id: string | null;
+  invite_token: string;
+  invite_email: string | null;
+  invite_expires_at: string | null;
+  status: CoupleSessionStatus;
   created_at: string;
   updated_at: string;
 }

@@ -7,6 +7,7 @@ import type { DocType, Decision } from "@/types";
 import { SummaryClient } from "./summary-client";
 import { DecisionEditor } from "@/components/summary/DecisionEditor";
 import { TranscriptViewer } from "@/components/summary/TranscriptViewer";
+import { CoupleInvite } from "@/components/summary/CoupleInvite";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -56,6 +57,15 @@ export default async function SummaryPage({ params }: Props) {
     .single();
 
   const shareToken = existingDoc?.share_token ?? null;
+
+  // Load couple_session if this session is linked to one
+  const { data: coupleSession } = session.couple_session_id
+    ? await supabase
+        .from("couple_sessions")
+        .select("id, invite_token")
+        .eq("id", session.couple_session_id)
+        .single()
+    : { data: null };
 
   // Group decisions by section for display
   const decisionsBySection: Record<string, Decision[]> = {};
@@ -139,6 +149,13 @@ export default async function SummaryPage({ params }: Props) {
           sessionId={sessionId}
           documents={documents}
           shareToken={shareToken}
+        />
+
+        {/* Couple invite CTA */}
+        <CoupleInvite
+          sessionId={sessionId}
+          existingCoupleSessionId={coupleSession?.id ?? null}
+          existingInviteToken={coupleSession?.invite_token ?? null}
         />
 
         {/* Lawyer referral section */}

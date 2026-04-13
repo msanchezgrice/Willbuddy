@@ -6,6 +6,7 @@ import VoiceControls from '@/components/voice/VoiceControls';
 import TranscriptFeed from '@/components/voice/TranscriptFeed';
 import SectionNav from '@/components/session/SectionNav';
 import ContextPanel from '@/components/session/ContextPanel';
+import PauseScreen from '@/components/session/PauseScreen';
 import { useVoice } from '@/components/voice/VoiceProvider';
 import { SECTION_LABELS } from '@/types';
 import { cn } from '@/lib/utils';
@@ -14,9 +15,10 @@ import { cn } from '@/lib/utils';
 // Inner layout (needs VoiceProvider context)
 // ---------------------------------------------------------------------------
 function SessionLayout() {
-  const { currentSection } = useVoice();
+  const { currentSection, isPaused, pauseReason } = useVoice();
   const [showNav, setShowNav] = useState(false);
   const [showContext, setShowContext] = useState(false);
+  const showPauseScreen = isPaused && pauseReason === 'section';
 
   return (
     <div className="flex h-[100dvh] flex-col bg-[#FAF8F5]">
@@ -87,13 +89,19 @@ function SessionLayout() {
             </h1>
           </div>
 
-          {/* Transcript */}
-          <TranscriptFeed />
+          {showPauseScreen ? (
+            <PauseScreen />
+          ) : (
+            <>
+              {/* Transcript */}
+              <TranscriptFeed />
 
-          {/* Voice controls - fixed at bottom on mobile */}
-          <div className="shrink-0 border-t border-[#E8E0D6] bg-white/80 backdrop-blur-sm">
-            <VoiceControls />
-          </div>
+              {/* Voice controls - fixed at bottom on mobile */}
+              <div className="shrink-0 border-t border-[#E8E0D6] bg-white/80 backdrop-blur-sm">
+                <VoiceControls />
+              </div>
+            </>
+          )}
         </main>
 
         {/* Right sidebar (desktop) */}
