@@ -1,11 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useVoice } from '@/components/voice/VoiceProvider';
-import { SECTION_LABELS, type Section } from '@/types';
+import { SECTION_LABELS, type Section, type Decision } from '@/types';
 
-// ---------------------------------------------------------------------------
-// Section-specific tips
-// ---------------------------------------------------------------------------
 const SECTION_TIPS: Record<Section, { title: string; tips: string[] }> = {
   family: {
     title: 'Family Snapshot',
@@ -49,11 +47,81 @@ const SECTION_TIPS: Record<Section, { title: string; tips: string[] }> = {
   },
 };
 
+function EditableDecision({ decision }: { decision: Decision }) {
+  const { updateDecision } = useVoice();
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(decision.value);
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (draft.trim() === decision.value || !draft.trim()) {
+      setIsEditing(false);
+      setDraft(decision.value);
+      return;
+    }
+    setSaving(true);
+    await updateDecision(decision.id, draft.trim());
+    setSaving(false);
+    setIsEditing(false);
+  };
+
+  const cancel = () => {
+    setDraft(decision.value);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-baseline justify-between gap-2 group">
+        <dt className="text-xs text-[#9B8E7E] capitalize shrink-0">
+          {decision.key.replace(/_/g, ' ')}
+        </dt>
+        <div className="flex items-center gap-1 flex-1 min-w-0">
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void save();
+              if (e.key === 'Escape') cancel();
+            }}
+            onBlur={save}
+            disabled={saving}
+            autoFocus
+            className="flex-1 text-sm font-medium text-[#2D2A26] text-right bg-[#F0EBE4] border border-[#5B7A5E] rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-[#5B7A5E] min-w-0"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="flex items-baseline justify-between gap-2 group cursor-text hover:bg-[#F0EBE4]/40 rounded -mx-1 px-1"
+      onClick={() => setIsEditing(true)}
+      title="Click to edit"
+    >
+      <dt className="text-xs text-[#9B8E7E] capitalize shrink-0">
+        {decision.key.replace(/_/g, ' ')}
+      </dt>
+      <dd className="text-sm font-medium text-[#2D2A26] text-right truncate max-w-[60%] flex items-center gap-1">
+        <span className="truncate">{decision.value}</span>
+        <svg
+          className="size-3 opacity-0 group-hover:opacity-60 shrink-0"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </svg>
+      </dd>
+    </div>
+  );
+}
+
 export default function ContextPanel() {
   const { currentSection, decisions } = useVoice();
   const tips = SECTION_TIPS[currentSection];
 
-  // Group decisions by section for display
   const decisionsBySection = decisions.reduce(
     (acc, d) => {
       if (!acc[d.section]) acc[d.section] = [];
@@ -65,7 +133,7 @@ export default function ContextPanel() {
 
   return (
     <aside className="flex h-full flex-col gap-6 overflow-y-auto py-6 px-4">
-      {/* ---- Current Topic Card ---- */}
+      {/* Current Topic Card */}
       <div className="rounded-2xl border border-[#E8E0D6] bg-white p-6">
         <h3 className="font-[family-name:var(--font-heading)] text-base font-bold text-[#2D2A26] mb-3">
           {tips.title}
@@ -80,11 +148,16 @@ export default function ContextPanel() {
         </ul>
       </div>
 
-      {/* ---- Decisions So Far ---- */}
+      {/* Decisions So Far */}
       <div className="flex flex-col gap-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-[#9B8E7E]">
-          Decisions So Far
-        </h3>
+        <div className="flex items-baseline justify-between">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#9B8E7E]">
+            Decisions So Far
+          </h3>
+          {decisions.length > 0 && (
+            <span className="text-[10px] text-[#9B8E7E]/70">Click to edit</span>
+          )}
+        </div>
 
         {decisions.length === 0 ? (
           <p className="text-sm text-[#9B8E7E]">
@@ -98,14 +171,7 @@ export default function ContextPanel() {
               </h4>
               <dl className="flex flex-col gap-1.5">
                 {sectionDecisions.map((d) => (
-                  <div key={d.id} className="flex items-baseline justify-between gap-2">
-                    <dt className="text-xs text-[#9B8E7E] capitalize">
-                      {d.key.replace(/_/g, ' ')}
-                    </dt>
-                    <dd className="text-sm font-medium text-[#2D2A26] text-right truncate max-w-[60%]">
-                      {d.value}
-                    </dd>
-                  </div>
+                  <EditableDecision key={d.id} decision={d} />
                 ))}
               </dl>
             </div>

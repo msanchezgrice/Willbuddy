@@ -35,6 +35,7 @@ interface VoiceContextValue {
   disconnect: () => void;
   toggleMic: () => void;
   sendTextMessage: (text: string) => void;
+  updateDecision: (decisionId: string, newValue: string) => Promise<void>;
   isMicMuted: boolean;
 }
 
@@ -341,6 +342,27 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   );
 
   // -----------------------------------------------------------------------
+  // Update a decision (user inline-edits in the context panel)
+  // -----------------------------------------------------------------------
+  const updateDecision = useCallback(
+    async (decisionId: string, newValue: string) => {
+      const now = new Date().toISOString();
+      setDecisions((prev) =>
+        prev.map((d) =>
+          d.id === decisionId ? { ...d, value: newValue, updated_at: now } : d
+        )
+      );
+      if (sessionId) {
+        await supabase.current
+          .from('decisions')
+          .update({ value: newValue, updated_at: now })
+          .eq('id', decisionId);
+      }
+    },
+    [sessionId],
+  );
+
+  // -----------------------------------------------------------------------
   // Auto-reconnect on unexpected disconnect
   // -----------------------------------------------------------------------
   useEffect(() => {
@@ -382,6 +404,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         disconnect,
         toggleMic,
         sendTextMessage,
+        updateDecision,
         isMicMuted,
       }}
     >
