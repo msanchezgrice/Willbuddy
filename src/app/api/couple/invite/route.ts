@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { randomBytes } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
+import { getResend, getFromAddress } from "@/lib/resend";
+import { renderInviteEmail } from "@/lib/emails/templates";
+import { getUserDisplayName } from "@/lib/emails/send";
 
 /**
  * POST /api/couple/invite
@@ -91,9 +94,39 @@ export async function POST(request: NextRequest) {
     console.error("[couple/invite] session link failed", updateError);
   }
 
+  const inviteUrl = buildInviteUrl(request, token);
+
+  // Fire-and-forget the invite email if partner email was provided.
+  // Not idempotent via sent_emails table because we don't have a Clerk
+  // userId for the partner yet (they haven't signed up).
+  if (email) {
+    try {
+      const fromName = await getUserDisplayName(userId);
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://willbuddy.app";
+      const { subject, html, text } = renderInviteEmail({
+        fromName,
+        inviteUrl,
+        appUrl,
+      });
+      const resend = getResend();
+      const { error: sendError } = await resend.emails.send({
+        from: getFromAddress(),
+        to: email,
+        subject,
+        html,
+        text,
+      });
+      if (sendError) {
+        console.error("[couple/invite] email send failed", sendError);
+      }
+    } catch (e) {
+      console.error("[couple/invite] email error", e);
+    }
+  }
+
   return NextResponse.json({
     coupleSession,
-    inviteUrl: buildInviteUrl(request, token),
+    inviteUrl,
   });
 }
 

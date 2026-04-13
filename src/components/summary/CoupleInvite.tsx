@@ -20,8 +20,10 @@ export function CoupleInvite({
 }: Props) {
   const [coupleId, setCoupleId] = useState<string | null>(existingCoupleSessionId);
   const [token, setToken] = useState<string | null>(existingInviteToken);
+  const [partnerEmail, setPartnerEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const inviteUrl =
@@ -36,7 +38,10 @@ export function CoupleInvite({
       const res = await fetch("/api/couple/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId }),
+        body: JSON.stringify({
+          sessionId,
+          email: partnerEmail.trim() || undefined,
+        }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -46,6 +51,7 @@ export function CoupleInvite({
       }
       setToken(json.coupleSession.invite_token);
       setCoupleId(json.coupleSession.id);
+      if (partnerEmail.trim()) setEmailSent(true);
     } catch (e) {
       console.error("[couple-invite] error", e);
       setError("Something went wrong. Please try again.");
@@ -85,16 +91,34 @@ export function CoupleInvite({
       )}
 
       {!token ? (
-        <button
-          type="button"
-          onClick={handleCreate}
-          disabled={busy}
-          className="mt-6 rounded-xl bg-[#5B7A5E] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#4a6a4e] disabled:opacity-60"
-        >
-          {busy ? "Creating link..." : "Generate invite link"}
-        </button>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <input
+            type="email"
+            value={partnerEmail}
+            onChange={(e) => setPartnerEmail(e.target.value)}
+            placeholder="partner@example.com (optional)"
+            className="flex-1 rounded-xl border border-[#E8E0D6] bg-white px-4 py-3 text-sm text-[#2D2A26] placeholder:text-[#9B8E7E] focus:border-[#5B7A5E] focus:outline-none focus:ring-2 focus:ring-[#5B7A5E]/20"
+          />
+          <button
+            type="button"
+            onClick={handleCreate}
+            disabled={busy}
+            className="rounded-xl bg-[#5B7A5E] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#4a6a4e] disabled:opacity-60"
+          >
+            {busy
+              ? "Creating..."
+              : partnerEmail.trim()
+                ? "Send invite"
+                : "Generate link"}
+          </button>
+        </div>
       ) : (
         <div className="mt-6 space-y-4">
+          {emailSent && (
+            <p className="rounded-lg bg-[#5B7A5E]/10 px-3 py-2 text-sm text-[#5B7A5E]">
+              Invite email sent. The link is also below if you want to share it another way.
+            </p>
+          )}
           <div className="flex items-center gap-3 rounded-xl border border-[#E8E0D6] bg-[#FAF8F5] px-4 py-3">
             <code className="flex-1 truncate text-xs text-[#2D2A26]">
               {inviteUrl}
