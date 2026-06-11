@@ -1,0 +1,78 @@
+{
+  "targetDemo": "Couples with young kids in Texas who need to talk through wills, guardianship, healthcare wishes, and powers of attorney before paying an estate-planning attorney.",
+  "positioning": {
+    "current": "Voice-first estate planning for Texas families. Talk through your estate plan like you are talking to a friend, then generate Texas draft documents for attorney review.",
+    "critique": "The core positioning is coherent and emotionally specific, especially for parents deciding guardianship. The homepage clearly frames WillBuddy as preparation rather than legal advice, but it does not yet give launch-ready trust signals such as visible support, legal links, indexing metadata, or analytics proof.",
+    "suggested": "The voice-first estate planning prep tool for Texas parents: finish the hard conversation at home, turn it into organized draft documents, and bring a clearer packet to your attorney."
+  },
+  "brandingCoherence": {
+    "score": "strong",
+    "notes": [
+      "The homepage consistently uses calm family-oriented language around conversation, guardianship, and attorney review.",
+      "The Texas-only scope is repeated in the hero, documents section, FAQ, and footer, which keeps claims bounded.",
+      "The product name, voice-first mechanic, and preparation-before-lawyer value proposition are aligned."
+    ]
+  },
+  "landingQuality": {
+    "score": "mixed",
+    "notes": [
+      "The page explains the main workflow, document set, price, legal limitation, and common objections clearly.",
+      "The primary CTA is visible and repeats in the pricing section.",
+      "Launch basics are missing or incomplete: no support/contact path on the landing surface, no privacy or terms links, no robots or sitemap output, and no visible analytics instrumentation in the fetched production HTML."
+    ]
+  },
+  "channelFit": [
+    {
+      "channel": "Search",
+      "fit": "possible",
+      "why": "Estate planning and guardianship have high-intent search behavior, but the app needs robots, sitemap, metadata, legal pages, and indexed URL documentation before search can compound."
+    },
+    {
+      "channel": "Parenting communities",
+      "fit": "strong",
+      "why": "The guardianship and young-kids angle is emotionally legible and easy to explain in parent groups, newsletters, and local communities."
+    },
+    {
+      "channel": "Attorney partnerships",
+      "fit": "possible",
+      "why": "The product positions itself as pre-work for an attorney rather than a lawyer replacement, but partner trust will depend on clear legal disclaimers, data handling, and support responsiveness."
+    },
+    {
+      "channel": "Paid social",
+      "fit": "possible",
+      "why": "The audience and pain point are clear, but conversion learning requires analytics on CTA and signup events before spend is defensible."
+    }
+  ],
+  "launchListNotes": [
+    {
+      "taskId": "T05",
+      "note": "Add a visible support email/contact route and wire Resend for contact submissions using env-var names only."
+    },
+    {
+      "taskId": "T07",
+      "note": "Adopt the existing PostHog project with pageview and signup/CTA tracking plus a documented event map and PII exclusions."
+    },
+    {
+      "taskId": "T09",
+      "note": "Add App Router metadata, robots, sitemap, and indexing documentation for the public URL set."
+    },
+    {
+      "taskId": "T10",
+      "note": "Add privacy and terms routes with footer links. Keep legal claims aligned with the app's actual AI, Clerk, Supabase, Stripe, Resend, and attorney-review behavior."
+    },
+    {
+      "taskId": "T15",
+      "note": "Add a smoke-test gate that covers the homepage, legal pages, SEO endpoints, contact route, and auth entry points."
+    },
+    {
+      "taskId": "P01",
+      "note": "Supabase is already implemented through migrations and server/client helpers; document the required env vars and readiness checks instead of provisioning a duplicate database."
+    }
+  ],
+  "topMoves": [
+    "Ship footer trust basics: support email, contact path, privacy, terms, and bounded legal disclaimers.",
+    "Instrument PostHog for pageviews plus high-intent landing/signup events without sending estate-planning answers or contact-message bodies.",
+    "Add robots, sitemap, OG/Twitter metadata, and a documented indexing URL set for the production domain.",
+    "Create a launch smoke-test script so the app has a repeatable gate before future GTM assessments."
+  ]
+}
