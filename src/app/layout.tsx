@@ -4,6 +4,7 @@ import { Libre_Baskerville } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Clock, FileText, Shield } from "lucide-react";
 import { getSupportEmail } from "@/lib/resend";
+import { Providers } from "./providers";
 import "./globals.css";
 
 const libreBaskerville = Libre_Baskerville({
@@ -77,8 +78,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${libreBaskerville.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#2D2A26]">
-          {children}
-          <Footer />
+          <Providers>
+            {children}
+            <Footer />
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

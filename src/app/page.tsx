@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
 import {
   Mic,
   ClipboardCheck,
@@ -25,12 +25,14 @@ function HeroSection() {
         <p className="text-base text-[#5B7A5E] font-medium mb-10">
           Draft documents generated. Ready for attorney review.
         </p>
-        <Link
+        <TrackedLink
           href="/sign-in"
+          event="signup_cta_clicked"
+          eventProperties={{ location: "hero", label: "Start Your Estate Plan" }}
           className="inline-block bg-[#5B7A5E] hover:bg-[#4A6A4D] text-white font-semibold text-lg px-12 py-4 rounded-full shadow-lg shadow-[#5B7A5E]/20 transition-all hover:-translate-y-0.5"
         >
           Start Your Estate Plan
-        </Link>
+        </TrackedLink>
         <p className="text-sm text-[#9B8E7E] mt-5">
           About 45 minutes together — or do it separately (25 min each) and
           compare answers after.
@@ -262,12 +264,14 @@ function PricingSection() {
             ))}
           </ul>
 
-          <Link
+          <TrackedLink
             href="/sign-in"
+            event="signup_cta_clicked"
+            eventProperties={{ location: "pricing", label: "Start for Free" }}
             className="inline-block bg-[#5B7A5E] hover:bg-[#4A6A4D] text-white font-semibold px-10 py-3.5 rounded-full shadow-lg shadow-[#5B7A5E]/20 transition-all hover:-translate-y-0.5"
           >
             Start for Free
-          </Link>
+          </TrackedLink>
         </div>
 
         <p className="text-sm text-[#9B8E7E] mt-8 max-w-md mx-auto leading-relaxed">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { captureServerEvent } from "@/lib/analytics/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { Section } from "@/types";
 
@@ -95,6 +96,9 @@ export async function POST() {
     await supabase.from("profiles").insert({
       id: userId,
       full_name: null,
+    });
+    void captureServerEvent("signup_completed", userId, {
+      source: "api_session_profile_inserted",
     });
   }
 

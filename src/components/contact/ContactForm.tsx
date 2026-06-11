@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { captureAnalyticsEvent } from "@/lib/analytics/client";
 
 type Status =
   | { type: "idle"; message: "" }
@@ -31,6 +32,9 @@ export function ContactForm() {
     });
 
     if (response.ok) {
+      captureAnalyticsEvent("contact_form_submitted", {
+        topic: String(formData.get("topic") ?? "Support"),
+      });
       form.reset();
       setStatus({
         type: "success",
