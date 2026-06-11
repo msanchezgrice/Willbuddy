@@ -5,9 +5,6 @@ import {
   Handshake,
   Check,
   ChevronDown,
-  Shield,
-  Clock,
-  FileText,
 } from "lucide-react";
 
 function HeroSection() {
@@ -367,42 +364,6 @@ function FAQSection() {
   );
 }
 
-function Footer() {
-  return (
-    <footer className="px-6 py-12 border-t border-[#E8E0D6]">
-      <div className="max-w-2xl mx-auto text-center">
-        <p className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#2D2A26] mb-4">
-          WillBuddy
-        </p>
-        <p className="text-xs text-[#9B8E7E] leading-relaxed max-w-lg mx-auto mb-6">
-          WillBuddy is not a law firm and does not provide legal advice. The
-          documents generated are drafts intended for review by a licensed
-          attorney. Use of this service does not create an attorney-client
-          relationship. WillBuddy is designed for Texas residents and generates
-          documents based on Texas estate law.
-        </p>
-        <div className="flex items-center justify-center gap-6 text-xs text-[#9B8E7E]">
-          <span className="flex items-center gap-1.5">
-            <Shield className="w-3.5 h-3.5" />
-            Encrypted
-          </span>
-          <span className="flex items-center gap-1.5">
-            <FileText className="w-3.5 h-3.5" />
-            Texas estate law
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" />
-            ~45 min session
-          </span>
-        </div>
-        <p className="text-xs text-[#9B8E7E] mt-8">
-          &copy; {new Date().getFullYear()} WillBuddy. All rights reserved.
-        </p>
-      </div>
-    </footer>
-  );
-}
-
 export default function LandingPage() {
   return (
     <main className="flex-1">
@@ -412,7 +373,6 @@ export default function LandingPage() {
       <WhyVoiceSection />
       <PricingSection />
       <FAQSection />
-      <Footer />
     </main>
   );
 }
