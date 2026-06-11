@@ -46,6 +46,12 @@ function Footer() {
           <a className="hover:text-[#2D2A26]" href={`mailto:${supportEmail}`}>
             {supportEmail}
           </a>
+          <Link className="hover:text-[#2D2A26]" href="/privacy">
+            Privacy
+          </Link>
+          <Link className="hover:text-[#2D2A26]" href="/terms">
+            Terms
+          </Link>
         </nav>
         <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-[#9B8E7E]">
           <span className="flex items-center gap-1.5">
