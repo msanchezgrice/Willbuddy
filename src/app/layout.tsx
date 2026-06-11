@@ -4,6 +4,7 @@ import { Libre_Baskerville } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Clock, FileText, Shield } from "lucide-react";
 import { getSupportEmail } from "@/lib/resend";
+import { siteConfig } from "@/lib/site";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -15,9 +16,41 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  title: "WillBuddy - Voice-First Estate Planning",
-  description:
-    "Talk through your estate plan like you're talking to a friend. AI-guided voice sessions for wills, guardianship, and powers of attorney in Texas.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: siteConfig.title,
+    description: siteConfig.description,
+    url: "/",
+    siteName: siteConfig.name,
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "WillBuddy voice-first estate planning for Texas families",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: ["/opengraph-image"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 function Footer() {
