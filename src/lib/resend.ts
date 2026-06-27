@@ -1,5 +1,9 @@
 import { Resend } from "resend";
 
+export const APP_URL = "https://mywillbuddy.com";
+export const SUPPORT_EMAIL = "support@mywillbuddy.com";
+export const DEFAULT_FROM_ADDRESS = `WillBuddy <${SUPPORT_EMAIL}>`;
+
 let cached: Resend | null = null;
 
 export function getResend(): Resend {
@@ -13,9 +17,9 @@ export function getResend(): Resend {
 }
 
 export function getFromAddress(): string {
-  return process.env.RESEND_FROM ?? "WillBuddy <onboarding@resend.dev>";
+  return process.env.RESEND_FROM ?? DEFAULT_FROM_ADDRESS;
 }
 
 export function getAppUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "https://willbuddy.app";
+  return process.env.NEXT_PUBLIC_APP_URL ?? APP_URL;
 }

@@ -9,6 +9,7 @@ import {
   Clock,
   FileText,
 } from "lucide-react";
+import { SUPPORT_EMAIL } from "@/lib/resend";
 
 function HeroSection() {
   return (
@@ -395,6 +396,12 @@ function Footer() {
             ~45 min session
           </span>
         </div>
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          className="mt-6 inline-flex text-xs font-medium text-[#5B7A5E] underline-offset-4 hover:underline"
+        >
+          {SUPPORT_EMAIL}
+        </a>
         <p className="text-xs text-[#9B8E7E] mt-8">
           &copy; {new Date().getFullYear()} WillBuddy. All rights reserved.
         </p>

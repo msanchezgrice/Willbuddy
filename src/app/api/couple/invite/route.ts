@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { randomBytes } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
-import { getResend, getFromAddress } from "@/lib/resend";
+import { getResend, getFromAddress, getAppUrl } from "@/lib/resend";
 import { renderInviteEmail } from "@/lib/emails/templates";
 import { getUserDisplayName } from "@/lib/emails/send";
 
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
   if (email) {
     try {
       const fromName = await getUserDisplayName(userId);
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://willbuddy.app";
+      const appUrl = getAppUrl();
       const { subject, html, text } = renderInviteEmail({
         fromName,
         inviteUrl,
@@ -133,6 +133,6 @@ export async function POST(request: NextRequest) {
 function buildInviteUrl(request: NextRequest, token: string): string {
   const origin =
     request.headers.get("origin") ??
-    `https://${request.headers.get("host") ?? "willbuddy.app"}`;
+    `https://${request.headers.get("host") ?? "mywillbuddy.com"}`;
   return `${origin}/couple/join/${token}`;
 }
