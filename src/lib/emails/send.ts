@@ -1,5 +1,5 @@
 import { clerkClient } from "@clerk/nextjs/server";
-import { getResend, getFromAddress } from "@/lib/resend";
+import { getResend, getFromAddress, getReplyToAddress } from "@/lib/resend";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export interface SendEmailOptions {
@@ -9,6 +9,7 @@ export interface SendEmailOptions {
   subject: string;
   html: string;
   text: string;
+  replyTo?: string;
 }
 
 export interface SendEmailResult {
@@ -62,6 +63,7 @@ export async function sendEmailOnce(
     const { data, error } = await resend.emails.send({
       from: getFromAddress(),
       to: email,
+      replyTo: options.replyTo ?? getReplyToAddress(),
       subject: options.subject,
       html: options.html,
       text: options.text,

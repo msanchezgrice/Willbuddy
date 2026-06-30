@@ -20,6 +20,14 @@ export function getSupportEmail(): string {
   return process.env.SUPPORT_EMAIL ?? "support@mywillbuddy.com";
 }
 
+/**
+ * Address that user replies to transactional/drip emails should land on.
+ * Defaults to the support inbox so replies are received, not lost.
+ */
+export function getReplyToAddress(): string {
+  return process.env.RESEND_REPLY_TO ?? getSupportEmail();
+}
+
 export function getAppUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "https://mywillbuddy.com";
 }
