@@ -219,7 +219,7 @@ function ExpiredOrNotFound({ reason }: { reason: "expired" | "not_found" }) {
         <p className="text-[#9B8E7E] leading-relaxed">
           {reason === "expired"
             ? "The share link for these estate planning documents has expired. Please ask the document owner to generate a new link."
-            : "We couldn&apos;t find documents at this link. It may have been removed or the URL may be incorrect."}
+            : "We could not find documents at this link. It may have been removed or the URL may be incorrect."}
         </p>
       </div>
     </main>

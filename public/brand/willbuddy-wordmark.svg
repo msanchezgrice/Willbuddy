@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">WillBuddy wordmark</title>
+  <desc id="desc">WillBuddy wordmark with green document mark and warm serif lettering.</desc>
+  <rect width="1200" height="320" rx="40" fill="#FAF8F5"/>
+  <g transform="translate(72 44)">
+    <rect width="232" height="232" rx="56" fill="#F0EBE4" stroke="#E8E0D6" stroke-width="8"/>
+    <path d="M68 56c0-15 13-28 28-28h62c12 0 24 5 32 14l28 28c9 8 14 20 14 32v104c0 15-13 28-28 28H96c-15 0-28-13-28-28V56Z" fill="#FFFFFF" stroke="#5B7A5E" stroke-width="12"/>
+    <path d="M166 34v48c0 10 8 18 18 18h48" fill="none" stroke="#5B7A5E" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M96 116 122 196l21-60 21 60 26-80" fill="none" stroke="#2D2A26" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="352" y="156" fill="#2D2A26" font-family="Georgia, 'Times New Roman', serif" font-size="96" font-weight="700" letter-spacing="0">WillBuddy</text>
+  <text x="358" y="216" fill="#5B4F3E" font-family="Arial, sans-serif" font-size="30" letter-spacing="0">Voice-first estate planning preparation for Texas families</text>
+  <line x1="352" y1="246" x2="1040" y2="246" stroke="#D4C9BB" stroke-width="4" stroke-linecap="round"/>
+</svg>

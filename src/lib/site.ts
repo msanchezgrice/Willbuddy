@@ -10,7 +10,7 @@ export function getSiteUrl(): string {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.NEXT_PUBLIC_APP_URL ??
-    "https://willbuddy.vercel.app"
+    "https://mywillbuddy.com"
   ).replace(/\/+$/, "");
 }
 

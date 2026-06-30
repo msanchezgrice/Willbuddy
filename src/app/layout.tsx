@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Libre_Baskerville } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Clock, FileText, Shield } from "lucide-react";
+import { ClerkProvider } from "@clerk/nextjs";
 import { getSupportEmail } from "@/lib/resend";
 import { siteConfig } from "@/lib/site";
 import { Providers } from "./providers";
@@ -22,6 +22,27 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  applicationName: siteConfig.name,
+  keywords: [
+    "estate planning",
+    "Texas will",
+    "online will",
+    "guardianship",
+    "power of attorney",
+    "medical power of attorney",
+    "HIPAA authorization",
+    "estate plan for parents",
+    "voice estate planning",
+    "WillBuddy",
+  ],
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.name,
+    statusBarStyle: "default",
+  },
   alternates: {
     canonical: "/",
   },
@@ -73,6 +94,9 @@ function Footer() {
           aria-label="Footer"
           className="mb-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-[#5B4F3E]"
         >
+          <Link className="hover:text-[#2D2A26]" href="/blog">
+            Blog
+          </Link>
           <Link className="hover:text-[#2D2A26]" href="/contact">
             Contact
           </Link>
@@ -81,6 +105,9 @@ function Footer() {
           </a>
           <Link className="hover:text-[#2D2A26]" href="/privacy">
             Privacy
+          </Link>
+          <Link className="hover:text-[#2D2A26]" href="/refunds">
+            Refunds
           </Link>
           <Link className="hover:text-[#2D2A26]" href="/terms">
             Terms
@@ -114,7 +141,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl="/">
       <html lang="en" className={`${libreBaskerville.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#2D2A26]">
           <Providers>

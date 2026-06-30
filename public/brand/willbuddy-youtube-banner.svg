@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440" role="img" aria-labelledby="title desc">
+  <title id="title">WillBuddy YouTube banner</title>
+  <desc id="desc">A WillBuddy banner with core content inside the YouTube safe area.</desc>
+  <rect width="2560" height="1440" fill="#FAF8F5"/>
+  <rect x="320" y="360" width="1920" height="720" rx="48" fill="#F0EBE4" stroke="#E8E0D6" stroke-width="6"/>
+  <rect x="512" y="507" width="1536" height="426" rx="34" fill="#FFFFFF" stroke="#D4C9BB" stroke-width="6"/>
+  <text x="630" y="650" fill="#5B7A5E" font-family="Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="5">WILLBUDDY</text>
+  <text x="630" y="760" fill="#2D2A26" font-family="Georgia, 'Times New Roman', serif" font-size="82" font-weight="700">Estate planning prep</text>
+  <text x="634" y="846" fill="#5B4F3E" font-family="Arial, sans-serif" font-size="38">Wills, guardianship, healthcare wishes, and powers of attorney</text>
+  <text x="634" y="904" fill="#7A6F62" font-family="Arial, sans-serif" font-size="30">Texas drafts for attorney review - mywillbuddy.com</text>
+  <g transform="translate(1760 610)">
+    <rect width="200" height="200" rx="48" fill="#F0EBE4" stroke="#D4C9BB" stroke-width="8"/>
+    <path d="M60 50c0-14 12-26 26-26h58c12 0 22 5 30 13l27 27c8 8 13 18 13 30v96c0 14-12 26-26 26H86c-14 0-26-12-26-26V50Z" fill="#FFFFFF" stroke="#5B7A5E" stroke-width="13"/>
+    <path d="M150 33v48c0 9 8 17 17 17h48" fill="none" stroke="#5B7A5E" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M86 112 112 180l19-52 19 52 26-68" fill="none" stroke="#2D2A26" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

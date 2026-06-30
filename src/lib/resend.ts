@@ -13,13 +13,13 @@ export function getResend(): Resend {
 }
 
 export function getFromAddress(): string {
-  return process.env.RESEND_FROM ?? "WillBuddy <onboarding@resend.dev>";
+  return process.env.RESEND_FROM ?? "WillBuddy <hello@mywillbuddy.com>";
 }
 
 export function getSupportEmail(): string {
-  return process.env.SUPPORT_EMAIL ?? "support@willbuddy.app";
+  return process.env.SUPPORT_EMAIL ?? "support@mywillbuddy.com";
 }
 
 export function getAppUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "https://willbuddy.app";
+  return process.env.NEXT_PUBLIC_APP_URL ?? "https://mywillbuddy.com";
 }

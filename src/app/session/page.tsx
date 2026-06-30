@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { UserButton } from '@clerk/nextjs';
 import VoiceProvider from '@/components/voice/VoiceProvider';
 import VoiceControls from '@/components/voice/VoiceControls';
 import TranscriptFeed from '@/components/voice/TranscriptFeed';
@@ -50,27 +51,30 @@ function SessionLayout() {
           {SECTION_LABELS[currentSection]}
         </h1>
 
-        <button
-          type="button"
-          onClick={() => setShowContext(true)}
-          className="flex size-9 items-center justify-center rounded-lg text-[#2D2A26] hover:bg-[#F0EBE4] transition-colors"
-          aria-label="Show context"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-5"
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setShowContext(true)}
+            className="flex size-9 items-center justify-center rounded-lg text-[#2D2A26] hover:bg-[#F0EBE4] transition-colors"
+            aria-label="Show context"
           >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="16" x2="12" y2="12" />
-            <line x1="12" y1="8" x2="12.01" y2="8" />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-5"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+          </button>
+          <UserButton />
+        </div>
       </header>
 
       {/* ---- Desktop 3-column grid ---- */}
@@ -83,10 +87,11 @@ function SessionLayout() {
         {/* Center content */}
         <main className="flex flex-1 flex-col overflow-hidden">
           {/* Desktop section header */}
-          <div className="hidden border-b border-[#E8E0D6] px-6 py-4 md:block">
+          <div className="hidden items-center justify-between border-b border-[#E8E0D6] px-6 py-4 md:flex">
             <h1 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#2D2A26]">
               {SECTION_LABELS[currentSection]}
             </h1>
+            <UserButton />
           </div>
 
           {showPauseScreen ? (

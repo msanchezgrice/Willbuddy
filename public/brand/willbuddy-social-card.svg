@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">WillBuddy social card</title>
+  <desc id="desc">A WillBuddy launch social card for link previews.</desc>
+  <rect width="1200" height="630" fill="#FAF8F5"/>
+  <rect x="52" y="52" width="1096" height="526" rx="32" fill="#FFFFFF" stroke="#E8E0D6" stroke-width="4"/>
+  <rect x="80" y="80" width="1040" height="470" rx="24" fill="#F0EBE4"/>
+  <g transform="translate(92 100)">
+    <rect width="148" height="148" rx="36" fill="#FFFFFF" stroke="#D4C9BB" stroke-width="6"/>
+    <path d="M44 38c0-10 8-18 18-18h42c8 0 16 3 21 9l19 19c6 5 9 13 9 21v70c0 10-8 18-18 18H62c-10 0-18-8-18-18V38Z" fill="#FFFFFF" stroke="#5B7A5E" stroke-width="9"/>
+    <path d="M110 24v34c0 7 6 13 13 13h34" fill="none" stroke="#5B7A5E" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M62 82 80 133l14-38 15 38 18-51" fill="none" stroke="#2D2A26" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="280" y="154" fill="#5B7A5E" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="3">WILLBUDDY</text>
+  <text x="280" y="286" fill="#2D2A26" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700" letter-spacing="0">Talk through your</text>
+  <text x="280" y="360" fill="#2D2A26" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700" letter-spacing="0">estate plan.</text>
+  <text x="92" y="430" fill="#5B4F3E" font-family="Arial, sans-serif" font-size="30" letter-spacing="0">Voice-first preparation for wills, guardianship, healthcare wishes,</text>
+  <text x="92" y="472" fill="#5B4F3E" font-family="Arial, sans-serif" font-size="30" letter-spacing="0">and powers of attorney before Texas attorney review.</text>
+  <rect x="92" y="504" width="320" height="54" rx="27" fill="#5B7A5E"/>
+  <text x="130" y="540" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="0">mywillbuddy.com</text>
+  <text x="448" y="539" fill="#7A6F62" font-family="Arial, sans-serif" font-size="24" letter-spacing="0">Not a law firm. Drafts for attorney review.</text>
+</svg>

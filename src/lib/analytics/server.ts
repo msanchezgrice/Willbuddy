@@ -1,4 +1,5 @@
 import type { Properties } from "posthog-js";
+import { stripSensitiveProperties } from "@/lib/analytics/properties";
 
 const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com";
 
@@ -39,28 +40,4 @@ export async function captureServerEvent(
     console.warn("[analytics] server capture threw", error);
     return { ok: false, reason: "posthog_request_failed" };
   }
-}
-
-function stripSensitiveProperties(properties: Properties): Properties {
-  const sanitized: Properties = { ...properties };
-
-  for (const key of [
-    "email",
-    "name",
-    "message",
-    "transcript",
-    "decisions",
-    "answers",
-    "token",
-    "invite_token",
-    "share_token",
-    "sessionId",
-    "session_id",
-    "userId",
-    "user_id",
-  ]) {
-    delete sanitized[key];
-  }
-
-  return sanitized;
 }

@@ -14,6 +14,7 @@ export default function robots(): MetadataRoute.Robots {
         "/couple/",
         "/sign-in",
         "/sign-up",
+        "/onboarding",
       ],
     },
     sitemap: absoluteUrl("/sitemap.xml"),

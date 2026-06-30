@@ -1,5 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
 import { createServiceClient } from "@/lib/supabase/server";
 import { generateAllDocuments, getDocumentCompleteness } from "@/lib/documents/generator";
 import { DOC_TYPE_LABELS } from "@/types";
@@ -78,6 +80,17 @@ export default async function SummaryPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-[#FAF8F5]">
+      {/* Account bar */}
+      <div className="flex items-center justify-between border-b border-[#E8E0D6] bg-white px-6 py-3">
+        <Link
+          href="/"
+          className="font-[family-name:var(--font-heading)] text-base font-bold text-[#2D2A26]"
+        >
+          WillBuddy
+        </Link>
+        <UserButton />
+      </div>
+
       {/* Hero / completion message */}
       <div className="bg-[#5B7A5E] text-white py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">

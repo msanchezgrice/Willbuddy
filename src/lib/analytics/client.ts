@@ -1,51 +1,86 @@
 "use client";
 
-import posthog from "posthog-js";
 import type { Properties } from "posthog-js";
+import {
+  getAttributionProperties,
+  stripSensitiveProperties,
+} from "@/lib/analytics/properties";
+import {
+  loadPostHogClient,
+  scheduleAnalyticsWork,
+} from "@/lib/analytics/posthog-client";
 import { normalizeAnalyticsRoute } from "@/lib/analytics/routes";
+
+type SearchParamsReader = {
+  get(name: string): string | null;
+};
 
 export function captureAnalyticsEvent(
   event: string,
   properties: Properties = {}
 ) {
-  if (!process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN || typeof window === "undefined") {
+  if (typeof window === "undefined") {
     return;
   }
 
-  const route = normalizeAnalyticsRoute(window.location.pathname);
+  const attributionProperties = getAttributionProperties(
+    new URLSearchParams(window.location.search)
+  );
+
+  void capturePostHogEvent(event, {
+    ...properties,
+    ...attributionProperties,
+  });
+}
+
+export function capturePageview(
+  pathname: string | null,
+  searchParams: SearchParamsReader | null
+) {
+  if (!pathname || typeof window === "undefined") {
+    return;
+  }
+
+  const attributionProperties = searchParams
+    ? getAttributionProperties(searchParams)
+    : {};
+
+  scheduleAnalyticsWork(() => {
+    void capturePostHogEvent("$pageview", attributionProperties, pathname, {
+      registerProperties: attributionProperties,
+    });
+  });
+}
+
+async function capturePostHogEvent(
+  event: string,
+  properties: Properties = {},
+  pathname = window.location.pathname,
+  options: { registerProperties?: Properties } = {}
+) {
+  const posthog = await loadPostHogClient();
+  if (!posthog) {
+    return;
+  }
+
+  const route = normalizeAnalyticsRoute(pathname);
+  const registerProperties = stripSensitiveProperties(
+    options.registerProperties ?? {}
+  );
+
+  if (Object.keys(registerProperties).length > 0) {
+    posthog.register(registerProperties);
+  }
 
   try {
     posthog.capture(event, {
       ...stripSensitiveProperties(properties),
       route,
       path: route,
+      $pathname: route,
+      $current_url: `${window.location.origin}${route}`,
     });
   } catch (error) {
     console.warn("[analytics] capture failed", error);
   }
-}
-
-function stripSensitiveProperties(properties: Properties): Properties {
-  const sanitized: Properties = { ...properties };
-  const blocked = [
-    "email",
-    "name",
-    "message",
-    "transcript",
-    "decisions",
-    "answers",
-    "token",
-    "invite_token",
-    "share_token",
-    "sessionId",
-    "session_id",
-    "userId",
-    "user_id",
-  ];
-
-  for (const key of blocked) {
-    delete sanitized[key];
-  }
-
-  return sanitized;
 }

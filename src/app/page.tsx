@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
 import {
   Mic,
@@ -7,7 +8,13 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-function HeroSection() {
+const CTA_PRIMARY_CLASS =
+  "inline-block bg-[#5B7A5E] hover:bg-[#4A6A4D] text-white font-semibold text-lg px-12 py-4 rounded-full shadow-lg shadow-[#5B7A5E]/20 transition-all hover:-translate-y-0.5";
+
+const CTA_PRICING_CLASS =
+  "inline-block bg-[#5B7A5E] hover:bg-[#4A6A4D] text-white font-semibold px-10 py-3.5 rounded-full shadow-lg shadow-[#5B7A5E]/20 transition-all hover:-translate-y-0.5";
+
+function HeroSection({ isAuthed }: { isAuthed: boolean }) {
   return (
     <section className="px-6 pt-20 pb-24 md:pt-32 md:pb-32">
       <div className="max-w-2xl mx-auto text-center">
@@ -25,14 +32,28 @@ function HeroSection() {
         <p className="text-base text-[#5B7A5E] font-medium mb-10">
           Draft documents generated. Ready for attorney review.
         </p>
-        <TrackedLink
-          href="/sign-in"
-          event="signup_cta_clicked"
-          eventProperties={{ location: "hero", label: "Start Your Estate Plan" }}
-          className="inline-block bg-[#5B7A5E] hover:bg-[#4A6A4D] text-white font-semibold text-lg px-12 py-4 rounded-full shadow-lg shadow-[#5B7A5E]/20 transition-all hover:-translate-y-0.5"
-        >
-          Start Your Estate Plan
-        </TrackedLink>
+        {isAuthed ? (
+          <TrackedLink
+            href="/session"
+            event="continue_cta_clicked"
+            eventProperties={{ location: "hero", label: "Continue your plan" }}
+            className={CTA_PRIMARY_CLASS}
+          >
+            Continue your plan
+          </TrackedLink>
+        ) : (
+          <TrackedLink
+            href="/onboarding"
+            event="signup_cta_clicked"
+            eventProperties={{
+              location: "hero",
+              label: "Start Your Estate Plan",
+            }}
+            className={CTA_PRIMARY_CLASS}
+          >
+            Start Your Estate Plan
+          </TrackedLink>
+        )}
         <p className="text-sm text-[#9B8E7E] mt-5">
           About 45 minutes together — or do it separately (25 min each) and
           compare answers after.
@@ -224,7 +245,7 @@ function WhyVoiceSection() {
   );
 }
 
-function PricingSection() {
+function PricingSection({ isAuthed }: { isAuthed: boolean }) {
   const included = [
     "All 5 Texas-compliant draft documents",
     "Full conversation transcript",
@@ -264,14 +285,28 @@ function PricingSection() {
             ))}
           </ul>
 
-          <TrackedLink
-            href="/sign-in"
-            event="signup_cta_clicked"
-            eventProperties={{ location: "pricing", label: "Start for Free" }}
-            className="inline-block bg-[#5B7A5E] hover:bg-[#4A6A4D] text-white font-semibold px-10 py-3.5 rounded-full shadow-lg shadow-[#5B7A5E]/20 transition-all hover:-translate-y-0.5"
-          >
-            Start for Free
-          </TrackedLink>
+          {isAuthed ? (
+            <TrackedLink
+              href="/session"
+              event="continue_cta_clicked"
+              eventProperties={{
+                location: "pricing",
+                label: "Continue your plan",
+              }}
+              className={CTA_PRICING_CLASS}
+            >
+              Continue your plan
+            </TrackedLink>
+          ) : (
+            <TrackedLink
+              href="/onboarding"
+              event="signup_cta_clicked"
+              eventProperties={{ location: "pricing", label: "Start for Free" }}
+              className={CTA_PRICING_CLASS}
+            >
+              Start for Free
+            </TrackedLink>
+          )}
         </div>
 
         <p className="text-sm text-[#9B8E7E] mt-8 max-w-md mx-auto leading-relaxed">
@@ -368,14 +403,17 @@ function FAQSection() {
   );
 }
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { userId } = await auth();
+  const isAuthed = Boolean(userId);
+
   return (
     <main className="flex-1">
-      <HeroSection />
+      <HeroSection isAuthed={isAuthed} />
       <HowItWorksSection />
       <DocumentsSection />
       <WhyVoiceSection />
-      <PricingSection />
+      <PricingSection isAuthed={isAuthed} />
       <FAQSection />
     </main>
   );

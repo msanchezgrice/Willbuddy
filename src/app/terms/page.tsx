@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "WillBuddy terms for voice-first estate planning preparation and draft documents.",
 };
 
-const updated = "June 11, 2026";
+const updated = "June 27, 2026";
 
 export default function TermsPage() {
   const supportEmail = getSupportEmail();
@@ -68,6 +68,24 @@ export default function TermsPage() {
               Payments are processed by Stripe. Prices and availability may
               change, but checkout should show the current amount before a
               payment is completed.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26]">
+              Refunds
+            </h2>
+            <p>
+              Refund requests are handled under the{" "}
+              <Link
+                className="font-semibold text-[#2D2A26] underline decoration-[#CDBFAE] underline-offset-4"
+                href="/refunds"
+              >
+                refund policy
+              </Link>
+              . WillBuddy does not provide legal advice and cannot refund or
+              reimburse attorney fees, filing fees, notarization costs, or other
+              third-party services.
             </p>
           </section>
 

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">WillBuddy profile avatar</title>
+  <desc id="desc">A warm cream square avatar with a green WillBuddy monogram and estate planning document mark.</desc>
+  <rect width="1024" height="1024" rx="224" fill="#FAF8F5"/>
+  <rect x="80" y="80" width="864" height="864" rx="176" fill="#F0EBE4" stroke="#E8E0D6" stroke-width="16"/>
+  <path d="M320 296c0-42 34-76 76-76h176c34 0 66 14 90 38l76 76c24 24 38 56 38 90v304c0 42-34 76-76 76H396c-42 0-76-34-76-76V296Z" fill="#FFFFFF" stroke="#5B7A5E" stroke-width="28"/>
+  <path d="M590 238v130c0 27 22 49 49 49h130" fill="none" stroke="#5B7A5E" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M396 462 468 698l58-178 60 178 72-236" fill="none" stroke="#2D2A26" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="512" cy="512" r="368" fill="none" stroke="#D4C9BB" stroke-width="12"/>
+</svg>

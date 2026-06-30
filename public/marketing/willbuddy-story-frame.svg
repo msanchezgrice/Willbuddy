@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" role="img" aria-labelledby="title desc">
+  <title id="title">WillBuddy story frame</title>
+  <desc id="desc">A vertical branded story frame for WillBuddy launch creative.</desc>
+  <rect width="1080" height="1920" fill="#FAF8F5"/>
+  <rect x="74" y="88" width="932" height="1744" rx="40" fill="#FFFFFF" stroke="#E8E0D6" stroke-width="5"/>
+  <text x="128" y="190" font-family="Georgia, serif" font-size="44" font-weight="700" fill="#5B7A5E" letter-spacing="4">WILLBUDDY</text>
+  <text x="128" y="392" font-family="Georgia, serif" font-size="86" font-weight="700" fill="#2D2A26">The question</text>
+  <text x="128" y="492" font-family="Georgia, serif" font-size="86" font-weight="700" fill="#2D2A26">parents avoid:</text>
+  <text x="128" y="650" font-family="Georgia, serif" font-size="72" font-weight="700" fill="#5B4F3E">Who raises</text>
+  <text x="128" y="736" font-family="Georgia, serif" font-size="72" font-weight="700" fill="#5B4F3E">the kids?</text>
+  <rect x="128" y="840" width="824" height="4" fill="#E8E0D6"/>
+  <text x="128" y="952" font-family="Arial, sans-serif" font-size="44" fill="#5B4F3E">Talk it through by voice.</text>
+  <text x="128" y="1026" font-family="Arial, sans-serif" font-size="44" fill="#5B4F3E">Organize your decisions.</text>
+  <text x="128" y="1100" font-family="Arial, sans-serif" font-size="44" fill="#5B4F3E">Bring drafts to your attorney.</text>
+  <g transform="translate(128 1234)">
+    <rect x="0" y="0" width="520" height="90" rx="45" fill="#5B7A5E"/>
+    <text x="260" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="#FFFFFF">Start your plan</text>
+  </g>
+  <g transform="translate(690 1320)" fill="none" stroke="#5B7A5E" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+    <path d="M96 24 C57 24 30 56 30 98 C30 158 96 202 96 202 C96 202 162 158 162 98 C162 56 135 24 96 24 Z"/>
+    <path d="M96 86 L96 152"/>
+    <path d="M64 120 L128 120"/>
+  </g>
+  <text x="128" y="1742" font-family="Arial, sans-serif" font-size="27" fill="#9B8E7E">Texas-focused draft documents for attorney review.</text>
+  <text x="128" y="1792" font-family="Arial, sans-serif" font-size="25" fill="#9B8E7E">Not legal advice.</text>
+</svg>
