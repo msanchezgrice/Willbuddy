@@ -8,6 +8,8 @@ interface SummaryActionsProps {
   isPaid: boolean;
   justPaid: boolean;
   shareToken: string | null;
+  /** Human labels for the documents this session's plan produces. */
+  docLabels: string[];
 }
 
 /**
@@ -20,7 +22,11 @@ export function SummaryActions({
   isPaid,
   justPaid,
   shareToken: initialShareToken,
+  docLabels,
 }: SummaryActionsProps) {
+  const docCount = docLabels.length;
+  const docCountLabel =
+    docCount === 1 ? "1 document" : `${docCount} documents`;
   const [shareToken, setShareToken] = useState(initialShareToken);
   const [shareLoading, setShareLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -157,13 +163,15 @@ export function SummaryActions({
           Unlock your complete estate plan
         </h3>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#5A5550]">
-          Download all five documents as a single PDF you can bring to any Texas
-          estate attorney to finalize and sign.
+          Download your {docCountLabel} as a single PDF you can bring to any
+          Texas estate attorney to finalize and sign.
         </p>
         <ul className="mx-auto mt-5 max-w-xs space-y-2 text-left text-sm text-[#5A5550]">
           {[
-            "Will, Guardianship, Medical & Durable POA, HIPAA",
-            "Combined PDF or ZIP of five separate PDFs",
+            docLabels.join(", "),
+            docCount > 1
+              ? `Combined PDF or ZIP of ${docCount} separate PDFs`
+              : "Downloadable PDF",
             "Shareable link for your attorney",
             "Free to revisit and update your answers",
           ].map((item) => (
@@ -213,17 +221,23 @@ export function SummaryActions({
           className="inline-flex items-center justify-center gap-2 rounded-full bg-[#5B7A5E] px-8 py-3.5 font-semibold text-white shadow-lg shadow-[#5B7A5E]/25 transition-all hover:-translate-y-0.5 hover:bg-[#4A6A4D] disabled:opacity-60"
         >
           <DownloadIcon />
-          {downloading ? "Preparing PDF…" : "Download All (One PDF)"}
+          {downloading
+            ? "Preparing PDF…"
+            : docCount > 1
+              ? "Download All (One PDF)"
+              : "Download PDF"}
         </button>
 
-        <button
-          onClick={handleDownloadZip}
-          disabled={downloading || downloadingZip}
-          className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#5B7A5E] px-8 py-3.5 font-semibold text-[#5B7A5E] transition-colors hover:bg-[#5B7A5E]/5 disabled:opacity-60"
-        >
-          <DownloadIcon />
-          {downloadingZip ? "Preparing ZIP…" : "Download ZIP (5 PDFs)"}
-        </button>
+        {docCount > 1 && (
+          <button
+            onClick={handleDownloadZip}
+            disabled={downloading || downloadingZip}
+            className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#5B7A5E] px-8 py-3.5 font-semibold text-[#5B7A5E] transition-colors hover:bg-[#5B7A5E]/5 disabled:opacity-60"
+          >
+            <DownloadIcon />
+            {downloadingZip ? "Preparing ZIP…" : `Download ZIP (${docCount} PDFs)`}
+          </button>
+        )}
 
         <button
           onClick={handleShare}

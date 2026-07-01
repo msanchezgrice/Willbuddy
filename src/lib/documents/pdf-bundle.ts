@@ -3,15 +3,19 @@ import type { DocType } from "@/types";
 import { DOC_TYPE_DOWNLOAD_ORDER, DOC_TYPE_FILENAMES } from "@/types";
 import { renderDocumentPdf } from "./pdf";
 
-/** Render each document as its own PDF and return a ZIP archive. */
+/** Render each in-scope document as its own PDF and return a ZIP archive. */
 export async function renderEstatePlanZip(
-  documents: Record<DocType, string>
+  documents: Partial<Record<DocType, string>>
 ): Promise<Buffer> {
   const zip = new JSZip();
 
+  const included = DOC_TYPE_DOWNLOAD_ORDER.filter(
+    (docType) => typeof documents[docType] === "string"
+  );
+
   await Promise.all(
-    DOC_TYPE_DOWNLOAD_ORDER.map(async (docType) => {
-      const pdf = await renderDocumentPdf(docType, documents[docType]);
+    included.map(async (docType) => {
+      const pdf = await renderDocumentPdf(docType, documents[docType]!);
       zip.file(DOC_TYPE_FILENAMES[docType], pdf);
     })
   );

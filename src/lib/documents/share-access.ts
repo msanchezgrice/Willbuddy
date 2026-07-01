@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { generateAllDocuments } from "@/lib/documents/generator";
-import type { Decision, DocType } from "@/types";
+import { resolvePlan } from "@/lib/sections/plan";
+import type { Decision, DocType, Section } from "@/types";
 
 export type ShareAccessResult =
   | {
@@ -8,6 +9,7 @@ export type ShareAccessResult =
       sessionId: string;
       decisions: Decision[];
       documents: Record<DocType, string>;
+      sectionPlan: Section[];
     }
   | { ok: false; reason: "not_found" | "expired" };
 
@@ -34,7 +36,7 @@ export async function getDocumentsByShareToken(
 
   const { data: session } = await supabase
     .from("sessions")
-    .select("id")
+    .select("id, section_plan")
     .eq("id", doc.session_id)
     .single();
 
@@ -55,5 +57,6 @@ export async function getDocumentsByShareToken(
     sessionId: doc.session_id,
     decisions: allDecisions,
     documents: generateAllDocuments(allDecisions),
+    sectionPlan: resolvePlan(session.section_plan as Section[] | null),
   };
 }

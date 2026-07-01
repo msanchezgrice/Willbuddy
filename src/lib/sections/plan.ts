@@ -131,6 +131,22 @@ export function docsForPlan(plan: Section[]): DocType[] {
   return docs;
 }
 
+/**
+ * Narrow a full set of generated documents down to the ones the plan produces.
+ * Preserves document text for in-plan doc types only.
+ */
+export function pickPlanDocuments(
+  documents: Partial<Record<DocType, string>>,
+  plan: Section[]
+): Partial<Record<DocType, string>> {
+  const out: Partial<Record<DocType, string>> = {};
+  for (const docType of docsForPlan(plan)) {
+    const body = documents[docType];
+    if (typeof body === "string") out[docType] = body;
+  }
+  return out;
+}
+
 /** Goal presets shown in the "what do you need" onboarding step. */
 export interface PlanPreset {
   id: string;

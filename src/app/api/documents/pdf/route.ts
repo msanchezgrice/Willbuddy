@@ -4,9 +4,10 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { generateAllDocuments } from "@/lib/documents/generator";
 import { renderDocumentPdf, renderEstatePlanPdf } from "@/lib/documents/pdf";
 import { renderEstatePlanZip } from "@/lib/documents/pdf-bundle";
+import { pickPlanDocuments, resolvePlan } from "@/lib/sections/plan";
 import { DOC_TYPE_FILENAMES } from "@/types";
 import { isSessionPaid } from "@/lib/payments";
-import type { DocType } from "@/types";
+import type { DocType, Section } from "@/types";
 import { DOC_TYPE_LABELS } from "@/types";
 
 export const runtime = "nodejs";
@@ -22,8 +23,9 @@ function isDocType(value: string | null): value is DocType {
  * GET /api/documents/pdf?sessionId=xxx&docType=will
  * GET /api/documents/pdf?sessionId=xxx&format=zip
  *
- * Returns a combined PDF of all documents, or a single document when docType is set.
- * Gated behind a completed payment for the session.
+ * Returns a combined PDF (or ZIP) of the in-plan documents, or a single
+ * document when docType is set. Gated behind a completed payment, and scoped to
+ * the session's tailored section plan.
  */
 export async function GET(request: NextRequest) {
   const { userId } = await auth();
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest) {
 
   const { data: session, error: sessionError } = await supabase
     .from("sessions")
-    .select("id, user_id")
+    .select("id, user_id, section_plan")
     .eq("id", sessionId)
     .single();
 
@@ -75,10 +77,14 @@ export async function GET(request: NextRequest) {
     .eq("session_id", sessionId)
     .order("created_at", { ascending: true });
 
-  const documents = generateAllDocuments(decisions ?? []);
+  const plan = resolvePlan(session.section_plan as Section[] | null);
+  const planDocs = pickPlanDocuments(
+    generateAllDocuments(decisions ?? []),
+    plan
+  );
 
   if (format === "zip") {
-    const zip = await renderEstatePlanZip(documents);
+    const zip = await renderEstatePlanZip(planDocs);
     return new NextResponse(new Uint8Array(zip), {
       status: 200,
       headers: {
@@ -91,7 +97,14 @@ export async function GET(request: NextRequest) {
   }
 
   if (isDocType(docTypeParam)) {
-    const pdf = await renderDocumentPdf(docTypeParam, documents[docTypeParam]);
+    // Don't serve a document the tailored plan didn't produce.
+    if (!(docTypeParam in planDocs)) {
+      return NextResponse.json(
+        { error: "Document not in plan" },
+        { status: 404 }
+      );
+    }
+    const pdf = await renderDocumentPdf(docTypeParam, planDocs[docTypeParam]!);
     return new NextResponse(new Uint8Array(pdf), {
       status: 200,
       headers: {
@@ -102,7 +115,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const pdf = await renderEstatePlanPdf(documents);
+  const pdf = await renderEstatePlanPdf(planDocs);
 
   return new NextResponse(new Uint8Array(pdf), {
     status: 200,

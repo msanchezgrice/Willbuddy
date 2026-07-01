@@ -6,6 +6,7 @@ import VoiceControls from '@/components/voice/VoiceControls';
 import TranscriptFeed from '@/components/voice/TranscriptFeed';
 import SectionNav from '@/components/session/SectionNav';
 import ContextPanel from '@/components/session/ContextPanel';
+import ResumeRecap from '@/components/session/ResumeRecap';
 import { useVoice } from '@/components/voice/VoiceProvider';
 import { SECTION_LABELS } from '@/types';
 import { useState } from 'react';
@@ -64,6 +65,7 @@ function SessionLayout() {
             </h2>
           </div>
           <div className="flex-1 overflow-y-auto px-4 py-4 md:px-12 md:py-6">
+            <ResumeRecap />
             <TranscriptFeed />
           </div>
           <div className="border-t border-[#E8E0D6] px-4 py-4 md:px-12">

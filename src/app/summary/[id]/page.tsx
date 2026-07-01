@@ -5,8 +5,9 @@ import { UserButton } from "@clerk/nextjs";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getDocumentCompleteness } from "@/lib/documents/generator";
 import { isSessionPaid, verifyAndRecordCheckout } from "@/lib/payments";
+import { docsForPlan, resolvePlan } from "@/lib/sections/plan";
 import { DOC_TYPE_LABELS } from "@/types";
-import type { DocType, Decision } from "@/types";
+import type { DocType, Decision, Section } from "@/types";
 import { SummaryActions } from "./summary-client";
 import { DecisionEditor } from "@/components/summary/DecisionEditor";
 import { TranscriptViewer } from "@/components/summary/TranscriptViewer";
@@ -48,6 +49,11 @@ export default async function SummaryPage({ params, searchParams }: Props) {
     .order("created_at", { ascending: true });
 
   const allDecisions: Decision[] = (decisions as Decision[]) ?? [];
+
+  // Only the documents this session's tailored plan actually produces.
+  const planDocTypes = docsForPlan(
+    resolvePlan(session.section_plan as Section[] | null)
+  );
 
   // Check completeness for the document cards
   const completeness = getDocumentCompleteness(allDecisions);
@@ -135,7 +141,7 @@ export default async function SummaryPage({ params, searchParams }: Props) {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {(Object.keys(DOC_TYPE_LABELS) as DocType[]).map((docType) => {
+          {planDocTypes.map((docType) => {
             const isComplete = completeness[docType].complete;
             const missing = completeness[docType].missing;
 
@@ -192,6 +198,7 @@ export default async function SummaryPage({ params, searchParams }: Props) {
           isPaid={paid}
           justPaid={justPaid}
           shareToken={shareToken}
+          docLabels={planDocTypes.map((d) => DOC_TYPE_LABELS[d])}
         />
 
         {/* Couple invite CTA */}

@@ -5,6 +5,7 @@ import {
   renderEstatePlanPdf,
 } from "@/lib/documents/pdf";
 import { renderEstatePlanZip } from "@/lib/documents/pdf-bundle";
+import { pickPlanDocuments } from "@/lib/sections/plan";
 import { DOC_TYPE_FILENAMES, DOC_TYPE_LABELS } from "@/types";
 import type { DocType } from "@/types";
 
@@ -47,10 +48,11 @@ export async function GET(
     );
   }
 
-  const { documents } = access;
+  const { documents, sectionPlan } = access;
+  const planDocs = pickPlanDocuments(documents, sectionPlan);
 
   if (format === "zip") {
-    const zip = await renderEstatePlanZip(documents);
+    const zip = await renderEstatePlanZip(planDocs);
     return new NextResponse(new Uint8Array(zip), {
       status: 200,
       headers: {
@@ -63,7 +65,10 @@ export async function GET(
   }
 
   if (isDocType(docTypeParam)) {
-    const pdf = await renderDocumentPdf(docTypeParam, documents[docTypeParam]);
+    if (!(docTypeParam in planDocs)) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    const pdf = await renderDocumentPdf(docTypeParam, planDocs[docTypeParam]!);
     return new NextResponse(new Uint8Array(pdf), {
       status: 200,
       headers: {
@@ -74,7 +79,7 @@ export async function GET(
     });
   }
 
-  const pdf = await renderEstatePlanPdf(documents);
+  const pdf = await renderEstatePlanPdf(planDocs);
   return new NextResponse(new Uint8Array(pdf), {
     status: 200,
     headers: {

@@ -5,6 +5,8 @@ import { DOC_TYPE_LABELS, DOC_TYPE_FILENAMES, type DocType } from "@/types";
 
 interface ShareDocumentDownloadsProps {
   token: string;
+  /** Documents produced by the session's tailored plan. */
+  docTypes: DocType[];
 }
 
 async function downloadBlob(url: string, filename: string) {
@@ -24,11 +26,15 @@ async function downloadBlob(url: string, filename: string) {
 /**
  * PDF download actions for the public attorney share page.
  */
-export function ShareDocumentDownloads({ token }: ShareDocumentDownloadsProps) {
+export function ShareDocumentDownloads({
+  token,
+  docTypes,
+}: ShareDocumentDownloadsProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const base = `/api/share/${token}/pdf`;
+  const multiple = docTypes.length > 1;
 
   async function handleDownload(
     key: string,
@@ -52,8 +58,9 @@ export function ShareDocumentDownloads({ token }: ShareDocumentDownloadsProps) {
         Download Documents
       </h2>
       <p className="text-sm text-[#9B8E7E] mb-5">
-        Download as one combined PDF, five separate PDFs, or a ZIP of all
-        documents.
+        {multiple
+          ? "Download as one combined PDF, individual PDFs, or a ZIP of all documents."
+          : "Download the document as a PDF."}
       </p>
 
       {error && (
@@ -73,24 +80,28 @@ export function ShareDocumentDownloads({ token }: ShareDocumentDownloadsProps) {
         >
           {loading === "all" ? "Preparing…" : "All in One PDF"}
         </button>
-        <button
-          type="button"
-          disabled={loading !== null}
-          onClick={() =>
-            handleDownload(
-              "zip",
-              `${base}?format=zip`,
-              "WillBuddy_Estate_Plan_Documents.zip"
-            )
-          }
-          className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#5B7A5E] px-5 py-2.5 text-sm font-semibold text-[#5B7A5E] transition-colors hover:bg-[#5B7A5E]/5 disabled:opacity-60"
-        >
-          {loading === "zip" ? "Preparing…" : "ZIP (5 separate PDFs)"}
-        </button>
+        {multiple && (
+          <button
+            type="button"
+            disabled={loading !== null}
+            onClick={() =>
+              handleDownload(
+                "zip",
+                `${base}?format=zip`,
+                "WillBuddy_Estate_Plan_Documents.zip"
+              )
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#5B7A5E] px-5 py-2.5 text-sm font-semibold text-[#5B7A5E] transition-colors hover:bg-[#5B7A5E]/5 disabled:opacity-60"
+          >
+            {loading === "zip"
+              ? "Preparing…"
+              : `ZIP (${docTypes.length} separate PDFs)`}
+          </button>
+        )}
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {(Object.keys(DOC_TYPE_LABELS) as DocType[]).map((docType) => (
+        {docTypes.map((docType) => (
           <button
             key={docType}
             type="button"

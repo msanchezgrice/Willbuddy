@@ -27,6 +27,7 @@ import type { OnboardingAnswers } from '@/lib/gemini/system-prompt';
 
 const ONBOARDING_STORAGE_KEY = 'willbuddy_onboarding';
 const GOALS_STORAGE_KEY = 'willbuddy_goals';
+const sessionCacheKey = (id: string) => `willbuddy_session_cache_${id}`;
 
 // ---------------------------------------------------------------------------
 // Context value
@@ -293,6 +294,42 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // -----------------------------------------------------------------------
   useEffect(() => {
     if (!sessionId) return;
+
+    // Instant paint: hydrate from the last cached snapshot while the network
+    // fetch is in flight. The DB response below reconciles authoritatively.
+    try {
+      const raw = window.localStorage.getItem(sessionCacheKey(sessionId));
+      if (raw) {
+        const cached = JSON.parse(raw) as {
+          plan?: Section[];
+          sectionsCompleted?: Section[];
+          currentSection?: Section;
+          decisions?: Decision[];
+          transcript?: TranscriptEntry[];
+        };
+        if (Array.isArray(cached.plan) && cached.plan.length) {
+          const cachedPlan = resolvePlan(cached.plan);
+          planRef.current = cachedPlan;
+          setSectionPlan(cachedPlan);
+        }
+        if (Array.isArray(cached.sectionsCompleted)) {
+          sectionsCompletedRef.current = cached.sectionsCompleted;
+          setSectionsCompleted(cached.sectionsCompleted);
+        }
+        if (typeof cached.currentSection === 'string') {
+          setCurrentSection(cached.currentSection);
+        }
+        if (Array.isArray(cached.decisions) && cached.decisions.length) {
+          setDecisions(cached.decisions);
+        }
+        if (Array.isArray(cached.transcript) && cached.transcript.length) {
+          setTranscript(cached.transcript);
+        }
+      }
+    } catch {
+      // Corrupt/absent cache — non-fatal, the fetch below hydrates.
+    }
+
     async function loadSession() {
       const res = await fetch(`/api/session?id=${sessionId}`);
       if (!res.ok) return;
@@ -330,6 +367,28 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
     }
     void loadSession();
   }, [sessionId]);
+
+  // Keep a lightweight snapshot in localStorage so returning to a session
+  // paints answers/progress/chat instantly before the DB round-trip.
+  useEffect(() => {
+    const id = sessionIdRef.current;
+    if (!id) return;
+    try {
+      window.localStorage.setItem(
+        sessionCacheKey(id),
+        JSON.stringify({
+          plan: sectionPlan,
+          sectionsCompleted,
+          currentSection,
+          decisions,
+          transcript: transcript.slice(-10),
+          ts: Date.now(),
+        }),
+      );
+    } catch {
+      // Storage full/unavailable — non-fatal.
+    }
+  }, [sessionId, sectionPlan, sectionsCompleted, currentSection, decisions, transcript]);
 
   // -----------------------------------------------------------------------
   // Connect to Gemini Live

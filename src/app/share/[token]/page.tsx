@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { generateAllDocuments, getDocumentCompleteness } from "@/lib/documents/generator";
+import { docsForPlan, resolvePlan } from "@/lib/sections/plan";
 import { DOC_TYPE_LABELS, SECTION_LABELS } from "@/types";
-import type { DocType, Decision, Section } from "@/types";
+import type { Decision, Section } from "@/types";
 import { ShareDocumentDownloads } from "@/components/share/ShareDocumentDownloads";
 
 interface Props {
@@ -68,9 +69,12 @@ export default async function SharePage({ params }: Props) {
 
   const allDecisions: Decision[] = (decisions as Decision[]) ?? [];
 
-  // Generate documents
+  // Generate documents, scoped to the session's tailored plan.
   const documents = generateAllDocuments(allDecisions);
   const completeness = getDocumentCompleteness(allDecisions);
+  const planDocTypes = docsForPlan(
+    resolvePlan(session.section_plan as Section[] | null)
+  );
 
   // Group decisions by section
   const decisionsBySection: Record<string, Decision[]> = {};
@@ -156,7 +160,7 @@ export default async function SharePage({ params }: Props) {
         </section>
 
         {/* PDF downloads for attorney */}
-        <ShareDocumentDownloads token={token} />
+        <ShareDocumentDownloads token={token} docTypes={planDocTypes} />
 
         {/* Document texts */}
         <section>
@@ -165,7 +169,7 @@ export default async function SharePage({ params }: Props) {
           </h2>
 
           <div className="space-y-8">
-            {(Object.keys(DOC_TYPE_LABELS) as DocType[]).map((docType) => {
+            {planDocTypes.map((docType) => {
               const isComplete = completeness[docType].complete;
 
               return (

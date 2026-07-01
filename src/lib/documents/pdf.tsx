@@ -198,13 +198,18 @@ function DocumentPages({ title, body }: { title: string; body: string }) {
 }
 
 function buildDocument(
-  documents: Record<DocType, string>,
+  documents: Partial<Record<DocType, string>>,
   docTypes: DocType[],
   documentTitle: string
 ) {
+  // Only render doc types that actually have content, so a tailored plan never
+  // emits blank pages for skipped topics.
+  const included = docTypes.filter(
+    (docType) => typeof documents[docType] === "string"
+  );
   return (
     <Document title={documentTitle} author="WillBuddy">
-      {docTypes.map((docType) => (
+      {included.map((docType) => (
         <DocumentPages
           key={docType}
           title={DOC_TYPE_LABELS[docType]}
@@ -227,9 +232,9 @@ export async function renderDocumentPdf(
   return renderToBuffer(doc);
 }
 
-/** Render all estate-plan documents into one combined PDF. */
+/** Render the in-scope estate-plan documents into one combined PDF. */
 export async function renderEstatePlanPdf(
-  documents: Record<DocType, string>
+  documents: Partial<Record<DocType, string>>
 ): Promise<Buffer> {
   registerPdfFonts();
   const doc = buildDocument(
