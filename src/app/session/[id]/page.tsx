@@ -7,13 +7,14 @@ import TranscriptFeed from '@/components/voice/TranscriptFeed';
 import SectionNav from '@/components/session/SectionNav';
 import ContextPanel from '@/components/session/ContextPanel';
 import ResumeRecap from '@/components/session/ResumeRecap';
+import PauseScreen from '@/components/session/PauseScreen';
 import { useVoice } from '@/components/voice/VoiceProvider';
 import { SECTION_LABELS } from '@/types';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 function SessionLayout() {
-  const { currentSection } = useVoice();
+  const { currentSection, isPaused } = useVoice();
   const [showNav, setShowNav] = useState(false);
   const [showContext, setShowContext] = useState(false);
 
@@ -59,18 +60,24 @@ function SessionLayout() {
 
         {/* Center */}
         <main className="flex flex-1 flex-col overflow-hidden">
-          <div className="hidden md:flex items-center justify-between border-b border-[#E8E0D6] px-8 py-4">
-            <h2 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">
-              {SECTION_LABELS[currentSection]}
-            </h2>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4 md:px-12 md:py-6">
-            <ResumeRecap />
-            <TranscriptFeed />
-          </div>
-          <div className="border-t border-[#E8E0D6] px-4 py-4 md:px-12">
-            <VoiceControls />
-          </div>
+          {isPaused ? (
+            <PauseScreen />
+          ) : (
+            <>
+              <div className="hidden md:flex items-center justify-between border-b border-[#E8E0D6] px-8 py-4">
+                <h2 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">
+                  {SECTION_LABELS[currentSection]}
+                </h2>
+              </div>
+              <div className="flex-1 overflow-y-auto px-4 py-4 md:px-12 md:py-6">
+                <ResumeRecap />
+                <TranscriptFeed />
+              </div>
+              <div className="border-t border-[#E8E0D6] px-4 py-4 md:px-12">
+                <VoiceControls />
+              </div>
+            </>
+          )}
         </main>
 
         {/* Right sidebar */}

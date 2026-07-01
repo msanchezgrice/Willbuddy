@@ -645,7 +645,9 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
 
   // -----------------------------------------------------------------------
   // Explicit user-initiated pause (button in VoiceControls).
-  // Cleanly disconnects and redirects home.
+  // Stops audio + the WS but KEEPS the user on the session page in a paused
+  // state so they can resume in place (with audio/context sync) rather than
+  // being dumped back to the landing page. All progress is already persisted.
   // -----------------------------------------------------------------------
   const pauseSession = useCallback(() => {
     recorderRef.current?.stop();
@@ -656,8 +658,8 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
     playerRef.current = null;
     setVoiceState('idle');
     setPauseReason('user');
-    router.push('/');
-  }, [router]);
+    setIsPaused(true);
+  }, []);
 
   // -----------------------------------------------------------------------
   // User-initiated finish: mark the session complete and go to the summary,
@@ -704,7 +706,10 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // Auto-reconnect on unexpected disconnect
   // -----------------------------------------------------------------------
   useEffect(() => {
-    if (voiceState === 'disconnected') {
+    // Don't auto-reconnect while paused — an intentional pause closes the WS,
+    // which fires 'disconnected'; reconnecting would restart audio behind the
+    // pause overlay. Resuming is explicit via resumeFromPause().
+    if (voiceState === 'disconnected' && !isPaused) {
       reconnectTimerRef.current = setTimeout(() => {
         connect();
       }, 2000);
@@ -714,7 +719,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         clearTimeout(reconnectTimerRef.current);
       }
     };
-  }, [voiceState, connect]);
+  }, [voiceState, isPaused, connect]);
 
   // Cleanup on unmount
   useEffect(() => {
