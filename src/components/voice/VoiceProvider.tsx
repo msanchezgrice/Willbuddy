@@ -10,11 +10,12 @@ import {
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import type {
-  Decision,
-  Section,
-  TranscriptEntry,
-  VoiceState,
+import {
+  SECTION_LABELS,
+  type Decision,
+  type Section,
+  type TranscriptEntry,
+  type VoiceState,
 } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import { captureAnalyticsEvent } from '@/lib/analytics/client';
@@ -56,6 +57,7 @@ interface VoiceContextValue {
   saveAndExit: () => void;
   pauseSession: () => void;
   finishSession: () => void;
+  jumpToSection: (section: Section) => void;
 }
 
 const VoiceContext = createContext<VoiceContextValue | null>(null);
@@ -613,6 +615,34 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   }, [connect, pendingNextSection]);
 
   // -----------------------------------------------------------------------
+  // Jump to a section from the sidebar. Updates state + persists immediately,
+  // and — if the model is live — steers it to that section so voice stays in
+  // sync with the click. If paused/idle, the section is stored and applied via
+  // resumeContext when the user reconnects.
+  // -----------------------------------------------------------------------
+  const jumpToSection = useCallback((section: Section) => {
+    if (section === currentSectionRef.current) return;
+    currentSectionRef.current = section;
+    setCurrentSection(section);
+
+    const sid = sessionIdRef.current;
+    if (sid) {
+      void fetch('/api/session', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sid, currentSection: section }),
+      });
+    }
+
+    // Steer the live model (no-op if the WS is closed — resumeContext handles it).
+    if (clientRef.current) {
+      // Cut any in-flight speech so the switch feels instant.
+      playerRef.current?.stop();
+      clientRef.current.sendSectionJump(SECTION_LABELS[section]);
+    }
+  }, []);
+
+  // -----------------------------------------------------------------------
   // Save current progress and redirect to home (section-break or user pause).
   // State is already persisted on each tool call; this just exits cleanly.
   // -----------------------------------------------------------------------
@@ -759,6 +789,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         saveAndExit,
         pauseSession,
         finishSession,
+        jumpToSection,
       }}
     >
       {children}

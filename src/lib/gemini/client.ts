@@ -301,6 +301,29 @@ export class GeminiLiveClient {
     });
   }
 
+  /**
+   * Steer the live model to a section the user tapped in the sidebar. Sent as a
+   * control directive (NOT committed to the visible transcript) so the model
+   * interrupts, transitions, and speaks its own natural acknowledgment. If the
+   * WS is closed the jump is a no-op here — the provider stores currentSection
+   * and it's applied via resumeContext on the next connect().
+   */
+  sendSectionJump(label: string): void {
+    if (!this.session) return;
+    const directive =
+      `[Control: The user just tapped "${label}" in the section list to jump there now. ` +
+      `Switch to the "${label}" section immediately: give a brief one-line spoken acknowledgment, ` +
+      `then ask the first relevant question for that section. Do not re-ask anything already answered.]`;
+    try {
+      void this.session.sendClientContent({
+        turns: [{ role: "user", parts: [{ text: directive }] }],
+        turnComplete: true,
+      });
+    } catch {
+      // WebSocket already closed, ignore.
+    }
+  }
+
   disconnect(): void {
     this.connected = false;
     if (this.session) {

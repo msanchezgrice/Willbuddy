@@ -50,7 +50,7 @@ function SessionLayout() {
           'max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:transition-transform max-md:duration-200',
           showNav ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'
         )}>
-          <SectionNav />
+          <SectionNav onNavigate={() => setShowNav(false)} />
           {showNav && (
             <button type="button" onClick={() => setShowNav(false)} className="absolute top-3 right-3 md:hidden size-8 flex items-center justify-center rounded-lg hover:bg-[#E8E0D6]">
               ✕

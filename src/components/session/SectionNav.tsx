@@ -8,8 +8,9 @@ import ProgressBar from '@/components/session/ProgressBar';
 // Estimate ~6 min per section
 const MINUTES_PER_SECTION = 6;
 
-export default function SectionNav() {
-  const { currentSection, sectionPlan, sectionsCompleted, decisions } = useVoice();
+export default function SectionNav({ onNavigate }: { onNavigate?: () => void }) {
+  const { currentSection, sectionPlan, sectionsCompleted, decisions, jumpToSection } =
+    useVoice();
 
   // Completion is authoritative from the session (sections_completed), with a
   // decisions-based heuristic as a fallback for older/interrupted sessions.
@@ -36,11 +37,6 @@ export default function SectionNav() {
     return 'pending';
   }
 
-  function canNavigate(section: Section): boolean {
-    const status = getStatus(section);
-    return status === 'done' || status === 'active';
-  }
-
   return (
     <nav className="flex h-full flex-col justify-between py-6 px-4">
       {/* Section list */}
@@ -51,19 +47,23 @@ export default function SectionNav() {
 
         {sectionPlan.map((section) => {
           const status = getStatus(section);
-          const navigable = canNavigate(section);
 
           return (
             <button
               key={section}
               type="button"
-              disabled={!navigable}
+              onClick={() => {
+                jumpToSection(section);
+                onNavigate?.();
+              }}
+              aria-current={status === 'active' ? 'step' : undefined}
+              title={`Jump to ${SECTION_LABELS[section]}`}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all',
-                'disabled:cursor-not-allowed',
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all cursor-pointer',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B7A5E]/40',
                 status === 'active' && 'bg-[#5B7A5E]/10 font-semibold text-[#2D2A26]',
                 status === 'done' && 'text-[#5B7A5E] hover:bg-[#5B7A5E]/5',
-                status === 'pending' && 'text-[#9B8E7E]',
+                status === 'pending' && 'text-[#9B8E7E] hover:bg-[#5B7A5E]/5 hover:text-[#5B4F3E]',
               )}
             >
               {/* Dot indicator */}
