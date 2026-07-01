@@ -119,10 +119,13 @@ export default function VoiceControls() {
     isConnected,
     isMicMuted,
     pauseSession,
+    finishSession,
+    decisions,
   } = useVoice();
 
   const [showTextInput, setShowTextInput] = useState(false);
   const [textValue, setTextValue] = useState('');
+  const [confirmFinish, setConfirmFinish] = useState(false);
 
   // ------- Button click handler -------
   function handleMicClick() {
@@ -245,6 +248,43 @@ export default function VoiceControls() {
           >
             End session
           </button>
+        </div>
+      )}
+
+      {/* ---- Finish & review (reliable completion, not model-dependent) ---- */}
+      {isConnected && decisions.length > 0 && (
+        <div className="mt-1 flex flex-col items-center gap-2">
+          {!confirmFinish ? (
+            <button
+              type="button"
+              onClick={() => setConfirmFinish(true)}
+              className="rounded-full border border-[#5B7A5E] px-5 py-2 text-xs font-semibold text-[#5B7A5E] transition-colors hover:bg-[#5B7A5E]/5"
+            >
+              Finish &amp; review my plan
+            </button>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs text-[#9B8E7E]">
+                Wrap up and review your plan? Your answers are saved.
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={finishSession}
+                  className="rounded-full bg-[#5B7A5E] px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#4a6a4e]"
+                >
+                  Yes, review my plan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmFinish(false)}
+                  className="text-xs text-[#9B8E7E] underline underline-offset-2 hover:text-[#2D2A26]"
+                >
+                  Keep talking
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

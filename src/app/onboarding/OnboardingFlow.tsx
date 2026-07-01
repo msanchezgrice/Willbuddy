@@ -66,9 +66,26 @@ const QUESTIONS: Question[] = [
 
 const STORAGE_KEY = "willbuddy_onboarding";
 
-export function OnboardingFlow() {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+const OPTION_LABELS: Record<string, string> = Object.fromEntries(
+  QUESTIONS.flatMap((q) => q.options.map((o) => [`${q.id}:${o.value}`, o.label]))
+);
+
+export function OnboardingFlow({
+  initialPlanningFor,
+}: {
+  initialPlanningFor?: string;
+}) {
+  // If the visitor picked "who are you planning for?" on the landing hero,
+  // seed that answer and skip straight to the next question (commitment effect).
+  const seededPlanningFor =
+    initialPlanningFor === "couple" || initialPlanningFor === "individual"
+      ? initialPlanningFor
+      : undefined;
+
+  const [step, setStep] = useState(seededPlanningFor ? 1 : 0);
+  const [answers, setAnswers] = useState<Record<string, string>>(
+    seededPlanningFor ? { planning_for: seededPlanningFor } : {}
+  );
 
   const totalSteps = QUESTIONS.length + 1; // questions + account step
   const isAccountStep = step === QUESTIONS.length;
@@ -138,18 +155,41 @@ export function OnboardingFlow() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center px-6 py-10">
+      <div className="flex flex-1 items-start justify-center px-6 pb-10 pt-10 md:pt-16">
         <div className="w-full max-w-xl">
           {isAccountStep ? (
             <div className="text-center">
               <h1 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26] md:text-3xl">
                 Create your free account
               </h1>
-              <p className="mx-auto mt-3 mb-8 max-w-md text-[#5B4F3E]">
+              <p className="mx-auto mt-3 max-w-md text-[#5B4F3E]">
                 Your answers are saved. Create an account to start your
                 conversation — it&apos;s free to begin, and you only pay when
                 you&apos;re ready for documents.
               </p>
+              <p className="mx-auto mt-2 mb-6 text-sm font-medium text-[#5B7A5E]">
+                About 2 minutes to your first draft.
+              </p>
+
+              {/* Recap of saved answers — reassures the visitor nothing is lost. */}
+              {Object.keys(answers).length > 0 && (
+                <div className="mx-auto mb-8 flex max-w-md flex-wrap justify-center gap-2">
+                  {QUESTIONS.map((q) => {
+                    const val = answers[q.id];
+                    if (!val) return null;
+                    const label = OPTION_LABELS[`${q.id}:${val}`] ?? val;
+                    return (
+                      <span
+                        key={q.id}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-[#E8E0D6] bg-white px-3 py-1.5 text-xs font-medium text-[#5B4F3E]"
+                      >
+                        <Check className="h-3 w-3 text-[#5B7A5E]" strokeWidth={3} />
+                        {label}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
               {notInTexas && (
                 <p className="mx-auto mb-6 max-w-md rounded-xl border border-[#E8E0D6] bg-[#F0EBE4]/60 px-4 py-3 text-sm text-[#5B4F3E]">
                   Heads up: WillBuddy currently generates{" "}

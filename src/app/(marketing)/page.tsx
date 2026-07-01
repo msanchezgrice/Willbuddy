@@ -42,22 +42,69 @@ function HeroSection({ isAuthed }: { isAuthed: boolean }) {
             Continue your plan
           </TrackedLink>
         ) : (
-          <TrackedLink
-            href="/onboarding"
-            event="signup_cta_clicked"
-            eventProperties={{
-              location: "hero",
-              label: "Start Your Estate Plan",
-            }}
-            className={CTA_PRIMARY_CLASS}
-          >
-            Start Your Estate Plan
-          </TrackedLink>
+          <div className="mx-auto max-w-md">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#5B7A5E]">
+              Let&apos;s start — who are you planning for?
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <TrackedLink
+                href="/onboarding?planning_for=couple"
+                event="signup_cta_clicked"
+                eventProperties={{
+                  location: "hero_inline",
+                  label: "Me and my partner",
+                  answer: "couple",
+                }}
+                className="flex-1 rounded-2xl border border-[#5B7A5E] bg-[#5B7A5E] px-6 py-4 font-semibold text-white shadow-lg shadow-[#5B7A5E]/20 transition-all hover:-translate-y-0.5 hover:bg-[#4A6A4D]"
+              >
+                Me &amp; my partner
+              </TrackedLink>
+              <TrackedLink
+                href="/onboarding?planning_for=individual"
+                event="signup_cta_clicked"
+                eventProperties={{
+                  location: "hero_inline",
+                  label: "Just me",
+                  answer: "individual",
+                }}
+                className="flex-1 rounded-2xl border-2 border-[#5B7A5E] bg-white px-6 py-4 font-semibold text-[#5B7A5E] transition-all hover:-translate-y-0.5 hover:bg-[#5B7A5E]/5"
+              >
+                Just me
+              </TrackedLink>
+            </div>
+            <p className="mt-4 text-sm text-[#9B8E7E]">
+              Free to start · about 2 minutes to your first draft.
+            </p>
+          </div>
         )}
         <p className="text-sm text-[#9B8E7E] mt-5">
           About 45 minutes together — or do it separately (25 min each) and
           compare answers after.
         </p>
+      </div>
+    </section>
+  );
+}
+
+function TrustBar() {
+  const items = [
+    { label: "Texas-compliant documents" },
+    { label: "Attorney-reviewed templates" },
+    { label: "Encrypted in transit & at rest" },
+    { label: "Never used to train AI models" },
+  ];
+  return (
+    <section className="border-y border-[#E8E0D6] bg-white/60 px-6 py-6">
+      <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        {items.map((item) => (
+          <span
+            key={item.label}
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#5B4F3E]"
+          >
+            <Check className="h-4 w-4 text-[#5B7A5E]" strokeWidth={2.5} />
+            {item.label}
+          </span>
+        ))}
       </div>
     </section>
   );
@@ -410,6 +457,7 @@ export default async function LandingPage() {
   return (
     <main className="flex-1">
       <HeroSection isAuthed={isAuthed} />
+      <TrustBar />
       <HowItWorksSection />
       <DocumentsSection />
       <WhyVoiceSection />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { captureAnalyticsEvent } from "@/lib/analytics/client";
 
 interface Props {
   sessionId: string;
@@ -51,6 +52,10 @@ export function CoupleInvite({
       }
       setToken(json.coupleSession.invite_token);
       setCoupleId(json.coupleSession.id);
+      captureAnalyticsEvent("couple_invite_created", {
+        session_id: sessionId,
+        delivery: partnerEmail.trim() ? "email" : "link",
+      });
       if (partnerEmail.trim()) setEmailSent(true);
     } catch (e) {
       console.error("[couple-invite] error", e);
@@ -63,6 +68,7 @@ export function CoupleInvite({
     if (!inviteUrl) return;
     try {
       await navigator.clipboard.writeText(inviteUrl);
+      captureAnalyticsEvent("couple_invite_copied", { session_id: sessionId });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {

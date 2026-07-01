@@ -17,6 +17,7 @@ import type {
   VoiceState,
 } from '@/types';
 import { createClient } from '@/lib/supabase/client';
+import { captureAnalyticsEvent } from '@/lib/analytics/client';
 import type { GeminiLiveClient } from '@/lib/gemini/client';
 import type { AudioRecorder } from '@/lib/gemini/audio-recorder';
 import type { AudioPlayer } from '@/lib/gemini/audio-player';
@@ -48,6 +49,7 @@ interface VoiceContextValue {
   resumeFromPause: () => Promise<void>;
   saveAndExit: () => void;
   pauseSession: () => void;
+  finishSession: () => void;
 }
 
 const VoiceContext = createContext<VoiceContextValue | null>(null);
@@ -98,6 +100,8 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const resumeHandleRef = useRef<string | null>(null);
   const onboardingRef = useRef<OnboardingAnswers | null>(null);
   const onboardingPersistedRef = useRef(false);
+  const sessionStartedTrackedRef = useRef(false);
+  const sessionCompletedTrackedRef = useRef(false);
 
   useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
   useEffect(() => { currentSectionRef.current = currentSection; }, [currentSection]);
@@ -366,6 +370,13 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       gemini.onSessionComplete = () => {
         // Mark session complete and redirect to summary
         if (sid) {
+          if (!sessionCompletedTrackedRef.current) {
+            sessionCompletedTrackedRef.current = true;
+            captureAnalyticsEvent('session_completed', {
+              session_id: sid,
+              trigger: 'model',
+            });
+          }
           void fetch('/api/session', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -391,6 +402,12 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       playerRef.current = player;
 
       setVoiceState('listening');
+
+      // Funnel: fire session_started once per mounted session.
+      if (!sessionStartedTrackedRef.current) {
+        sessionStartedTrackedRef.current = true;
+        captureAnalyticsEvent('session_started', { session_id: sid ?? undefined });
+      }
     } catch (err) {
       console.error('Voice connect error:', err);
       setVoiceState('error');
@@ -528,6 +545,47 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   }, [router]);
 
   // -----------------------------------------------------------------------
+  // User-initiated finish: mark the session complete and go to the summary,
+  // regardless of whether the model emitted its completion tool call. This is
+  // the reliable "I'm done" path so completion never depends solely on the AI.
+  // -----------------------------------------------------------------------
+  const finishSession = useCallback(() => {
+    const sid = sessionIdRef.current;
+    recorderRef.current?.stop();
+    playerRef.current?.stop();
+    clientRef.current?.disconnect();
+    clientRef.current = null;
+    recorderRef.current = null;
+    playerRef.current = null;
+    setVoiceState('idle');
+    setIsPaused(false);
+    setPauseReason(null);
+    setCompletedSection(null);
+    setPendingNextSection(null);
+
+    if (!sid) {
+      router.push('/');
+      return;
+    }
+
+    if (!sessionCompletedTrackedRef.current) {
+      sessionCompletedTrackedRef.current = true;
+      captureAnalyticsEvent('session_completed', {
+        session_id: sid,
+        trigger: 'user',
+      });
+    }
+
+    void fetch('/api/session', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: sid, status: 'completed' }),
+    }).finally(() => {
+      router.push(`/summary/${sid}`);
+    });
+  }, [router]);
+
+  // -----------------------------------------------------------------------
   // Auto-reconnect on unexpected disconnect
   // -----------------------------------------------------------------------
   useEffect(() => {
@@ -578,6 +636,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         resumeFromPause,
         saveAndExit,
         pauseSession,
+        finishSession,
       }}
     >
       {children}

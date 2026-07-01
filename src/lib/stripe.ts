@@ -42,8 +42,10 @@ export async function createCheckoutSession(
     metadata: {
       willbuddy_session_id: sessionId,
     },
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/summary/${sessionId}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/session/${sessionId}`,
+    // Include the checkout session id so the summary page can verify payment
+    // immediately on return, without waiting for the async webhook.
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/summary/${sessionId}?checkout={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/summary/${sessionId}`,
   });
 
   if (!checkoutSession.url) {

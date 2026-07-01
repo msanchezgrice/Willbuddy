@@ -3,20 +3,23 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { createServiceClient } from "@/lib/supabase/server";
-import { generateAllDocuments, getDocumentCompleteness } from "@/lib/documents/generator";
+import { getDocumentCompleteness } from "@/lib/documents/generator";
+import { isSessionPaid, verifyAndRecordCheckout } from "@/lib/payments";
 import { DOC_TYPE_LABELS } from "@/types";
 import type { DocType, Decision } from "@/types";
-import { SummaryClient } from "./summary-client";
+import { SummaryActions } from "./summary-client";
 import { DecisionEditor } from "@/components/summary/DecisionEditor";
 import { TranscriptViewer } from "@/components/summary/TranscriptViewer";
 import { CoupleInvite } from "@/components/summary/CoupleInvite";
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ checkout?: string }>;
 }
 
-export default async function SummaryPage({ params }: Props) {
+export default async function SummaryPage({ params, searchParams }: Props) {
   const { id: sessionId } = await params;
+  const { checkout } = await searchParams;
   const { userId } = await auth();
 
   if (!userId) {
@@ -45,9 +48,19 @@ export default async function SummaryPage({ params }: Props) {
 
   const allDecisions: Decision[] = (decisions as Decision[]) ?? [];
 
-  // Generate documents and check completeness
-  const documents = generateAllDocuments(allDecisions);
+  // Check completeness for the document cards
   const completeness = getDocumentCompleteness(allDecisions);
+
+  // Payment gate: documents are only downloadable after a completed payment.
+  let paid = await isSessionPaid(supabase, sessionId);
+  let justPaid = false;
+  if (!paid && checkout) {
+    // Returning from Stripe — verify immediately (don't wait for the webhook).
+    if (await verifyAndRecordCheckout(supabase, sessionId, checkout)) {
+      paid = true;
+      justPaid = true;
+    }
+  }
 
   // Check for existing share token
   const { data: existingDoc } = await supabase
@@ -157,10 +170,11 @@ export default async function SummaryPage({ params }: Props) {
           })}
         </div>
 
-        {/* Action buttons — client component handles downloads and share link */}
-        <SummaryClient
+        {/* Action buttons — client component handles paywall, downloads and share link */}
+        <SummaryActions
           sessionId={sessionId}
-          documents={documents}
+          isPaid={paid}
+          justPaid={justPaid}
           shareToken={shareToken}
         />
 

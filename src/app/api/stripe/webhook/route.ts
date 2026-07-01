@@ -54,18 +54,23 @@ export async function POST(request: Request) {
 
     const supabase = createServiceClient();
 
-    const { error: insertError } = await supabase.from("payments").insert({
-      session_id: willbuddySessionId,
-      stripe_checkout_session_id: session.id,
-      stripe_payment_intent_id:
-        typeof session.payment_intent === "string"
-          ? session.payment_intent
-          : session.payment_intent?.id ?? null,
-      amount_cents: session.amount_total ?? 4900,
-      currency: session.currency ?? "usd",
-      status: "completed",
-      completed_at: new Date().toISOString(),
-    });
+    // Upsert (idempotent) — the summary page may have already recorded this
+    // payment on return from Stripe, so we must not fail on the unique index.
+    const { error: insertError } = await supabase.from("payments").upsert(
+      {
+        session_id: willbuddySessionId,
+        stripe_checkout_session_id: session.id,
+        stripe_payment_intent_id:
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : session.payment_intent?.id ?? null,
+        amount_cents: session.amount_total ?? 4900,
+        currency: session.currency ?? "usd",
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      },
+      { onConflict: "stripe_checkout_session_id" }
+    );
 
     if (insertError) {
       console.error("[stripe/webhook] Failed to insert payment:", insertError);

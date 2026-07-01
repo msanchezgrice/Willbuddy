@@ -10,11 +10,17 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ planning_for?: string }>;
+}) {
   const { userId } = await auth();
   if (userId) {
     redirect("/session");
   }
 
-  return <OnboardingFlow />;
+  const { planning_for } = await searchParams;
+
+  return <OnboardingFlow initialPlanningFor={planning_for} />;
 }
