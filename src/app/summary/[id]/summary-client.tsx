@@ -25,6 +25,7 @@ export function SummaryActions({
   const [shareLoading, setShareLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [downloadingZip, setDownloadingZip] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const paidTracked = useRef(false);
@@ -83,6 +84,35 @@ export function SummaryActions({
     }
   }
 
+  async function handleDownloadZip() {
+    setDownloadingZip(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/documents/pdf?sessionId=${sessionId}&format=zip`
+      );
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "WillBuddy_Estate_Plan_Documents.zip";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      captureAnalyticsEvent("document_downloaded", {
+        session_id: sessionId,
+        format: "zip",
+      });
+    } catch (err) {
+      console.error("[summary] zip download error", err);
+      setError("Download failed. Please try again.");
+    } finally {
+      setDownloadingZip(false);
+    }
+  }
+
   async function handleShare() {
     if (shareToken) {
       await copyShareLink(shareToken);
@@ -127,13 +157,13 @@ export function SummaryActions({
           Unlock your complete estate plan
         </h3>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#5A5550]">
-          Download all five attorney-ready documents as a polished PDF you can
-          bring to any Texas estate attorney to finalize and sign.
+          Download all five documents as a single PDF you can bring to any Texas
+          estate attorney to finalize and sign.
         </p>
         <ul className="mx-auto mt-5 max-w-xs space-y-2 text-left text-sm text-[#5A5550]">
           {[
             "Will, Guardianship, Medical & Durable POA, HIPAA",
-            "Formatted PDF, ready for attorney review",
+            "Combined PDF or ZIP of five separate PDFs",
             "Shareable link for your attorney",
             "Free to revisit and update your answers",
           ].map((item) => (
@@ -176,14 +206,23 @@ export function SummaryActions({
           {error}
         </p>
       )}
-      <div className="flex flex-col justify-center gap-4 sm:flex-row">
+      <div className="flex flex-col justify-center gap-4 sm:flex-row sm:flex-wrap">
         <button
           onClick={handleDownloadPdf}
-          disabled={downloading}
+          disabled={downloading || downloadingZip}
           className="inline-flex items-center justify-center gap-2 rounded-full bg-[#5B7A5E] px-8 py-3.5 font-semibold text-white shadow-lg shadow-[#5B7A5E]/25 transition-all hover:-translate-y-0.5 hover:bg-[#4A6A4D] disabled:opacity-60"
         >
           <DownloadIcon />
-          {downloading ? "Preparing PDF…" : "Download All Documents (PDF)"}
+          {downloading ? "Preparing PDF…" : "Download All (One PDF)"}
+        </button>
+
+        <button
+          onClick={handleDownloadZip}
+          disabled={downloading || downloadingZip}
+          className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#5B7A5E] px-8 py-3.5 font-semibold text-[#5B7A5E] transition-colors hover:bg-[#5B7A5E]/5 disabled:opacity-60"
+        >
+          <DownloadIcon />
+          {downloadingZip ? "Preparing ZIP…" : "Download ZIP (5 PDFs)"}
         </button>
 
         <button

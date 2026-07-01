@@ -44,6 +44,22 @@ export const DOC_TYPE_LABELS: Record<DocType, string> = {
   hipaa: "HIPAA Authorization",
 };
 
+export const DOC_TYPE_FILENAMES: Record<DocType, string> = {
+  will: "WillBuddy_Last_Will_and_Testament.pdf",
+  guardianship: "WillBuddy_Guardianship_Designation.pdf",
+  medical_poa: "WillBuddy_Medical_Power_of_Attorney.pdf",
+  durable_poa: "WillBuddy_Durable_Power_of_Attorney.pdf",
+  hipaa: "WillBuddy_HIPAA_Authorization.pdf",
+};
+
+export const DOC_TYPE_DOWNLOAD_ORDER: DocType[] = [
+  "will",
+  "guardianship",
+  "medical_poa",
+  "durable_poa",
+  "hipaa",
+];
+
 // Whitelist of valid decision keys per section (Codex security finding)
 export const VALID_DECISION_KEYS: Record<Section, string[]> = {
   family: [
@@ -121,6 +137,8 @@ export interface Session {
   mode: SessionMode;
   couple_session_id: string | null;
   onboarding: OnboardingQuizAnswers | null;
+  section_plan: Section[] | null;
+  goals: SessionGoals | null;
 }
 
 export interface OnboardingQuizAnswers {
@@ -129,6 +147,12 @@ export interface OnboardingQuizAnswers {
   texas?: string;
   priority?: string;
   completedAt?: string;
+}
+
+/** What the user chose to cover in the "what do you need" onboarding step. */
+export interface SessionGoals {
+  preset: string | null;
+  modules: Section[];
 }
 
 export interface Decision {

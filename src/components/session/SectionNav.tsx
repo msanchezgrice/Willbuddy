@@ -1,28 +1,34 @@
 'use client';
 
 import { useVoice } from '@/components/voice/VoiceProvider';
-import { SECTIONS, SECTION_LABELS, type Section } from '@/types';
+import { SECTION_LABELS, type Section } from '@/types';
 import { cn } from '@/lib/utils';
 import ProgressBar from '@/components/session/ProgressBar';
 
-// Estimate ~6 min per section, 5 sections = 30 min total
+// Estimate ~6 min per section
 const MINUTES_PER_SECTION = 6;
 
 export default function SectionNav() {
-  const { currentSection, decisions } = useVoice();
+  const { currentSection, sectionPlan, sectionsCompleted, decisions } = useVoice();
 
-  // Derive which sections are done based on decisions captured
-  const completedSections = new Set<Section>();
+  // Completion is authoritative from the session (sections_completed), with a
+  // decisions-based heuristic as a fallback for older/interrupted sessions.
+  const completedSections = new Set<Section>(sectionsCompleted);
   for (const d of decisions) {
-    // If we have at least 2 decisions for a section, consider it done
     const sectionDecisions = decisions.filter((x) => x.section === d.section);
-    if (sectionDecisions.length >= 2) {
-      completedSections.add(d.section);
-    }
+    if (sectionDecisions.length >= 2) completedSections.add(d.section);
+  }
+  // Only count modules that are actually in this session's plan.
+  const planSet = new Set(sectionPlan);
+  for (const s of [...completedSections]) {
+    if (!planSet.has(s)) completedSections.delete(s);
   }
 
   const completedCount = completedSections.size;
-  const remainingMin = (SECTIONS.length - completedCount) * MINUTES_PER_SECTION;
+  const remainingMin = Math.max(
+    0,
+    (sectionPlan.length - completedCount) * MINUTES_PER_SECTION,
+  );
 
   function getStatus(section: Section): 'done' | 'active' | 'pending' {
     if (completedSections.has(section)) return 'done';
@@ -43,7 +49,7 @@ export default function SectionNav() {
           Sections
         </h2>
 
-        {SECTIONS.map((section) => {
+        {sectionPlan.map((section) => {
           const status = getStatus(section);
           const navigable = canNavigate(section);
 
@@ -85,9 +91,11 @@ export default function SectionNav() {
 
       {/* Progress footer */}
       <div className="flex flex-col gap-2 pt-4 border-t border-[#E8E0D6]">
-        <ProgressBar completed={completedCount} total={SECTIONS.length} />
+        <ProgressBar completed={completedCount} total={sectionPlan.length} />
         <div className="flex items-center justify-between text-xs text-[#9B8E7E]">
-          <span>{Math.round((completedCount / SECTIONS.length) * 100)}% complete</span>
+          <span>
+            {Math.round((completedCount / Math.max(sectionPlan.length, 1)) * 100)}% complete
+          </span>
           <span>~{remainingMin} min remaining</span>
         </div>
       </div>

@@ -11,6 +11,7 @@ import { SummaryActions } from "./summary-client";
 import { DecisionEditor } from "@/components/summary/DecisionEditor";
 import { TranscriptViewer } from "@/components/summary/TranscriptViewer";
 import { CoupleInvite } from "@/components/summary/CoupleInvite";
+import { DocumentDownloadButton } from "@/components/summary/DocumentDownloadButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -127,6 +128,12 @@ export default async function SummaryPage({ params, searchParams }: Props) {
           Your Documents
         </h2>
 
+        <p className="text-sm text-[#9B8E7E] mb-8 max-w-2xl">
+          {paid
+            ? "Download everything as one PDF, or grab individual documents to send to your attorney."
+            : "Unlock to download a combined PDF or individual documents for each part of your plan."}
+        </p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           {(Object.keys(DOC_TYPE_LABELS) as DocType[]).map((docType) => {
             const isComplete = completeness[docType].complete;
@@ -165,6 +172,15 @@ export default async function SummaryPage({ params, searchParams }: Props) {
 
                 {/* Key decisions for this doc */}
                 <KeyDecisions docType={docType} decisions={allDecisions} />
+
+                <div className="mt-4 pt-4 border-t border-[#E8E0D6]">
+                  <DocumentDownloadButton
+                    sessionId={sessionId}
+                    docType={docType}
+                    label="Download PDF"
+                    isPaid={paid}
+                  />
+                </div>
               </div>
             );
           })}

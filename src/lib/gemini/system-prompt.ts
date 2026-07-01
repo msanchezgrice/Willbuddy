@@ -1,5 +1,6 @@
 import type { Decision, FlaggedItem, Section, TranscriptEntry } from "@/types";
 import { SECTION_CONFIG } from "./sections";
+import { resolvePlan } from "@/lib/sections/plan";
 
 export interface ResumeContext {
   currentSection: Section;
@@ -20,6 +21,8 @@ export interface OnboardingAnswers {
 interface SystemPromptOptions {
   resumeContext?: ResumeContext;
   onboarding?: OnboardingAnswers;
+  /** Tailored, ordered list of modules for this session. Falls back to all 5. */
+  sectionPlan?: Section[];
 }
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -87,17 +90,40 @@ export function getSystemPrompt(options?: SystemPromptOptions): string {
   const onboarding = options?.onboarding;
   const isCouple = onboarding?.planning_for !== "individual";
   const audience = isCouple ? "a couple" : "an individual";
-  const sectionGuide = Object.entries(SECTION_CONFIG)
-    .map(
-      ([key, config]) =>
+
+  // The session covers only the modules in the tailored plan, in plan order.
+  const plan = resolvePlan(options?.sectionPlan);
+  const firstLabel = SECTION_CONFIG[plan[0]].label;
+  const agendaLines = plan
+    .map((s, i) => `${i + 1}. ${SECTION_CONFIG[s].label}`)
+    .join("\n");
+
+  const sectionGuide = plan
+    .map((key) => {
+      const config = SECTION_CONFIG[key];
+      return (
         `### ${config.label} (${key})\n` +
         `Estimated time: ~${config.estimatedMinutes} minutes\n` +
         `Questions to cover:\n${config.questions.map((q) => `- ${q}`).join("\n")}\n` +
         (config.emotionalGuidance
           ? `\nEmotional note: ${config.emotionalGuidance}\n`
           : "")
-    )
+      );
+    })
     .join("\n");
+
+  const agendaBlock = `
+## Today's Session Agenda (IMPORTANT)
+
+This session is tailored to what this user needs. Cover ONLY these modules, in THIS exact order — do not add other topics or reorder them:
+
+${agendaLines}
+
+- Start with the first module (${firstLabel}).
+- In your welcome, tell them how many areas you'll cover today (${plan.length}) and name them briefly. Do NOT say "five areas" unless there are actually five.
+- When you finish a module that is NOT the last one, call updateProgress(section, nextSection) with the next module in the agenda.
+- When you finish the FINAL module (${SECTION_CONFIG[plan[plan.length - 1]].label}), acknowledge completion warmly and call updateProgress with that section and NO nextSection to end the session.
+`;
 
   let resumeBlock = "";
   if (resumeContext) {
@@ -158,7 +184,7 @@ All documents generated from this conversation will be positioned as "draft docu
 
 ## How You Work
 - ALWAYS speak in complete, natural sentences. Never give one-word responses.
-- Start the session with a warm welcome. Introduce yourself, explain what you'll cover, and set expectations for timing. Something like: "Hi there! I'm WillBuddy, and I'm going to walk you through creating your estate plan today. We'll cover five areas: your family info, guardianship, assets, healthcare wishes, and who handles your affairs. The whole thing takes about 45 minutes. Let's start with the easy stuff."
+- Start the session with a warm welcome. Introduce yourself, then explain what you'll cover using TODAY'S SESSION AGENDA below (name the actual modules and their count — do not assume five). Set expectations for timing (~5-10 minutes per module). For example: "Hi there! I'm WillBuddy, and I'm going to walk you through your estate plan today. We'll cover [the modules in the agenda]. Let's start with the easy stuff."
 - Ask questions ONE AT A TIME. Wait for the user's response before continuing.
 - After each answer, acknowledge it warmly, then use the recordDecision tool to capture the structured decision.
 - If the user seems unsure or conflicted, say something reassuring and use flagForReview to note it. For example: "That's totally fine, you don't have to decide right now. We'll flag this so you can think about it and discuss with your attorney."
@@ -229,6 +255,7 @@ Use this reference information when answering questions. Google Search is also e
 
 ## Section Guide
 ${sectionGuide}
+${agendaBlock}
 
 ## Explaining Context and Common Choices
 For EVERY question you ask, briefly explain:
@@ -248,5 +275,5 @@ Examples of good pacing:
 - At the end: congratulate them warmly. "You just did something most families never do. You've made decisions that will give your family clarity and protection. The next step is to take these drafts to a Texas estate planning attorney for review and finalization."
 ${onboardingBlock}${resumeBlock}
 
-Begin by greeting ${isCouple ? "the couple" : "them"} warmly and starting with the Family Snapshot section (unless resuming).`;
+Begin by greeting ${isCouple ? "the couple" : "them"} warmly and starting with the ${firstLabel} section (unless resuming).`;
 }

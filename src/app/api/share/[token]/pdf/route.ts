@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { createServiceClient } from "@/lib/supabase/server";
-import { generateAllDocuments } from "@/lib/documents/generator";
-import { renderDocumentPdf, renderEstatePlanPdf } from "@/lib/documents/pdf";
+import { getDocumentsByShareToken } from "@/lib/documents/share-access";
+import {
+  renderDocumentPdf,
+  renderEstatePlanPdf,
+} from "@/lib/documents/pdf";
 import { renderEstatePlanZip } from "@/lib/documents/pdf-bundle";
-import { DOC_TYPE_FILENAMES } from "@/types";
-import { isSessionPaid } from "@/lib/payments";
+import { DOC_TYPE_FILENAMES, DOC_TYPE_LABELS } from "@/types";
 import type { DocType } from "@/types";
-import { DOC_TYPE_LABELS } from "@/types";
 
 export const runtime = "nodejs";
 
@@ -18,26 +17,19 @@ function isDocType(value: string | null): value is DocType {
 }
 
 /**
- * GET /api/documents/pdf?sessionId=xxx
- * GET /api/documents/pdf?sessionId=xxx&docType=will
- * GET /api/documents/pdf?sessionId=xxx&format=zip
+ * GET /api/share/[token]/pdf
+ * GET /api/share/[token]/pdf?docType=will
+ * GET /api/share/[token]/pdf?format=zip
  *
- * Returns a combined PDF of all documents, or a single document when docType is set.
- * Gated behind a completed payment for the session.
+ * Public PDF downloads for attorney share links (token-gated, no auth).
  */
-export async function GET(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const sessionId = request.nextUrl.searchParams.get("sessionId");
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  const { token } = await params;
   const docTypeParam = request.nextUrl.searchParams.get("docType");
   const format = request.nextUrl.searchParams.get("format");
-
-  if (!sessionId) {
-    return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
-  }
 
   if (docTypeParam && !isDocType(docTypeParam)) {
     return NextResponse.json({ error: "Invalid docType" }, { status: 400 });
@@ -47,35 +39,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid format" }, { status: 400 });
   }
 
-  const supabase = createServiceClient();
-
-  const { data: session, error: sessionError } = await supabase
-    .from("sessions")
-    .select("id, user_id")
-    .eq("id", sessionId)
-    .single();
-
-  if (sessionError || !session) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
-  }
-  if (session.user_id !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  if (!(await isSessionPaid(supabase, sessionId))) {
+  const access = await getDocumentsByShareToken(token);
+  if (!access.ok) {
     return NextResponse.json(
-      { error: "Payment required to download documents." },
-      { status: 402 }
+      { error: access.reason === "expired" ? "Link expired" : "Not found" },
+      { status: access.reason === "expired" ? 410 : 404 }
     );
   }
 
-  const { data: decisions } = await supabase
-    .from("decisions")
-    .select("*")
-    .eq("session_id", sessionId)
-    .order("created_at", { ascending: true });
-
-  const documents = generateAllDocuments(decisions ?? []);
+  const { documents } = access;
 
   if (format === "zip") {
     const zip = await renderEstatePlanZip(documents);
@@ -103,7 +75,6 @@ export async function GET(request: NextRequest) {
   }
 
   const pdf = await renderEstatePlanPdf(documents);
-
   return new NextResponse(new Uint8Array(pdf), {
     status: 200,
     headers: {

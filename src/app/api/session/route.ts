@@ -120,7 +120,7 @@ export async function POST() {
 
 /**
  * PATCH /api/session - Update session state
- * Body: { sessionId, currentSection?, sectionsCompleted?, status?, geminiResumeHandle?, onboarding?, userConfirmed? }
+ * Body: { sessionId, currentSection?, sectionsCompleted?, status?, geminiResumeHandle?, onboarding?, sectionPlan?, goals?, userConfirmed? }
  */
 export async function PATCH(request: NextRequest) {
   const { userId } = await auth();
@@ -151,6 +151,9 @@ export async function PATCH(request: NextRequest) {
     dbUpdates.gemini_resume_handle = updates.geminiResumeHandle;
   if (updates.onboarding !== undefined)
     dbUpdates.onboarding = updates.onboarding;
+  if (updates.sectionPlan !== undefined)
+    dbUpdates.section_plan = updates.sectionPlan;
+  if (updates.goals !== undefined) dbUpdates.goals = updates.goals;
   if (updates.userConfirmed !== undefined)
     dbUpdates.user_confirmed = updates.userConfirmed;
   if (updates.status === "completed")

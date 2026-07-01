@@ -18,12 +18,15 @@ import type {
 } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import { captureAnalyticsEvent } from '@/lib/analytics/client';
+import { buildSectionPlan, resolvePlan } from '@/lib/sections/plan';
+import type { SessionGoals } from '@/types';
 import type { GeminiLiveClient } from '@/lib/gemini/client';
 import type { AudioRecorder } from '@/lib/gemini/audio-recorder';
 import type { AudioPlayer } from '@/lib/gemini/audio-player';
 import type { OnboardingAnswers } from '@/lib/gemini/system-prompt';
 
 const ONBOARDING_STORAGE_KEY = 'willbuddy_onboarding';
+const GOALS_STORAGE_KEY = 'willbuddy_goals';
 
 // ---------------------------------------------------------------------------
 // Context value
@@ -32,6 +35,8 @@ interface VoiceContextValue {
   voiceState: VoiceState;
   isConnected: boolean;
   currentSection: Section;
+  sectionPlan: Section[];
+  sectionsCompleted: Section[];
   transcript: TranscriptEntry[];
   decisions: Decision[];
   sessionId: string | null;
@@ -74,6 +79,8 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const router = useRouter();
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [currentSection, setCurrentSection] = useState<Section>('family');
+  const [sectionPlan, setSectionPlan] = useState<Section[]>(() => resolvePlan(null));
+  const [sectionsCompleted, setSectionsCompleted] = useState<Section[]>([]);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(initialSessionId ?? null);
@@ -100,6 +107,9 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const resumeHandleRef = useRef<string | null>(null);
   const onboardingRef = useRef<OnboardingAnswers | null>(null);
   const onboardingPersistedRef = useRef(false);
+  const goalsRef = useRef<SessionGoals | null>(null);
+  const planRef = useRef<Section[]>(sectionPlan);
+  const planPersistedRef = useRef(false);
   const sessionStartedTrackedRef = useRef(false);
   const sessionCompletedTrackedRef = useRef(false);
 
@@ -108,7 +118,8 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   useEffect(() => { decisionsRef.current = decisions; }, [decisions]);
   useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
 
-  // Load onboarding answers from localStorage on mount (captured pre-account).
+  // Load onboarding answers + section goals from localStorage on mount
+  // (captured pre-account, before the session row exists).
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
@@ -116,6 +127,13 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         const parsed = JSON.parse(raw) as OnboardingAnswers;
         if (parsed && typeof parsed === 'object') {
           onboardingRef.current = parsed;
+        }
+      }
+      const goalsRaw = window.localStorage.getItem(GOALS_STORAGE_KEY);
+      if (goalsRaw) {
+        const parsedGoals = JSON.parse(goalsRaw) as SessionGoals;
+        if (parsedGoals && Array.isArray(parsedGoals.modules)) {
+          goalsRef.current = parsedGoals;
         }
       }
     } catch {
@@ -224,6 +242,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
           ...new Set([...sectionsCompletedRef.current, section]),
         ];
         sectionsCompletedRef.current = mergedCompleted;
+        setSectionsCompleted(mergedCompleted);
         // Persist section-complete to Supabase immediately
         const sid = sessionIdRef.current;
         if (sid) {
@@ -280,13 +299,26 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       const data = await res.json();
       if (data.session) {
         setCurrentSection(data.session.current_section ?? 'family');
-        sectionsCompletedRef.current = data.session.sections_completed ?? [];
+        const completed = (data.session.sections_completed ?? []) as Section[];
+        sectionsCompletedRef.current = completed;
+        setSectionsCompleted(completed);
         resumeHandleRef.current = data.session.gemini_resume_handle ?? null;
         // DB onboarding wins over localStorage (survives device switches) and
         // means we don't need to re-persist it.
         if (data.session.onboarding) {
           onboardingRef.current = data.session.onboarding as OnboardingAnswers;
           onboardingPersistedRef.current = true;
+        }
+        if (data.session.goals) {
+          goalsRef.current = data.session.goals as SessionGoals;
+        }
+        // A stored plan is authoritative for a returning session — don't
+        // recompute or overwrite it on connect.
+        if (data.session.section_plan?.length) {
+          const storedPlan = resolvePlan(data.session.section_plan as Section[]);
+          planRef.current = storedPlan;
+          setSectionPlan(storedPlan);
+          planPersistedRef.current = true;
         }
       }
       if (data.decisions?.length) {
@@ -320,6 +352,29 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       // Persist onboarding answers onto the session (once).
       persistOnboarding();
 
+      // Compute the tailored section plan (once). A plan loaded from the DB for
+      // a returning session already set planPersistedRef, so we won't overwrite.
+      if (!planPersistedRef.current) {
+        const computedPlan = buildSectionPlan(
+          onboardingRef.current ?? undefined,
+          goalsRef.current?.modules ?? null,
+        );
+        planRef.current = computedPlan;
+        setSectionPlan(computedPlan);
+        planPersistedRef.current = true;
+        if (sid) {
+          void fetch('/api/session', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: sid,
+              sectionPlan: computedPlan,
+              goals: goalsRef.current ?? { preset: null, modules: computedPlan },
+            }),
+          });
+        }
+      }
+
       // Dynamically import so the modules are only loaded client-side
       const { GeminiLiveClient: GeminiCls } = await import('@/lib/gemini/client');
       const { AudioRecorder: RecorderCls } = await import('@/lib/gemini/audio-recorder');
@@ -341,6 +396,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         resumeHandle: resumeHandleRef.current,
         resumeContext,
         onboarding: onboardingRef.current ?? undefined,
+        sectionPlan: planRef.current,
       });
       const recorder = new RecorderCls();
       const player = new PlayerCls();
@@ -620,6 +676,8 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         voiceState,
         isConnected,
         currentSection,
+        sectionPlan,
+        sectionsCompleted,
         transcript,
         decisions,
         sessionId,

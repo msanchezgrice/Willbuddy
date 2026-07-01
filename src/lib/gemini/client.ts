@@ -15,6 +15,7 @@ interface GeminiLiveClientOptions {
   resumeHandle?: string | null;
   resumeContext?: ResumeContext;
   onboarding?: OnboardingAnswers;
+  sectionPlan?: Section[];
 }
 
 /**
@@ -57,6 +58,7 @@ export class GeminiLiveClient {
     const systemPrompt = getSystemPrompt({
       resumeContext: this.options.resumeContext,
       onboarding: this.options.onboarding,
+      sectionPlan: this.options.sectionPlan,
     });
 
     const config: Record<string, unknown> = {
@@ -243,12 +245,13 @@ export class GeminiLiveClient {
       // Dispatch to external handler
       this.onToolCall?.(name, args);
 
-      // Handle section changes
+      // Handle section changes. A missing nextSection means the model has
+      // finished the final module in the (possibly tailored) plan, so the
+      // session is complete — this is plan-agnostic (no hardcoded last section).
       if (name === "updateProgress") {
         if (args.nextSection) {
           this.onSectionChange?.(args.nextSection as Section);
-        } else if (args.section === "executor") {
-          // Last section completed, session is done
+        } else {
           this.onSessionComplete?.();
         }
       }

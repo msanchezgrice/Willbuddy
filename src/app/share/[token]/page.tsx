@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { generateAllDocuments, getDocumentCompleteness } from "@/lib/documents/generator";
 import { DOC_TYPE_LABELS, SECTION_LABELS } from "@/types";
 import type { DocType, Decision, Section } from "@/types";
+import { ShareDocumentDownloads } from "@/components/share/ShareDocumentDownloads";
 
 interface Props {
   params: Promise<{ token: string }>;
@@ -153,6 +154,9 @@ export default async function SharePage({ params }: Props) {
             ))}
           </div>
         </section>
+
+        {/* PDF downloads for attorney */}
+        <ShareDocumentDownloads token={token} />
 
         {/* Document texts */}
         <section>
