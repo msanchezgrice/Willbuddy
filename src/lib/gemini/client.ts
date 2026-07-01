@@ -1,7 +1,11 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import type { Section, TranscriptEntry, VoiceState } from "@/types";
 import { willBuddyTools } from "./tools";
-import { getSystemPrompt } from "./system-prompt";
+import {
+  getSystemPrompt,
+  type OnboardingAnswers,
+  type ResumeContext,
+} from "./system-prompt";
 
 const LIVE_MODEL = "gemini-3.1-flash-live-preview";
 
@@ -9,7 +13,8 @@ interface GeminiLiveClientOptions {
   apiKey: string;
   sessionId: string;
   resumeHandle?: string | null;
-  resumeContext?: Parameters<typeof getSystemPrompt>[0];
+  resumeContext?: ResumeContext;
+  onboarding?: OnboardingAnswers;
 }
 
 /**
@@ -49,7 +54,10 @@ export class GeminiLiveClient {
   async connect(): Promise<void> {
     this.onStateChange?.("connecting");
 
-    const systemPrompt = getSystemPrompt(this.options.resumeContext);
+    const systemPrompt = getSystemPrompt({
+      resumeContext: this.options.resumeContext,
+      onboarding: this.options.onboarding,
+    });
 
     const config: Record<string, unknown> = {
       responseModalities: [Modality.AUDIO],
@@ -303,10 +311,16 @@ export class GeminiLiveClient {
   }
 }
 
-/** Merge incremental transcript fragments (BrowserBud pattern) */
+/**
+ * Merge incremental transcript fragments.
+ * Gemini Live streams transcription as incremental deltas (not cumulative),
+ * so fragments must be concatenated. We guard against the occasional case
+ * where a provider re-sends the full cumulative string.
+ */
 function mergeTranscript(existing: string, incoming: string): string {
   if (!existing) return incoming;
   if (!incoming) return existing;
-  // Gemini sends cumulative transcriptions, so just use the latest
-  return incoming;
+  // If the incoming chunk already contains everything we have, it's cumulative.
+  if (incoming.startsWith(existing)) return incoming;
+  return existing + incoming;
 }

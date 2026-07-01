@@ -17,9 +17,11 @@ export default function TranscriptFeed() {
   const { transcript } = useVoice();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages. `block: 'nearest'` keeps the scroll
+  // contained to the transcript's scroll container so it can't move the window
+  // (which would otherwise reveal the page footer on mount).
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ block: 'nearest' });
   }, [transcript.length]);
 
   if (transcript.length === 0) {

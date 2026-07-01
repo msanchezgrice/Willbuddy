@@ -120,6 +120,15 @@ export interface Session {
   user_confirmed: boolean;
   mode: SessionMode;
   couple_session_id: string | null;
+  onboarding: OnboardingQuizAnswers | null;
+}
+
+export interface OnboardingQuizAnswers {
+  planning_for?: string;
+  children?: string;
+  texas?: string;
+  priority?: string;
+  completedAt?: string;
 }
 
 export interface Decision {

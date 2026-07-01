@@ -1,7 +1,7 @@
 import type { Decision, FlaggedItem, Section, TranscriptEntry } from "@/types";
 import { SECTION_CONFIG } from "./sections";
 
-interface ResumeContext {
+export interface ResumeContext {
   currentSection: Section;
   sectionsCompleted: Section[];
   decisions: Decision[];
@@ -9,11 +9,84 @@ interface ResumeContext {
   recentTranscript: TranscriptEntry[];
 }
 
+/** Answers collected during the pre-session onboarding quiz. */
+export interface OnboardingAnswers {
+  planning_for?: string; // 'couple' | 'individual'
+  children?: string; // 'have_kids' | 'expecting' | 'no_kids'
+  texas?: string; // 'yes' | 'no'
+  priority?: string; // 'guardianship' | 'assets' | 'healthcare' | 'getting_started'
+}
+
+interface SystemPromptOptions {
+  resumeContext?: ResumeContext;
+  onboarding?: OnboardingAnswers;
+}
+
+const PRIORITY_LABELS: Record<string, string> = {
+  guardianship: "naming guardians for their children",
+  assets: "deciding who gets what (assets & property)",
+  healthcare: "healthcare & end-of-life wishes",
+  getting_started: "just getting started — they weren't sure where to begin",
+};
+
+const CHILDREN_LABELS: Record<string, string> = {
+  have_kids: "they have children at home",
+  expecting: "they are expecting a child",
+  no_kids: "they do not have children yet",
+};
+
+/** Build the "what the user already told us" block from onboarding answers. */
+function buildOnboardingBlock(onboarding?: OnboardingAnswers): string {
+  if (!onboarding) return "";
+  const facts: string[] = [];
+
+  if (onboarding.planning_for === "couple") {
+    facts.push("They are planning together with a partner (couple).");
+  } else if (onboarding.planning_for === "individual") {
+    facts.push("They are planning as an individual (no partner in this plan).");
+  }
+
+  if (onboarding.children && CHILDREN_LABELS[onboarding.children]) {
+    facts.push(CHILDREN_LABELS[onboarding.children] + ".");
+  }
+
+  if (onboarding.texas === "yes") {
+    facts.push("They live in Texas.");
+  } else if (onboarding.texas === "no") {
+    facts.push(
+      "They indicated they do NOT live in Texas — gently note that WillBuddy currently generates Texas-compliant drafts only, but continue helping them."
+    );
+  }
+
+  if (onboarding.priority && PRIORITY_LABELS[onboarding.priority]) {
+    facts.push(
+      `What's most on their mind: ${PRIORITY_LABELS[onboarding.priority]}.`
+    );
+  }
+
+  if (facts.length === 0) return "";
+
+  return `
+## What the user already told us (from onboarding)
+
+Before this conversation, the user answered a few quick questions. Use these facts to personalize the session. Do NOT re-ask questions they've already answered here — acknowledge what you already know and move forward.
+
+${facts.map((f) => `- ${f}`).join("\n")}
+
+Open warmly, briefly reflect back what you already know (e.g. "Since you mentioned you're in Texas with little ones at home..."), and steer toward what matters most to them first when it makes sense.
+`;
+}
+
 /**
  * Build the system prompt for WillBuddy's Gemini Flash Live session.
- * Optionally includes resume context for returning sessions.
+ * Optionally includes resume context for returning sessions and onboarding
+ * answers to personalize the opening.
  */
-export function getSystemPrompt(resumeContext?: ResumeContext): string {
+export function getSystemPrompt(options?: SystemPromptOptions): string {
+  const resumeContext = options?.resumeContext;
+  const onboarding = options?.onboarding;
+  const isCouple = onboarding?.planning_for !== "individual";
+  const audience = isCouple ? "a couple" : "an individual";
   const sectionGuide = Object.entries(SECTION_CONFIG)
     .map(
       ([key, config]) =>
@@ -62,7 +135,9 @@ Do NOT re-ask questions they've already answered unless they want to change some
 `;
   }
 
-  return `You are WillBuddy, a warm and knowledgeable estate planning coach helping a couple create their estate plan in Texas.
+  const onboardingBlock = buildOnboardingBlock(onboarding);
+
+  return `You are WillBuddy, a warm and knowledgeable estate planning coach helping ${audience} create their estate plan in Texas.
 
 ## Your Role
 You are NOT a lawyer. You are a guide who helps people think through important decisions about their estate plan. You help them understand their options, surface edge cases they might not have considered, and record their decisions so they can take them to an attorney.
@@ -171,7 +246,7 @@ Examples of good pacing:
 - Never give specific legal advice. Say things like "many families choose..." or "your attorney can advise on..."
 - If the user asks a question you can't answer, say "That's a great question for your attorney."
 - At the end: congratulate them warmly. "You just did something most families never do. You've made decisions that will give your family clarity and protection. The next step is to take these drafts to a Texas estate planning attorney for review and finalization."
-${resumeBlock}
+${onboardingBlock}${resumeBlock}
 
-Begin by greeting the couple warmly and starting with the Family Snapshot section (unless resuming).`;
+Begin by greeting ${isCouple ? "the couple" : "them"} warmly and starting with the Family Snapshot section (unless resuming).`;
 }

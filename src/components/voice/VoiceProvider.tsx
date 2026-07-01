@@ -20,6 +20,9 @@ import { createClient } from '@/lib/supabase/client';
 import type { GeminiLiveClient } from '@/lib/gemini/client';
 import type { AudioRecorder } from '@/lib/gemini/audio-recorder';
 import type { AudioPlayer } from '@/lib/gemini/audio-player';
+import type { OnboardingAnswers } from '@/lib/gemini/system-prompt';
+
+const ONBOARDING_STORAGE_KEY = 'willbuddy_onboarding';
 
 // ---------------------------------------------------------------------------
 // Context value
@@ -84,23 +87,68 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = useRef(createClient());
 
+  // Refs mirror state so async callbacks (wired once into the Gemini client)
+  // always read the latest values instead of a stale closure snapshot. This is
+  // critical because sessionId is set AFTER connect() begins.
+  const sessionIdRef = useRef<string | null>(initialSessionId ?? null);
+  const currentSectionRef = useRef<Section>('family');
+  const decisionsRef = useRef<Decision[]>([]);
+  const transcriptRef = useRef<TranscriptEntry[]>([]);
+  const sectionsCompletedRef = useRef<Section[]>([]);
+  const resumeHandleRef = useRef<string | null>(null);
+  const onboardingRef = useRef<OnboardingAnswers | null>(null);
+  const onboardingPersistedRef = useRef(false);
+
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
+  useEffect(() => { currentSectionRef.current = currentSection; }, [currentSection]);
+  useEffect(() => { decisionsRef.current = decisions; }, [decisions]);
+  useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
+
+  // Load onboarding answers from localStorage on mount (captured pre-account).
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as OnboardingAnswers;
+        if (parsed && typeof parsed === 'object') {
+          onboardingRef.current = parsed;
+        }
+      }
+    } catch {
+      // localStorage unavailable / malformed — non-fatal.
+    }
+  }, []);
+
+  // Persist onboarding answers onto the session row once we have both.
+  const persistOnboarding = useCallback(() => {
+    const sid = sessionIdRef.current;
+    if (!sid || !onboardingRef.current || onboardingPersistedRef.current) return;
+    onboardingPersistedRef.current = true;
+    void fetch('/api/session', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: sid, onboarding: onboardingRef.current }),
+    });
+  }, []);
+
   // -----------------------------------------------------------------------
   // Persist transcript entry to Supabase
   // -----------------------------------------------------------------------
   const saveTranscript = useCallback(
     async (entry: TranscriptEntry) => {
-      if (!sessionId) return;
+      const sid = sessionIdRef.current;
+      if (!sid) return;
       await supabase.current
         .from('transcript_entries')
         .upsert({
           id: entry.id,
-          session_id: sessionId,
+          session_id: sid,
           role: entry.role,
           content: entry.content,
           timestamp: entry.timestamp,
         });
     },
-    [sessionId],
+    [],
   );
 
   // -----------------------------------------------------------------------
@@ -108,13 +156,14 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // -----------------------------------------------------------------------
   const saveDecision = useCallback(
     async (decision: Decision) => {
-      if (!sessionId) return;
+      const sid = sessionIdRef.current;
+      if (!sid) return;
       await supabase.current
         .from('decisions')
         .upsert(
           {
             id: decision.id,
-            session_id: sessionId,
+            session_id: sid,
             section: decision.section,
             key: decision.key,
             value: decision.value,
@@ -127,7 +176,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
           { onConflict: 'id' },
         );
     },
-    [sessionId],
+    [],
   );
 
   // -----------------------------------------------------------------------
@@ -139,7 +188,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         const now = new Date().toISOString();
         const decision: Decision = {
           id: crypto.randomUUID(),
-          session_id: sessionId ?? '',
+          session_id: sessionIdRef.current ?? '',
           section: (args.section as string) as Decision['section'],
           key: args.key as string,
           value: args.value as string,
@@ -166,14 +215,20 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       if (name === 'updateProgress') {
         const section = args.section as Section;
         const nextSection = args.nextSection as Section | undefined;
+        // Merge with previously completed sections rather than overwriting.
+        const mergedCompleted = [
+          ...new Set([...sectionsCompletedRef.current, section]),
+        ];
+        sectionsCompletedRef.current = mergedCompleted;
         // Persist section-complete to Supabase immediately
-        if (sessionId) {
+        const sid = sessionIdRef.current;
+        if (sid) {
           void fetch('/api/session', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              sessionId,
-              sectionsCompleted: [...new Set([section])],
+              sessionId: sid,
+              sectionsCompleted: mergedCompleted,
               currentSection: nextSection ?? section,
             }),
           });
@@ -197,16 +252,17 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       }
 
       if (name === 'flagForReview') {
-        if (sessionId) {
+        const sid = sessionIdRef.current;
+        if (sid) {
           void supabase.current.from('flagged_items').insert({
-            session_id: sessionId,
+            session_id: sid,
             topic: args.topic as string,
             reason: args.reason as string,
           });
         }
       }
     },
-    [saveDecision, sessionId],
+    [saveDecision],
   );
 
   // -----------------------------------------------------------------------
@@ -220,6 +276,14 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       const data = await res.json();
       if (data.session) {
         setCurrentSection(data.session.current_section ?? 'family');
+        sectionsCompletedRef.current = data.session.sections_completed ?? [];
+        resumeHandleRef.current = data.session.gemini_resume_handle ?? null;
+        // DB onboarding wins over localStorage (survives device switches) and
+        // means we don't need to re-persist it.
+        if (data.session.onboarding) {
+          onboardingRef.current = data.session.onboarding as OnboardingAnswers;
+          onboardingPersistedRef.current = true;
+        }
       }
       if (data.decisions?.length) {
         setDecisions(data.decisions);
@@ -243,28 +307,36 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       const res = await fetch('/api/gemini/token', { method: 'POST' });
       if (!res.ok) throw new Error('Failed to fetch Gemini token');
       const { token, sessionId: newSessionId } = await res.json();
+      const sid = newSessionId ?? sessionIdRef.current;
+      // Update the ref SYNCHRONOUSLY so callbacks wired below persist correctly,
+      // even before the setSessionId re-render lands.
+      if (sid) sessionIdRef.current = sid;
       if (newSessionId) setSessionId(newSessionId);
+
+      // Persist onboarding answers onto the session (once).
+      persistOnboarding();
 
       // Dynamically import so the modules are only loaded client-side
       const { GeminiLiveClient: GeminiCls } = await import('@/lib/gemini/client');
       const { AudioRecorder: RecorderCls } = await import('@/lib/gemini/audio-recorder');
       const { AudioPlayer: PlayerCls } = await import('@/lib/gemini/audio-player');
 
-      const sid = newSessionId ?? sessionId;
-
-      // Build resume context if we have prior session data
-      const resumeContext = decisions.length > 0 ? {
-        currentSection,
-        sectionsCompleted: [] as Section[],
-        decisions,
+      // Build resume context from the latest data (refs avoid stale closures).
+      const priorDecisions = decisionsRef.current;
+      const resumeContext = priorDecisions.length > 0 ? {
+        currentSection: currentSectionRef.current,
+        sectionsCompleted: sectionsCompletedRef.current,
+        decisions: priorDecisions,
         flaggedItems: [],
-        recentTranscript: transcript.slice(-10),
+        recentTranscript: transcriptRef.current.slice(-10),
       } : undefined;
 
       const gemini = new GeminiCls({
         apiKey: token,
         sessionId: sid ?? '',
+        resumeHandle: resumeHandleRef.current,
         resumeContext,
+        onboarding: onboardingRef.current ?? undefined,
       });
       const recorder = new RecorderCls();
       const player = new PlayerCls();
@@ -276,9 +348,13 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         saveTranscript(entry);
       };
       gemini.onToolCall = handleToolCall;
-      gemini.onSectionChange = (section: Section) => setCurrentSection(section);
+      gemini.onSectionChange = (section: Section) => {
+        currentSectionRef.current = section;
+        setCurrentSection(section);
+      };
       gemini.onAudioData = (base64Audio: string) => player.play(base64Audio);
       gemini.onSessionHandle = (handle: string) => {
+        resumeHandleRef.current = handle;
         if (sid) {
           void fetch('/api/session', {
             method: 'PATCH',
@@ -319,7 +395,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       console.error('Voice connect error:', err);
       setVoiceState('error');
     }
-  }, [handleToolCall, isMicMuted, saveTranscript]);
+  }, [handleToolCall, isMicMuted, saveTranscript, persistOnboarding, router]);
 
   // -----------------------------------------------------------------------
   // Disconnect
@@ -355,7 +431,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       // Add user bubble immediately
       const entry: TranscriptEntry = {
         id: crypto.randomUUID(),
-        session_id: sessionId ?? '',
+        session_id: sessionIdRef.current ?? '',
         role: 'user',
         content: text,
         timestamp: new Date().toISOString(),
@@ -365,7 +441,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
 
       clientRef.current.sendText(text);
     },
-    [sessionId, saveTranscript],
+    [saveTranscript],
   );
 
   // -----------------------------------------------------------------------
@@ -394,6 +470,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // -----------------------------------------------------------------------
   const resumeFromPause = useCallback(async () => {
     if (pendingNextSection) {
+      currentSectionRef.current = pendingNextSection;
       setCurrentSection(pendingNextSection);
     }
     setIsPaused(false);
