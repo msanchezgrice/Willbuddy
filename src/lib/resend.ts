@@ -20,6 +20,15 @@ export function getSupportEmail(): string {
   return process.env.SUPPORT_EMAIL ?? "support@mywillbuddy.com";
 }
 
+/** Where inbound mail to support@ / hello@ is forwarded. */
+export function getInboundForwardTo(): string {
+  return (
+    process.env.INBOUND_FORWARD_TO ??
+    process.env.SUPPORT_EMAIL ??
+    "msanchezgrice@gmail.com"
+  );
+}
+
 /**
  * Address that user replies to transactional/drip emails should land on.
  * Defaults to the support inbox so replies are received, not lost.
