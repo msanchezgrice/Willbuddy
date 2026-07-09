@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville } from "next/font/google";
+import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import { siteConfig } from "@/lib/site";
 import { Providers } from "./providers";
@@ -80,6 +81,12 @@ export default function RootLayout({
     <ClerkProvider afterSignOutUrl="/">
       <html lang="en" className={`${libreBaskerville.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#2D2A26]">
+          <Script
+            src="https://analytics.ahrefs.com/analytics.js"
+            data-key="S+xmJrUNKoNEccYeMdhjvw"
+            strategy="beforeInteractive"
+            async
+          />
           <Providers>{children}</Providers>
         </body>
       </html>
