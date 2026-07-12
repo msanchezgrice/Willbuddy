@@ -2,78 +2,114 @@ import type { BlogPost } from "../types";
 
 export const dyingWithoutWill: BlogPost = {
   slug: "dying-without-a-will-in-texas",
-  title:
-    "What Happens in Texas If You Die Without a Will (Intestate Succession Explained)",
+  title: "What Happens If You Die Without a Will in Texas?",
   description:
-    "If you die without a will in Texas, state law decides who gets what — and the result may surprise you. Here's how Texas intestate succession actually works.",
+    "A source-backed guide to Texas intestacy rules for spouses, children, separate property, community property, and blended families.",
   date: "2026-06-24",
+  dateModified: "2026-07-12",
   category: "Texas Estate Law",
-  author: "The WillBuddy Team",
-  content: `Most people assume that if they die without a will, everything simply goes to their spouse, or that the state "takes it all." Neither is quite true. When you die without a valid will in Texas, you die *intestate*, and a set of default rules — the laws of **intestate succession** — decides who inherits your property. Those rules are rigid, sometimes counterintuitive, and almost never an exact match for what you would have chosen.
+  author: "WillBuddy Editorial Team",
+  editorialNote:
+    "Written and source-checked by the WillBuddy Editorial Team against current Texas statutes and state guidance. This article was not attorney-reviewed.",
+  faqs: [
+    {
+      question: "Does a spouse inherit everything when someone dies without a will in Texas?",
+      answer:
+        "Not always. The answer depends on whether property is community or separate property and whether the person left descendants, including descendants who are not also descendants of the surviving spouse.",
+      sourceUrl:
+        "https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm",
+      sourceLabel: "Texas Estates Code Chapter 201",
+    },
+    {
+      question: "Does the State of Texas automatically take an intestate estate?",
+      answer:
+        "No. Texas intestacy law follows a statutory family-inheritance order. Escheat to the state is a backstop only when an estate has no devisee or heir.",
+      sourceUrl:
+        "https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm",
+      sourceLabel: "Texas Estates Code Chapter 201",
+    },
+    {
+      question: "Can a will change the Texas intestacy result?",
+      answer:
+        "A valid will can direct probate property to the beneficiaries selected by the person making the will, subject to Texas law and rights that may apply to surviving family members.",
+      sourceUrl:
+        "https://tcss.legis.texas.gov/resources/ES/htm/ES.251.htm",
+      sourceLabel: "Texas Estates Code Chapter 251",
+    },
+  ],
+  content: `Dying without a valid will is called dying **intestate**. In that situation, Texas does not ask what the person probably wanted. The state applies a family-inheritance formula to the probate property left behind. The controlling rules are in [Texas Estates Code Chapter 201](https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm), and the [Texas State Law Library's intestacy overview](https://www.sll.texas.gov/faqs/intestate-succession/) emphasizes that the result depends on a surviving spouse, the character of the property, and which relatives survive.
 
-Understanding what the default looks like is one of the most motivating reasons to write a will. Here's a plain-English overview of how it works in Texas.
+That formula can be sensible for one family and a poor fit for another. A blended family, an unmarried partner, a close friend, a charity, or a child who needs long-term financial safeguards can expose gaps between the statute and a person's actual priorities.
 
-> This article explains general concepts, not your specific situation. Texas estate law is detailed and fact-dependent, so treat this as a starting point and confirm specifics with a licensed Texas attorney.
+> **Educational information only.** This guide summarizes general Texas law as of July 12, 2026. It cannot determine how a particular asset or family relationship will be treated. WillBuddy is not a law firm and does not provide legal advice. Ask a licensed Texas attorney to evaluate your situation.
 
-## Separate property vs. community property
+## Start with the property, not just the family tree
 
-Texas is a **community property** state, and that distinction drives everything in intestate succession. Broadly:
+For a married person, the first question is not simply “Who survives?” It is also “What kind of property is this?” Chapter 201 has separate rules for the **separate estate** and the deceased spouse's interest in the **community estate**. The State Law Library likewise identifies property character as a central intestacy factor. See [Texas Estates Code Sections 201.002 and 201.003](https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm) and the [State Law Library explanation](https://www.sll.texas.gov/faqs/intestate-succession/).
 
-- **Community property** is most of what you and your spouse acquire during the marriage.
-- **Separate property** is what you owned before marriage, plus gifts and inheritances you received individually during the marriage.
+As a planning exercise, make three columns:
 
-The intestacy rules treat these two categories very differently, and they further split property into **real property** (land and homes) and **personal property** (everything else). This is why "it all goes to my spouse" is often wrong — the answer depends on the type of property *and* who your surviving relatives are.
+1. Property you believe is community property.
+2. Property you believe is separate property.
+3. Property whose ownership or beneficiary designation you need to confirm.
 
-## If you're married with children
+That list is not a legal classification. Deeds, account agreements, marital agreements, the source of funds, and beneficiary designations can matter. It is a useful agenda for an attorney conversation.
 
-This is where people are most often surprised.
+## Married with descendants: the blended-family fork
 
-**Community property:** If all of your children are also the children of your surviving spouse, your half of the community property generally passes to your spouse, who then owns it all. But if you have children from another relationship, your half of the community property passes to your children — not your spouse. A blended family can end up with the surviving spouse co-owning property with stepchildren, which is rarely what anyone intended.
+For the deceased spouse's community interest, Texas draws an important line. If no descendant survives, or every surviving descendant of the deceased spouse is also a descendant of the surviving spouse, the deceased spouse's community estate passes to the surviving spouse. If at least one surviving descendant is not also a descendant of the surviving spouse, the deceased spouse's undivided one-half community interest passes to the deceased spouse's descendants under the statutory distribution rule. [Texas Estates Code Section 201.003](https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm) states this distinction.
 
-**Separate property:** Your separate personal property is typically divided so that your spouse receives one-third and your children receive two-thirds. For separate real property, your spouse generally receives a life estate in one-third (the right to use it during their lifetime), with your children inheriting the rest. The home you assumed would simply belong to your spouse may instead be partly owned by your kids.
+That does **not** mean a surviving spouse loses the spouse's own community interest. It means the deceased spouse's share can follow a different path. In a blended family, this can produce shared ownership or divided economic interests that nobody discussed in advance.
 
-## If you're married with no children
+Separate property follows a different formula. When a person dies intestate leaving a spouse and descendants, Section 201.002 divides separate personal property and separate real property differently. The spouse receives one-third of separate personal property, while descendants receive the balance; for separate real property, the statute gives the spouse a one-third life estate and passes the remainder interests under the descendant rules. Read the full conditions in [Texas Estates Code Section 201.002](https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm) before applying those fractions to any real family.
 
-If you have no descendants, your spouse inherits all of the community property. But your **separate property** may be shared with your parents or siblings: your spouse typically takes all separate personal property and half of the separate real property, while the other half of the real property can pass to your parents or siblings. Many people are stunned to learn their spouse might co-own the family land with a sibling or in-law.
+## Married with no descendants
 
-## If you're single with children
+If an intestate person leaves a spouse but no descendant, the spouse receives the deceased spouse's community estate under Section 201.003. Separate property is still governed by Section 201.002: the spouse receives the separate personal estate, while separate real property can be divided between the spouse and the deceased person's parents or siblings under the statutory branches. The spouse can receive all of the separate real property if the statute's listed parent-and-sibling lines do not survive. [Texas Estates Code Sections 201.002–201.003](https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm) contain the complete rule.
 
-Your estate generally passes to your children in equal shares. If a child has died before you but left children of their own (your grandchildren), that child's share typically passes down to them.
+The practical lesson is narrow but important: “married” does not by itself answer who receives every Texas asset.
 
-## If you're single with no children
+## Not married: descendants come first
 
-The estate climbs the family tree according to a set order: to your parents; if they're gone, to your siblings and their descendants; and if there are none, to grandparents and their lines. The law keeps searching for the nearest blood relatives. Only if no heirs can be found at all does the property *escheat* to the state — a genuinely rare outcome, but a reminder that the law will hand your assets to relatives you might never have chosen over, say, a close friend or a charity.
+When an intestate person leaves no spouse, Section 201.001 begins with children and their descendants. If that line does not survive, the statute moves through parents, siblings and their descendants, then paternal and maternal family lines. [Texas Estates Code Section 201.001](https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm) provides the order, while Section 201.101 explains representation when a member of a family branch died earlier but left descendants.
 
-## What intestacy can't do for you
+An unmarried partner is not inserted into that family order merely because the relationship was committed or long-lasting. Whether another doctrine applies is fact-specific and belongs with a Texas lawyer. For planning purposes, do not assume affection or shared expenses replace a will or a valid beneficiary arrangement.
 
-Beyond the distribution surprises, dying without a will means losing the ability to make several crucial choices:
+## What the intestacy formula does not decide for you
 
-- **No guardian nomination.** If you have minor children, intestacy says nothing about who raises them. A court decides without your input — arguably the single biggest risk for parents.
-- **No chosen executor.** The court appoints an administrator, who may have to post a bond and operate under tighter court supervision, adding cost and delay.
-- **No tailored trusts.** Minor children may receive assets through a court-supervised process, and they typically receive everything outright at 18 — with no staggered distributions or protective trust you could have designed.
-- **No specific gifts.** That heirloom you wanted a particular person to have? Intestacy doesn't recognize sentimental wishes.
-- **No charitable gifts or friends.** Only legal heirs inherit. Unmarried partners, close friends, and charities receive nothing by default.
+Chapter 201 allocates an intestate estate; it does not record your personal choices. Without a valid nomination, the court lacks your written preference for who should serve in roles such as guardian or executor.
 
-## The practical fallout for your family
+- A surviving parent may designate an eligible guardian for minor children by will or qualifying written declaration, subject to disqualification, refusal, death, and the children's best interests. See [Texas Estates Code Section 1104.053](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm) and our guide to [choosing a guardian](/blog/choosing-a-guardian).
+- Texas gives first priority for letters testamentary or administration to the executor named in a will, if qualified. Without that selection, the statutory priority list continues through other candidates. See [Texas Estates Code Sections 304.001 and 304.003](https://tcss.legis.texas.gov/resources/ES/htm/ES.304.htm) and our guide to [naming an executor](/blog/naming-an-executor).
+- A will can express an intent for independent administration under Section 401.001, which changes the level of routine court involvement described by that statute. See [Texas Estates Code Chapter 401](https://tcss.legis.texas.gov/resources/ES/htm/ES.401.htm).
 
-Intestacy doesn't just produce unexpected ownership splits — it makes administration harder. Property co-owned by a spouse and children (or stepchildren) can be difficult to sell or manage. Minors' inheritances may require court oversight. And disputes are more likely when the law, rather than your clear instructions, dictates who gets what. All of this lands on grieving family members at the worst possible time.
+Those choices are often more emotionally important than the percentage chart.
 
-## Common myths, corrected
+## Three family snapshots
 
-- **"My spouse automatically gets everything."** Often false, especially with separate property or children from another relationship.
-- **"Everything avoids probate if I have no will."** No — intestate estates still go through probate, often with *more* court involvement, not less.
-- **"The state takes it."** Extremely rare; the law tries hard to find relatives first.
-- **"My kids will be fine."** Without a guardian nomination and a thoughtful structure for their inheritance, "fine" is left to a judge's discretion.
+These examples are issue-spotters, not legal conclusions:
 
-## The simple fix
+**A married couple with only shared children.** The community-property result may be different from the separate-property result. They should inventory both categories and check beneficiary designations rather than assuming the same rule covers every asset. [Sections 201.002–201.003](https://tcss.legis.texas.gov/resources/ES/htm/ES.201.htm) show why.
 
-A valid will lets you override every one of these defaults. You decide who inherits, in what shares, and with what protections. You nominate guardians for your children. You choose your executor and can simplify the probate process. You can leave specific items to specific people and provide for partners, friends, and causes the intestacy rules ignore entirely.
+**A parent in a blended family.** A descendant from another relationship activates the specific community-property branch in Section 201.003(c). The family should also decide who will manage any inheritance and whether a trust belongs in the plan.
 
-The default rules exist for people who never got around to deciding. The entire point of a will is to make those decisions yourself — based on your family, your values, and your wishes — rather than leaving them to a statute written for everyone and no one in particular.
+**An unmarried adult with a partner or close friend.** Section 201.001's no-spouse order follows descendants and blood-family branches. If that is not the desired result, the person needs legally effective planning rather than an informal promise.
 
-If you take one thing from this article, let it be this: in Texas, *not* having a will is itself a plan. It's just the state's plan, not yours. Writing your own is how you take the pen back.
+## A practical next-step checklist
+
+1. List family relationships, including children from prior relationships and deceased children who left descendants.
+2. Inventory assets and how each one is titled.
+3. Record every named beneficiary or transfer-on-death designation.
+4. Compare the likely default questions with your actual wishes.
+5. Choose an executor and backup using the [executor guide](/blog/naming-an-executor).
+6. If you have minor children, work through the [guardian decision guide](/blog/choosing-a-guardian).
+7. Read the [Texas estate-planning hub](/texas-estate-planning), then bring the inventory and decisions to a licensed Texas estate-planning attorney.
+
+## The takeaway
+
+Texas has an intestacy plan for everyone, but it is intentionally generic. The most reliable way to learn whether it fits is to compare Chapter 201's branches against your actual property and relationships. If the answers differ from your wishes, a properly prepared and executed plan can replace guesswork with written choices. Texas will-execution requirements are collected in [Texas Estates Code Chapter 251](https://tcss.legis.texas.gov/resources/ES/htm/ES.251.htm), and the State Law Library points Texans to [Supreme Court-approved simple will forms and legal-help resources](https://www.sll.texas.gov/faqs/simple-will-forms/).
 
 ---
 
-*WillBuddy is not a law firm and does not provide legal advice. The documents WillBuddy generates are drafts intended for review by a licensed attorney. WillBuddy is designed for Texas residents and produces documents based on Texas estate law.*`,
+*WillBuddy is not a law firm and does not provide legal advice. WillBuddy provides educational information and draft-planning tools. Any draft should be reviewed for your facts and properly executed with guidance from a licensed Texas attorney.*`,
 };

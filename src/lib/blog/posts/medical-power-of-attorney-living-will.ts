@@ -1,102 +1,138 @@
 import type { BlogPost } from "../types";
 
+const medicalPoaForm =
+  "https://www.hhs.texas.gov/regulations/forms/advance-directives/medical-power-attorney-designation-health-care-agent-mpoa";
+const livingWillForm =
+  "https://www.hhs.texas.gov/regulations/forms/advance-directives/directive-physicians-family-or-surrogates-living-will";
+
 export const medicalPoa: BlogPost = {
   slug: "medical-power-of-attorney-living-will",
-  title:
-    "Medical Power of Attorney and Living Wills: Making Your Healthcare Wishes Known",
+  title: "Texas Medical Power of Attorney and Living Will Guide",
   description:
-    "Healthcare directives ensure your wishes are honored and spare your family agonizing guesswork. Here's how a medical power of attorney and a living will work together.",
+    "Learn how a Texas medical power of attorney and directive to physicians work together, using current Texas HHS forms and law.",
   date: "2026-06-18",
+  dateModified: "2026-07-12",
   category: "Healthcare Directives",
-  author: "The WillBuddy Team",
-  content: `Estate planning isn't only about what happens after you die. Some of its most important protections apply while you're very much alive — but unable to speak for yourself. A medical emergency, a serious illness, or an accident can leave you incapacitated and reliant on others to make healthcare decisions on your behalf. Healthcare directives let you decide, in advance, *who* makes those decisions and *what* you'd want.
+  author: "WillBuddy Editorial Team",
+  editorialNote:
+    "Written and source-checked by the WillBuddy Editorial Team against current Texas statutes and Texas HHS forms. This article was not attorney-reviewed or medically reviewed.",
+  faqs: [
+    {
+      question: "When does a Texas medical power of attorney take effect?",
+      answer:
+        "The current Texas HHS form states that it takes effect when the person becomes unable to make healthcare decisions and a physician certifies that fact in writing.",
+      sourceUrl: medicalPoaForm,
+      sourceLabel: "Texas HHS Medical Power of Attorney form",
+    },
+    {
+      question: "Is a medical power of attorney the same as a living will in Texas?",
+      answer:
+        "No. A medical power of attorney names a healthcare agent, while the directive to physicians records treatment preferences for defined terminal or irreversible conditions.",
+      sourceUrl: livingWillForm,
+      sourceLabel: "Texas HHS Directive to Physicians form",
+    },
+    {
+      question: "Does a Texas medical power of attorney manage finances?",
+      answer:
+        "No. Financial and property authority belongs in a separate durable power of attorney governed by the Texas Estates Code.",
+      sourceUrl:
+        "https://tcss.legis.texas.gov/resources/ES/htm/ES.752.htm",
+      sourceLabel: "Texas Estates Code Chapter 752",
+    },
+  ],
+  content: `Texas uses separate documents to answer two different healthcare questions:
 
-For families, these documents do something profound: they replace a moment of agonizing guesswork with the clarity of your own voice.
+1. **Who should make healthcare decisions if I cannot?** A medical power of attorney names an agent.
+2. **What treatment would I want in defined end-of-life circumstances?** A directive to physicians and family or surrogates—often called a living will—records treatment preferences.
 
-> This article explains general concepts and is not legal or medical advice. Document names and rules vary; confirm specifics for your situation with a licensed Texas attorney and your physician.
+Both documents are part of the Texas Advance Directives Act in [Health and Safety Code Chapter 166](https://tcss.legis.texas.gov/resources/HS/htm/HS.166.htm). Texas Health and Human Services publishes current statutory-form pages for a [Medical Power of Attorney](https://www.hhs.texas.gov/regulations/forms/advance-directives/medical-power-attorney-designation-health-care-agent-mpoa) and a [Directive to Physicians and Family or Surrogates](https://www.hhs.texas.gov/regulations/forms/advance-directives/directive-physicians-family-or-surrogates-living-will).
 
-## The two core documents
+> **Educational information only.** This guide summarizes general Texas law and the Texas HHS forms available as of July 12, 2026. WillBuddy is not a law firm and does not provide legal or medical advice. Discuss legal questions with a licensed Texas attorney and treatment questions with qualified healthcare professionals.
 
-Two documents handle most healthcare planning, and they work best as a pair.
+## What the medical power of attorney does
 
-### 1. Medical power of attorney
+The current Texas HHS medical power of attorney form lets an adult appoint an agent to make healthcare decisions, subject to limitations written in the document and restrictions imposed by law. The form says it takes effect when the principal is unable to make the principal's own healthcare decisions and a physician certifies that fact in writing. Read the instructions and full grant from the [Texas HHS Medical Power of Attorney page](https://www.hhs.texas.gov/regulations/forms/advance-directives/medical-power-attorney-designation-health-care-agent-mpoa) and the statutory provisions beginning at [Health and Safety Code Section 166.151](https://tcss.legis.texas.gov/resources/HS/htm/HS.166.htm).
 
-A **medical power of attorney** names a person — your **healthcare agent** — to make medical decisions for you when you're unable to make them yourself. This agent steps in only when a physician determines you lack the capacity to decide.
+The form also provides spaces for first and second alternate agents. If the primary agent is unwilling or unable to act, an alternate can serve in the stated order. The form contains a specific rule about a spouse-agent designation after the marriage ends unless the document provides otherwise. See the [Texas HHS form page](https://www.hhs.texas.gov/regulations/forms/advance-directives/medical-power-attorney-designation-health-care-agent-mpoa).
 
-Your agent can do things like:
+The agent's authority is not unlimited. Chapter 166 and the statutory form identify decisions an agent may not make, require the agent to follow known wishes, and otherwise direct the agent to act in the principal's best interest. Review [Health and Safety Code Sections 166.152–166.166](https://tcss.legis.texas.gov/resources/HS/htm/HS.166.htm) rather than relying on a generic healthcare-proxy description.
 
-- Consent to or refuse medical treatments and procedures.
-- Choose doctors, specialists, and care facilities.
-- Make decisions about medications and therapies.
-- Access the medical information needed to decide wisely.
+## What the directive to physicians does
 
-The power of this document is its flexibility. No directive can anticipate every medical scenario, but a trusted agent can apply your values to whatever situation actually arises.
+The Texas HHS directive is designed to communicate treatment wishes for a future time when the signer cannot make those wishes known because of illness or injury. Its statutory choices address a **terminal condition** and an **irreversible condition** as defined in the form, with options concerning life-sustaining treatment and comfort-focused care. See the [Texas HHS Directive to Physicians page](https://www.hhs.texas.gov/regulations/forms/advance-directives/directive-physicians-family-or-surrogates-living-will) and [Health and Safety Code Sections 166.031–166.039](https://tcss.legis.texas.gov/resources/HS/htm/HS.166.htm).
 
-### 2. Directive to physicians (living will)
+The directive is not a general list of every medical preference. It speaks to the circumstances and treatment choices described in the statute and form. That is why conversation with the healthcare agent and physician still matters.
 
-A **living will** — in Texas, a *directive to physicians* — is where you express your wishes about life-sustaining treatment if you have a terminal or irreversible condition. It speaks to questions like:
+## Why the documents work together
 
-- Do you want life support continued or withdrawn in defined end-of-life situations?
-- Your wishes regarding artificial nutrition and hydration.
-- Comfort care and pain management preferences.
+The directive records choices for defined conditions. The medical power of attorney supplies a person who can respond to healthcare decisions that arise when the principal cannot decide. The HHS directive itself notes that Texas law provides other directives, including the medical power of attorney and out-of-hospital do-not-resuscitate order. See the [Texas HHS Directive to Physicians page](https://www.hhs.texas.gov/regulations/forms/advance-directives/directive-physicians-family-or-surrogates-living-will).
 
-Where the medical power of attorney names a *decision-maker*, the living will provides *instructions*. Together, they ensure both that someone is empowered to act and that they know what you'd want.
+A clean plan therefore asks both:
 
-## Why you need both
+- Have I selected someone who understands my values and can decide under pressure?
+- Have I recorded the treatment preferences the Texas directive asks me to make?
 
-People sometimes assume one document covers everything. They don't. A living will is specific but can't address every situation; a medical power of attorney is flexible but gives your agent no guidance unless you've shared your wishes. Used together, your agent makes real-time decisions *informed by* your written instructions — the best of both.
+## Choose an agent for judgment, not family rank
 
-## Don't forget HIPAA authorization
+Use these practical criteria:
 
-Federal privacy law can prevent even close family from accessing your medical records without authorization. A **HIPAA authorization** lets the people you designate obtain your medical information so they can make informed decisions. Without it, your healthcare agent might be empowered to decide but unable to get the very records they need. It's a small document that removes a maddening obstacle at the worst possible time.
+- The person listens accurately and will follow your wishes even when personally uncomfortable.
+- The person can communicate calmly with clinicians and family.
+- The person is reachable and willing to serve.
+- The person understands your religious, cultural, and quality-of-life values.
+- The person will ask questions when the medical situation is unclear.
+- The appointment will not predictably create avoidable conflict.
 
-## Choosing your healthcare agent
+The current form restricts certain categories of people from serving as agent, including a healthcare provider or an employee of a provider unless a statutory relationship exception applies. Read the exact restriction in [Health and Safety Code Section 166.153](https://tcss.legis.texas.gov/resources/HS/htm/HS.166.htm) and the HHS form before naming anyone.
 
-This is the heart of the matter. Your agent should be someone who:
+## Have a scenario-based conversation
 
-- **Knows you well** and understands your values about quality of life, medical intervention, and dignity.
-- **Can stay calm under pressure** and make hard decisions in a crisis.
-- **Will honor your wishes** even if they personally would choose differently.
-- **Can advocate firmly** with medical staff and, if needed, with other family members.
-- **Is reasonably available**, including reachable in an emergency.
+Do more than say, “I do not want to be kept alive on machines.” That phrase can mean different things to different people. Use the HHS directive's defined scenarios to start a more precise conversation with your agent and physician:
 
-Notice that the best agent isn't always your spouse or eldest child by default. Sometimes a spouse is too emotionally overwhelmed to make the call you'd want, or a particular relative is simply more level-headed under pressure. Choose for capability and alignment with your wishes, and name a **backup agent** in case your first choice is unavailable.
+- What outcomes would you consider an acceptable recovery?
+- What burdens of treatment would you accept for a meaningful chance of that recovery?
+- What does comfort-focused care mean to you?
+- Are there religious or personal values clinicians should know?
+- Who should be present or consulted if possible?
+- Where are the signed forms and who has copies?
 
-## The conversation that makes it work
+These are value questions, not medical predictions. A physician can explain treatments and likely outcomes; a lawyer can explain document choices.
 
-A healthcare directive on paper is far more powerful when paired with an honest conversation. Sit down with your chosen agent and talk through:
+## Follow the execution instructions exactly
 
-- What "quality of life" means to you.
-- Your feelings about life support, resuscitation, and prolonged treatment with little hope of recovery.
-- Your views on comfort care and where you'd want to be cared for.
-- Any religious or personal values that should guide decisions.
+The HHS forms provide alternatives involving qualified witnesses or a notary and contain restrictions on who may serve as a witness. The requirements differ by document and circumstance. Do not reuse a witness plan from a will or assume every family member is qualified. Follow the current instructions from the [Texas HHS Medical Power of Attorney page](https://www.hhs.texas.gov/regulations/forms/advance-directives/medical-power-attorney-designation-health-care-agent-mpoa), the [Texas HHS Directive to Physicians page](https://www.hhs.texas.gov/regulations/forms/advance-directives/directive-physicians-family-or-surrogates-living-will), and [Health and Safety Code Chapter 166](https://tcss.legis.texas.gov/resources/HS/htm/HS.166.htm).
 
-These conversations are hard. They're also a gift. Families who have talked openly report enormous relief later: instead of fighting over what you "would have wanted," they can act with confidence because they already know. The talk itself, more than the document, is what frees your loved ones from guilt and second-guessing.
+An incorrectly completed form can fail when it is most needed. If anything about capacity, witnesses, electronic execution, language access, or an existing directive is uncertain, get legal help before signing.
 
-## Common misconceptions
+## Make the documents usable in a real emergency
 
-- **"I'm young and healthy, so I don't need this."** Accidents and sudden illness don't check your age. Adults of any age benefit from naming a healthcare agent.
-- **"My spouse can automatically decide everything."** Not always, and not without friction. Privacy laws and institutional rules can complicate things without proper documents.
-- **"A living will handles it all."** It only addresses specific end-of-life scenarios; it can't cover the full range of medical decisions a healthcare agent can.
-- **"Once it's signed, I'm done."** Wishes evolve. Revisit your directives after major health changes, and make sure your agent and doctors have current copies.
+The HHS directive instructs people to provide copies to the physician, usual hospital, and family or spokesperson and to consider periodic review. The medical power of attorney form includes space to record where the original is kept and who has copies. Start from the [Texas HHS advance-directives page](https://www.hhs.texas.gov/formas/advance-directives).
 
-## Keep them accessible
+Create an access plan:
 
-A directive locked in a safe-deposit box helps no one in an emergency. Make sure:
+1. Give the agent and alternates the appropriate signed document.
+2. Ask the treating physician how to add it to the medical record.
+3. Tell close family who the agent is.
+4. Keep an accessible copy without broadly exposing sensitive health information.
+5. Replace distributed copies after a valid revocation or update.
 
-- Your healthcare agent has a copy and knows where the originals are.
-- Your primary physician and relevant facilities have copies on file.
-- Close family knows these documents exist and who your agent is.
+## Keep financial authority separate
 
-Some people also carry a wallet card noting they have directives and naming their agent.
+A medical power of attorney does not authorize financial management. The Texas statutory durable financial form expressly says it does not authorize medical or healthcare decisions, underscoring the separation between the two systems. See [Texas Estates Code Section 752.051](https://tcss.legis.texas.gov/resources/ES/htm/ES.752.htm) and our [Texas durable power of attorney guide](/blog/durable-power-of-attorney).
 
-## Putting it together
+Your healthcare plan should also be coordinated with the will and broader family plan. The [wills-versus-trusts guide](/blog/wills-vs-trusts-texas) explains the different after-death property tools.
 
-A complete healthcare plan generally includes a **medical power of attorney**, a **directive to physicians (living will)**, and a **HIPAA authorization** — supported by clear conversations with the people who'd act on your behalf. Together they ensure that if you can't speak for yourself, your wishes still will.
+## Review when life changes
 
-That's the quiet power of these documents. They don't just protect you medically; they protect the people who love you from the impossible weight of guessing. Deciding now, while you're well and clear-headed, is one of the most considerate things you can do for your family.
+Revisit the documents after a diagnosis, major procedure, marriage change, agent conflict, move, or change in values. The HHS directive recommends periodic review so it continues to reflect current preferences. See the [Texas HHS Directive to Physicians page](https://www.hhs.texas.gov/regulations/forms/advance-directives/directive-physicians-family-or-surrogates-living-will).
+
+Use the [Texas estate-planning hub](/texas-estate-planning) to review these documents alongside the financial power of attorney, will, executor, and guardian choices.
+
+## The takeaway
+
+The Texas medical power of attorney chooses a decision-maker. The directive to physicians records treatment preferences for defined end-of-life conditions. Complete both from current Texas sources, choose and prepare capable agents, follow execution instructions, distribute usable copies, and revisit the choices after meaningful change. The paperwork matters; the informed conversation is what makes the paperwork useful.
 
 ---
 
-*WillBuddy is not a law firm and does not provide legal advice. The documents WillBuddy generates are drafts intended for review by a licensed attorney. WillBuddy is designed for Texas residents and produces documents based on Texas estate law.*`,
+*WillBuddy is not a law firm and does not provide legal advice or medical advice. WillBuddy provides educational information and draft-planning tools. Any draft should be reviewed for your facts and properly executed with guidance from licensed Texas legal and healthcare professionals.*`,
 };

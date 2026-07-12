@@ -2,89 +2,139 @@ import type { BlogPost } from "../types";
 
 export const choosingGuardian: BlogPost = {
   slug: "choosing-a-guardian",
-  title: "Choosing a Guardian for Your Children: A Step-by-Step Guide",
+  title: "Choosing a Guardian for Minor Children in Texas",
   description:
-    "Naming a guardian is the hardest decision in most parents' estate plans. This step-by-step guide helps you choose with clarity and confidence.",
+    "A careful, source-backed process for Texas parents choosing primary and alternate guardians for minor children.",
   date: "2026-06-26",
+  dateModified: "2026-07-12",
   category: "Guardianship",
-  author: "The WillBuddy Team",
-  content: `Ask parents what scares them most about estate planning and the answer is almost always the same: choosing who would raise their children. It's the question with no perfectly comfortable answer, which is precisely why so many families avoid it — and why so many children would be left in legal limbo if the worst happened.
+  author: "WillBuddy Editorial Team",
+  editorialNote:
+    "Written and source-checked by the WillBuddy Editorial Team against current Texas statutes and state guidance. This article was not attorney-reviewed.",
+  faqs: [
+    {
+      question: "Does a guardian nomination in a Texas will bind the court?",
+      answer:
+        "Texas law gives a qualifying parental designation preference, but the court can decline the named person if that person is disqualified, deceased, unwilling, or would not serve the children's best interests.",
+      sourceUrl:
+        "https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm",
+      sourceLabel: "Texas Estates Code Section 1104.053",
+    },
+    {
+      question: "Can different people care for a child and manage the child's estate?",
+      answer:
+        "Yes. Texas law permits one person to serve as guardian of the person and another as guardian of the estate when the arrangement is in the ward's best interest.",
+      sourceUrl:
+        "https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm",
+      sourceLabel: "Texas Estates Code Section 1104.001",
+    },
+    {
+      question: "Should parents name alternate guardians?",
+      answer:
+        "Naming alternates is a practical safeguard because a first choice may be unable or unwilling to serve. Texas's statutory declaration form expressly provides for multiple alternates.",
+      sourceUrl:
+        "https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm",
+      sourceLabel: "Texas Estates Code Section 1104.153",
+    },
+  ],
+  content: `Choosing a possible guardian for minor children is not about finding a perfect substitute parent. It is about giving a Texas court a careful, current record of the person you believe is best equipped to care for your children if a guardian is ever needed.
 
-Choosing a guardian doesn't have to be paralyzing. Broken into steps, it becomes a series of manageable judgments instead of one impossible decision. Here's a practical guide.
+Texas law allows a surviving parent of a minor to designate an eligible guardian by will or written declaration for the parent's death or incapacity. The court gives that person preference, but it may appoint someone else if the designee is disqualified, has died, refuses, or would not serve the children's best interests. Those rules appear in [Texas Estates Code Section 1104.053](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm). The distinction matters: parents **designate or nominate**; the court **appoints**.
 
-## What a guardian actually does
+> **Educational information only.** This guide summarizes general Texas law as of July 12, 2026. WillBuddy is not a law firm and does not provide legal advice. Family structure, existing custody orders, parental rights, residency, and a proposed guardian's eligibility require advice from a licensed Texas attorney.
 
-A **guardian** is the person a court appoints to raise your minor children if both parents die or become unable to care for them. In your will, you *nominate* a guardian; a judge typically honors that nomination unless there's a compelling reason not to. Without a nomination, the court decides with no guidance from you — which may mean a relative you wouldn't have chosen, or a contested fight among family members.
+## Understand the two guardian roles
 
-It helps to know there are really two roles:
+Texas recognizes a guardian of the **person** and a guardian of the **estate**. Section 1104.001 permits one person to be appointed for personal care and another for property when the court finds that division to be in the ward's best interest. It also identifies limited situations in which joint appointment is allowed. Read [Texas Estates Code Section 1104.001](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm).
 
-- **Guardian of the person** — handles day-to-day upbringing: housing, schooling, healthcare, daily love and discipline.
-- **Guardian of the estate** — manages any money or property the child inherits.
+For planning purposes:
 
-These can be the same person or two different people. We'll come back to why splitting them sometimes makes sense.
+- The guardian of the person is the role associated with the child's care and personal decisions under the court's authority.
+- The guardian of the estate is the role associated with property the child owns under the court's authority.
 
-## Step 1: Define your criteria before you name names
+Do not assume the same person must fill both. Also do not assume a guardian of the estate is the same as a trustee or custodian. Those roles arise from different legal arrangements, so ask an attorney how any trust for the child should coordinate with a guardian nomination. Our [wills-versus-trusts guide](/blog/wills-vs-trusts-texas) helps frame that conversation.
 
-The instinct is to jump straight to candidates — your sister, his brother, a best friend. Resist that. If you start with people, you start with loyalty, guilt, and family politics. If you start with **criteria**, you make a clearer decision and protect relationships in the process.
+## Step 1: Write the criteria before the names
 
-Sit down with your partner and rank what matters most. Common criteria include:
+Start with a private list of what your children would need, then rank it. Useful criteria include:
 
-- **Shared values** — religion, education, lifestyle, how they'd handle discipline and independence.
-- **Emotional stability and maturity** — could they provide a steady, loving home?
-- **Age and health** — grandparents may be loving but may not have the energy for a decade-plus of parenting; a peer might be in a more sustainable season.
-- **Existing relationship** — does this person already know and love your kids?
-- **Location** — would your children stay near their school, friends, and extended family, or be uprooted?
-- **Financial responsibility** — not whether they're wealthy, but whether they manage money sensibly.
-- **Family structure** — do they have the bandwidth alongside their own children or commitments?
+- A safe and emotionally stable home.
+- A genuine existing relationship with the children.
+- Alignment on education, faith, culture, discipline, and contact with extended family.
+- Health, age, energy, and expected caregiving capacity.
+- Geographic disruption and access to the children's support network.
+- Willingness to cooperate with the person managing any inheritance.
+- The ability to respect siblings' relationships and each child's individual needs.
 
-You won't find someone who scores perfectly on every dimension. The point is to know which factors you'd never compromise on and which you can flex.
+These are parental judgments, not statutory eligibility rules. Legal eligibility is governed by Chapter 1104, including its disqualification provisions, and should be confirmed by counsel. See [Texas Estates Code Chapter 1104](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm).
 
-## Step 2: Make a candidate list — and look beyond the obvious
+## Step 2: Build a realistic candidate list
 
-Now list everyone who could plausibly serve. Don't self-censor yet. Include siblings on both sides, close friends, cousins, and even a trusted couple. Widening the pool prevents you from defaulting to the most obvious relative simply because they came to mind first.
+List relatives and nonrelatives without ranking them at first. Then test each candidate against the criteria. A close family relationship is meaningful, but it does not automatically answer whether the person has capacity, willingness, or a workable household.
 
-For each candidate, jot quick notes against your criteria. Patterns emerge fast. The aunt who shares your values but lives three time zones away. The friend who's local and steady but has four kids already. Seeing the trade-offs side by side turns an emotional tangle into a comparison you can actually reason about.
+Ask practical questions:
 
-## Step 3: Separate "who we love" from "who can do the job"
+- Would all siblings be able to live together?
+- Would the candidate expect to move the children?
+- Does the candidate's household support the idea?
+- Is the candidate willing to coordinate with the executor or trustee?
+- Are there immigration, health, criminal-history, substance-use, or family-conflict facts an attorney should evaluate?
 
-This is the reframing that unsticks most couples. The most beloved person in your life isn't automatically the best guardian, and choosing someone else is not a rejection. A guardian needs to be *able* — practically, logistically, and emotionally — to raise your children for years.
+Do not conduct a secret investigation or make promises before legal review. The purpose is to identify issues early.
 
-Give yourself permission to weigh capability heavily. Your children need stability and presence, not just affection from afar.
+## Step 3: Treat “best interests” as a real constraint
 
-## Step 4: Consider splitting the roles
+The statute does not make a designation absolute. Under Section 1104.053, the court can decline the designated person if serving would not be in the minor children's best interests. Other sections of Chapter 1104 also direct courts to consider best interests in guardian selection. See [Sections 1104.051–1104.054](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm).
 
-If the most nurturing caregiver isn't great with money, you don't have to force one person to do both jobs. Name a warm, present **guardian of the person** to raise your kids, and a financially savvy **guardian of the estate** (or a trustee) to manage the inheritance. This division also creates a natural check: the person raising your children isn't the same person controlling the purse strings, which can reduce both temptation and conflict.
+That should shape the planning record. Choose for the children's needs rather than family seniority, expected hurt feelings, or equal treatment among adults.
 
-## Step 5: Choose a backup (and maybe a third)
+## Step 4: Decide whether financial management should be separate
 
-Life changes. Your first-choice guardian could move, fall ill, divorce, or simply be unable to serve when the moment comes. Always name at least one **alternate guardian**, and consider a third. This chain ensures a court is never left guessing, even if your top choice can't step in.
+The most nurturing caregiver may not be the strongest financial administrator. Texas permits separate guardians of the person and estate when that is in the ward's best interest. [Section 1104.001](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm) is the statutory source.
 
-## Step 6: Have the conversation — actually ask
+Before splitting roles, discuss how the people would communicate and how a trust, custodian, executor, life-insurance proceeds, and court-supervised guardianship would interact. A licensed attorney can recommend the appropriate structure. The practical goal is not to create competing centers of authority; it is to align care and resources.
 
-Never name a guardian who hasn't said yes. Springing this responsibility on someone after the fact is unfair to them and risky for your kids. Have a direct, honest conversation:
+## Step 5: Name alternates in order
 
-- Explain why you're asking *them* specifically.
-- Be clear that it's a "just in case" — you fully expect to raise your own children.
-- Talk through logistics: where the kids would live, how expenses would be covered, what support exists.
-- Give them room to think and to say no. A reluctant yes is worse than an honest no.
+Your first choice may move, become ill, die, decline, or become legally ineligible. Section 1104.153's statutory declaration form includes a first, second, and third alternate for both person and estate roles. The form is optional, but its structure shows why ordered backups are useful. See [Texas Estates Code Section 1104.153](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm).
 
-These conversations are often more touching than awkward. Being asked to step in for someone's children is a profound expression of trust.
+Choose alternates with the same care as the primary. “Anyone but the court's default” is not enough; each name should be someone you would affirmatively trust.
 
-## Step 7: Back it up with money and instructions
+## Step 6: Ask before naming
 
-A willing guardian shouldn't also face financial strain. Make sure your plan provides resources — through life insurance, a trust, or other assets — so raising your children isn't a hardship. Then leave guidance: a letter of intent describing your hopes for your kids' upbringing, education, faith, traditions, and anything else you'd want a guardian to know. It isn't legally binding, but it's an invaluable compass for whoever steps in.
+Have a direct conversation with each proposed primary and alternate. Explain that:
 
-## Step 8: Put it in writing — and revisit it
+- The designation is a contingency, not a prediction.
+- A court would control the legal appointment.
+- The person is free to say no now or later.
+- You want to discuss values, location, sibling unity, finances, and family contact.
+- You intend to keep the decision under review.
 
-A guardian nomination only carries weight if it's properly documented in your will. Verbal wishes and good intentions don't bind a court. Once it's in writing, calendar a review every few years and after any major life change — a birth, a death, a divorce, a move. The right guardian today may not be the right guardian in five years.
+Ask the candidate's partner or household to join an appropriate follow-up conversation. A willing person in an unwilling household is not a stable plan.
 
-## A note on the emotional weight
+## Step 7: Put the designation in a legally appropriate document
 
-If this process brings up grief, anxiety, or even tears, that's not a sign you're doing it wrong — it's a sign you're taking it seriously. The discomfort is the love. And on the other side of the decision is something genuinely freeing: the knowledge that, no matter what, your children would be raised by people you chose, for reasons you thought through carefully.
+Texas law provides requirements for a separate declaration appointing a guardian for children. Section 1104.152 addresses handwriting or witness requirements, and Section 1104.153 provides an optional form and self-proving affidavit language. A will can also contain a designation under Section 1104.053. Review the full requirements in [Texas Estates Code Sections 1104.152–1104.153](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm).
 
-You don't have to get it perfect. You just have to make a thoughtful choice and write it down. That alone puts your family far ahead of most.
+The [Texas Judicial Branch forms page](https://txcourts.gov/forms/) publishes Supreme Court-approved will forms for several family situations. The [Texas State Law Library's simple-will FAQ](https://www.sll.texas.gov/faqs/simple-will-forms/) explains where those forms live and recommends lawyer review regardless of situation. A form's availability does not determine whether it fits a particular family.
+
+## Step 8: Coordinate money, instructions, and roles
+
+A guardian nomination does not by itself create the full financial plan. Discuss life insurance, beneficiary designations, trusts, custodianship, and the role of the executor with licensed advisers. Use the [executor guide](/blog/naming-an-executor) to decide whether one person should carry both nominations.
+
+A separate letter can communicate routines, relationships, education hopes, religious practices, medical history, and family traditions. Ask counsel what belongs in a binding instrument and what is better kept as nonbinding guidance. Review the letter without putting sensitive credentials into it.
+
+## Step 9: Review after meaningful change
+
+Revisit the choice after a birth, death, divorce, remarriage, move, serious illness, estrangement, or major change in a candidate's household. Also review periodically even when nothing dramatic happens. A once-thoughtful nomination can become stale.
+
+Use the [Texas estate-planning hub](/texas-estate-planning) to review the guardian together with the will, executor, incapacity documents, and healthcare directives.
+
+## The takeaway
+
+The strongest guardian decision is not the most obvious relative. It is an eligible, willing person chosen through a child-centered process, backed by ordered alternates and coordinated with the financial plan. Texas law gives a qualifying parental designation meaningful preference while preserving court review for disqualification and best interests. Thoughtful documentation gives the court better evidence of your judgment than an unwritten family assumption ever could.
 
 ---
 
-*WillBuddy is not a law firm and does not provide legal advice. The documents WillBuddy generates are drafts intended for review by a licensed attorney. WillBuddy is designed for Texas residents and produces documents based on Texas estate law.*`,
+*WillBuddy is not a law firm and does not provide legal advice. WillBuddy provides educational information and draft-planning tools. Any draft should be reviewed for your facts and properly executed with guidance from a licensed Texas attorney.*`,
 };

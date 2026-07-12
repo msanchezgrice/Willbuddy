@@ -1,3 +1,10 @@
+export interface BlogFaq {
+  question: string;
+  answer: string;
+  sourceUrl?: string;
+  sourceLabel?: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -7,6 +14,12 @@ export interface BlogPost {
   category: string;
   /** Short author label shown on the post. */
   author: string;
+  /** ISO date for the most recent source review. */
+  dateModified?: string;
+  /** Truthful note describing the editorial review applied to the article. */
+  editorialNote?: string;
+  /** Questions answered visibly on the page and reflected in FAQ schema. */
+  faqs?: BlogFaq[];
   /** Markdown body. */
   content: string;
 }

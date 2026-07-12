@@ -25,6 +25,12 @@ export function Footer() {
           <Link className="hover:text-[#2D2A26]" href="/blog">
             Blog
           </Link>
+          <Link
+            className="hover:text-[#2D2A26]"
+            href="/texas-estate-planning"
+          >
+            Texas planning guide
+          </Link>
           <Link className="hover:text-[#2D2A26]" href="/contact">
             Contact
           </Link>

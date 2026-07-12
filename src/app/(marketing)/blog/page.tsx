@@ -38,6 +38,27 @@ export default function BlogIndexPage() {
           </p>
         </header>
 
+        <Link
+          href="/texas-estate-planning"
+          className="mb-10 flex items-center justify-between gap-5 rounded-2xl bg-[#F0EBE4] p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#5B7A5E]">
+              Start here
+            </span>
+            <h2 className="mt-1 font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26]">
+              Texas estate-planning guide
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-[#5B4F3E]">
+              Connect wills, executors, guardians, trusts, powers of attorney,
+              and healthcare directives in one source-backed checklist.
+            </p>
+          </div>
+          <span className="shrink-0 text-xl text-[#5B7A5E]" aria-hidden="true">
+            →
+          </span>
+        </Link>
+
         {featured && (
           <Link
             href={`/blog/${featured.slug}`}
