@@ -100,6 +100,9 @@ export async function POST() {
     void captureServerEvent("signup_completed", userId, {
       source: "api_session_profile_inserted",
     });
+    void captureServerEvent("signed_up", userId, {
+      source: "api_session_profile_inserted",
+    });
   }
 
   const { data: session, error } = await supabase
