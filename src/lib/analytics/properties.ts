@@ -31,6 +31,7 @@ const ATTRIBUTION_PARAM_KEYS = [
 ];
 
 const MAX_ATTRIBUTION_VALUE_LENGTH = 160;
+const POSTHOG_PUBLIC_TOKEN_PATTERN = /^phc_[A-Za-z0-9_-]+$/;
 
 type SearchParamsReader = {
   get(name: string): string | null;
@@ -41,6 +42,24 @@ export function stripSensitiveProperties(properties: Properties = {}): Propertie
 
   for (const key of SENSITIVE_PROPERTY_KEYS) {
     delete sanitized[key];
+  }
+
+  return sanitized;
+}
+
+/**
+ * PostHog places its public project token in event.properties.token before
+ * transport. Preserve only that SDK token while continuing to remove any
+ * application-provided token-like value from analytics payloads.
+ */
+export function sanitizeTransportProperties(
+  properties: Properties = {}
+): Properties {
+  const sanitized = stripSensitiveProperties(properties);
+  const token = properties.token;
+
+  if (typeof token === "string" && POSTHOG_PUBLIC_TOKEN_PATTERN.test(token)) {
+    sanitized.token = token;
   }
 
   return sanitized;

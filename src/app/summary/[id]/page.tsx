@@ -119,7 +119,7 @@ export default async function SummaryPage({ params, searchParams }: Props) {
             You just did something most families never do.
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-xl mx-auto">
-            You sat down, talked it through, and made real decisions about what matters most.
+            You worked through the questions and made real decisions about what matters most.
             Your draft estate plan documents are ready for attorney review.
           </p>
         </div>

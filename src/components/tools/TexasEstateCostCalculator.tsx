@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Calculator, Info } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
+import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
 import {
   calculateEstatePlanningRanges,
   DEFAULT_COST_ASSUMPTIONS,
@@ -116,6 +117,9 @@ function ResultRow({
 }
 
 export function TexasEstateCostCalculator() {
+  const { recordStart, recordComplete } = useToolAnalytics(
+    "texas_estate_planning_cost_calculator"
+  );
   const [inputs, setInputs] = useState<EstateCostInputs>({
     estateValue: DEFAULT_COST_ASSUMPTIONS.estateValue,
     willPreparation: { ...DEFAULT_COST_ASSUMPTIONS.willPreparation },
@@ -131,6 +135,7 @@ export function TexasEstateCostCalculator() {
     key: Key,
     value: EstateCostInputs[Key]
   ) {
+    recordStart();
     setInputs((current) => ({ ...current, [key]: value }));
   }
 
@@ -139,6 +144,7 @@ export function TexasEstateCostCalculator() {
     captureAnalyticsEvent("texas_estate_cost_comparison_updated", {
       tool: "texas_estate_cost_calculator",
     });
+    recordComplete();
   }
 
   return (

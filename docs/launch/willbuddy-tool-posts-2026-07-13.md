@@ -1,0 +1,33 @@
+# WillBuddy tool posts — 2026-07-13
+
+These posts are approved for the WillBuddy product account only. Before posting through the X API, `GET /2/users/me` must return the verified WillBuddy handle. Never publish these from `@msanchezgrice` or an unverified account.
+
+## Estate-planning readiness
+
+Not sure what your estate plan is missing? WillBuddy’s free readiness check turns a few private answers into a focused next-step list. No account or email required.
+
+https://mywillbuddy.com/tools/estate-planning-readiness?utm_source=willbuddy&utm_medium=organic_social&utm_campaign=texas_tools_202607&utm_content=readiness
+
+## Will vs. trust
+
+Will or living trust? Work through five practical questions, see which direction may deserve a closer look, and review the Texas sources behind the result.
+
+https://mywillbuddy.com/blog/wills-vs-trusts-texas?utm_source=willbuddy&utm_medium=organic_social&utm_campaign=texas_tools_202607&utm_content=will_vs_trust
+
+## Texas intestacy
+
+Which selected Texas intestacy branches may apply if someone dies without a will? Explore a simplified view of community and separate property branches. It is not an heirship determination.
+
+https://mywillbuddy.com/tools/texas-intestacy-calculator?utm_source=willbuddy&utm_medium=organic_social&utm_campaign=texas_tools_202607&utm_content=intestacy
+
+## Texas estate-planning costs
+
+What might a Texas will or living-trust plan cost? Adjust the assumptions yourself and see transparent illustrative ranges—without a fake “savings” promise.
+
+https://mywillbuddy.com/tools/texas-estate-planning-cost-calculator?utm_source=willbuddy&utm_medium=organic_social&utm_campaign=texas_tools_202607&utm_content=costs
+
+## Power of attorney navigator
+
+“Power of attorney” is not one document. Use this free Texas navigator to map five different jobs—financial, medical, records access, treatment wishes, and guardianship preferences—to the documents worth reviewing.
+
+https://mywillbuddy.com/tools/texas-power-of-attorney-navigator?utm_source=willbuddy&utm_medium=organic_social&utm_campaign=texas_tools_202607&utm_content=power_of_attorney

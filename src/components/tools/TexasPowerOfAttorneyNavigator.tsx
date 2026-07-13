@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
+import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
+import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
 
-type Answer = boolean | null;
+type Response = boolean | null;
 
 const questions = [
   {
@@ -52,119 +54,120 @@ const questions = [
 
 type QuestionId = (typeof questions)[number]["id"];
 
-const initialAnswers = Object.fromEntries(
+const initialResponses = Object.fromEntries(
   questions.map((question) => [question.id, null])
-) as Record<QuestionId, Answer>;
+) as Record<QuestionId, Response>;
 
 export function TexasPowerOfAttorneyNavigator() {
-  const [answers, setAnswers] = useState(initialAnswers);
+  const { recordStart, recordComplete } = useToolAnalytics(
+    "texas_power_of_attorney_navigator"
+  );
+  const [responses, setResponses] = useState(initialResponses);
   const [showResult, setShowResult] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const currentQuestion = questions[currentStep];
 
-  const completed = Object.values(answers).every(
-    (answer): answer is boolean => answer !== null
+  const completed = Object.values(responses).every(
+    (response): response is boolean => response !== null
   );
   const recommendations = useMemo(
-    () => questions.filter((question) => answers[question.id] === true),
-    [answers]
+    () => questions.filter((question) => responses[question.id] === true),
+    [responses]
   );
 
-  function choose(id: QuestionId, answer: boolean) {
-    setAnswers((current) => ({ ...current, [id]: answer }));
+  function choose(id: QuestionId, response: boolean) {
+    recordStart();
+    setResponses((current) => ({ ...current, [id]: response }));
     setShowResult(false);
   }
 
   function reset() {
-    setAnswers(initialAnswers);
+    setResponses(initialResponses);
     setShowResult(false);
+    setCurrentStep(0);
+  }
+
+  function finishQuiz() {
+    if (!completed) return;
+    setShowResult(true);
+    captureAnalyticsEvent("texas_directive_navigator_completed", {
+      recommended_count: recommendations.length,
+      tool_version: "2026-07-13",
+    });
+    recordComplete({ recommended_count: recommendations.length });
+  }
+
+  function continueQuiz() {
+    if (responses[currentQuestion.id] === null) return;
+    if (currentStep === questions.length - 1) {
+      finishQuiz();
+      return;
+    }
+    setCurrentStep((step) => step + 1);
   }
 
   return (
-    <div className="rounded-3xl border border-[#D8CDBF] bg-white p-5 shadow-sm sm:p-8">
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!completed) return;
-          setShowResult(true);
-          captureAnalyticsEvent("texas_directive_navigator_completed", {
-            recommended_count: recommendations.length,
-            tool_version: "2026-07-13",
-          });
-        }}
-      >
-        <fieldset>
-          <legend className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">
-            Five jobs, five different documents
-          </legend>
-          <p className="mt-2 text-sm leading-relaxed text-[#6B5E50]">
-            Answer at a high level. Do not enter names, diagnoses, account
-            details, or other private information.
-          </p>
-
-          <div className="mt-7 space-y-6">
-            {questions.map((question, index) => (
-              <div
-                key={question.id}
-                className="rounded-2xl border border-[#E8E0D6] bg-[#FAF8F5] p-5"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#5B7A5E]">
-                  Question {index + 1} of {questions.length}
-                </p>
-                <p className="mt-2 font-semibold leading-relaxed text-[#2D2A26]">
-                  {question.prompt}
-                </p>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  {[true, false].map((value) => {
-                    const selected = answers[question.id] === value;
-                    return (
-                      <label
-                        key={String(value)}
-                        className={`cursor-pointer rounded-xl border px-4 py-3 text-center text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
-                          selected
-                            ? "border-[#5B7A5E] bg-[#EAF0E8] text-[#365239]"
-                            : "border-[#D8CDBF] bg-white text-[#5B4F3E] hover:border-[#8CA18D]"
-                        }`}
-                      >
-                        <input
-                          className="sr-only"
-                          type="radio"
-                          name={question.id}
-                          value={value ? "yes" : "no"}
-                          checked={selected}
-                          onChange={() => choose(question.id, value)}
-                        />
-                        {value ? "Yes" : "Not right now"}
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+    <div className="rounded-3xl border border-[#D8CDBF] bg-white p-5 shadow-sm sm:p-7">
+      {!showResult && (
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-6 border-b border-[#E8E0D6] pb-5">
+            <h2 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">
+              Five jobs, five different documents
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-[#6B5E50]">
+              Answer at a high level. Do not enter names, diagnoses, account
+              details, or other private information.
+            </p>
           </div>
-        </fieldset>
 
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-          <button
-            type="submit"
-            disabled={!completed}
-            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#5B7A5E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#4A6A4D] disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            Build my document map
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={reset}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#D8CDBF] px-6 py-3 font-semibold text-[#5B4F3E] hover:bg-[#F0EBE4]"
-          >
-            <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            Reset
-          </button>
+          <QuizProgress current={currentStep + 1} total={questions.length} />
+          <fieldset className="mt-7 min-h-[190px]">
+            <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] sm:text-2xl">
+              {currentQuestion.prompt}
+            </legend>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {[true, false].map((value) => {
+                const selected = responses[currentQuestion.id] === value;
+                return (
+                  <label
+                    key={String(value)}
+                    className={`flex min-h-14 cursor-pointer items-center justify-center rounded-2xl border px-4 py-3 text-center text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                      selected
+                        ? "border-[#5B7A5E] bg-[#EAF0E8] text-[#365239] shadow-sm"
+                        : "border-[#D8CDBF] bg-white text-[#5B4F3E] hover:border-[#8CA18D]"
+                    }`}
+                  >
+                    <input
+                      className="sr-only"
+                      type="radio"
+                      name={currentQuestion.id}
+                      value={value ? "yes" : "no"}
+                      checked={selected}
+                      onChange={() => choose(currentQuestion.id, value)}
+                    />
+                    {value ? "Yes" : "Not right now"}
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+          <QuizNavigation
+            canContinue={responses[currentQuestion.id] !== null}
+            isFirst={currentStep === 0}
+            onBack={() => setCurrentStep((step) => Math.max(0, step - 1))}
+            onContinue={continueQuiz}
+            continueLabel={
+              currentStep === questions.length - 1
+                ? "Build my document map"
+                : "Continue"
+            }
+          />
         </div>
-      </form>
+      )}
 
       <div aria-live="polite">
         {showResult && (
-          <section className="mt-8 border-t border-[#E8E0D6] pt-8">
+          <section>
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">
               Your document map
             </p>
@@ -227,6 +230,14 @@ export function TexasPowerOfAttorneyNavigator() {
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
+            <button
+              type="button"
+              onClick={reset}
+              className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#5B4F3E] hover:bg-[#F0EBE4]"
+            >
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              Start over
+            </button>
           </section>
         )}
       </div>

@@ -19,31 +19,14 @@ export async function GET(request: NextRequest) {
   const sessionId = request.nextUrl.searchParams.get("id");
 
   if (sessionId) {
-    // Load specific session with full context for resume
-    const [sessionResult, decisionsResult, transcriptResult, flagsResult] =
-      await Promise.all([
-        supabase
-          .from("sessions")
-          .select("*")
-          .eq("id", sessionId)
-          .single(),
-        supabase
-          .from("decisions")
-          .select("*")
-          .eq("session_id", sessionId)
-          .order("created_at", { ascending: true }),
-        supabase
-          .from("transcript_entries")
-          .select("*")
-          .eq("session_id", sessionId)
-          .order("timestamp", { ascending: false })
-          .limit(10),
-        supabase
-          .from("flagged_items")
-          .select("*")
-          .eq("session_id", sessionId)
-          .eq("resolved", false),
-      ]);
+    // Verify ownership before querying any child records. The service client
+    // bypasses RLS, so every session lookup must include the authenticated user.
+    const sessionResult = await supabase
+      .from("sessions")
+      .select("*")
+      .eq("id", sessionId)
+      .eq("user_id", userId)
+      .single();
 
     if (sessionResult.error || !sessionResult.data) {
       return NextResponse.json(
@@ -51,6 +34,26 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Load the owned session's full context for resume.
+    const [decisionsResult, transcriptResult, flagsResult] = await Promise.all([
+      supabase
+        .from("decisions")
+        .select("*")
+        .eq("session_id", sessionId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("transcript_entries")
+        .select("*")
+        .eq("session_id", sessionId)
+        .order("timestamp", { ascending: false })
+        .limit(10),
+      supabase
+        .from("flagged_items")
+        .select("*")
+        .eq("session_id", sessionId)
+        .eq("resolved", false),
+    ]);
 
     return NextResponse.json({
       session: sessionResult.data,
@@ -118,6 +121,10 @@ export async function POST() {
     );
   }
 
+  void captureServerEvent("plan_started", userId, {
+    source: "api_session_created",
+  });
+
   return NextResponse.json({ session });
 }
 
@@ -162,16 +169,32 @@ export async function PATCH(request: NextRequest) {
   if (updates.status === "completed")
     dbUpdates.completed_at = new Date().toISOString();
 
-  const { error } = await supabase
+  const { data: updatedSession, error } = await supabase
     .from("sessions")
     .update(dbUpdates)
-    .eq("id", sessionId);
+    .eq("id", sessionId)
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json(
       { error: "Failed to update session" },
       { status: 500 }
     );
+  }
+
+  if (!updatedSession) {
+    return NextResponse.json(
+      { error: "Session not found" },
+      { status: 404 }
+    );
+  }
+
+  if (updates.status === "completed") {
+    void captureServerEvent("plan_completed", userId, {
+      source: "api_session_completed",
+    });
   }
 
   return NextResponse.json({ success: true });

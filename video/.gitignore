@@ -1,0 +1,7 @@
+node_modules/
+output/*.mp4
+output/*.webm
+output/*.wav
+output/*.png
+!output/.gitkeep
+review-artifacts/

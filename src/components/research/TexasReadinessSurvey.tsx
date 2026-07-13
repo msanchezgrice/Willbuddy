@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
+import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
 
 const questions = [
   {
@@ -62,9 +63,15 @@ type Answers = Record<string, string>;
 export function TexasReadinessSurvey() {
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const questionLegendRef = useRef<HTMLLegendElement>(null);
+  const currentQuestion = questions[currentStep];
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  useEffect(() => {
+    questionLegendRef.current?.focus();
+  }, [currentStep]);
+
+  function submit() {
     if (questions.some((question) => !answers[question.id])) return;
 
     captureAnalyticsEvent("texas_readiness_survey_completed", {
@@ -78,12 +85,21 @@ export function TexasReadinessSurvey() {
     setSubmitted(true);
   }
 
+  function continueSurvey() {
+    if (!answers[currentQuestion.id]) return;
+    if (currentStep === questions.length - 1) {
+      submit();
+      return;
+    }
+    setCurrentStep((step) => step + 1);
+  }
+
   if (submitted) {
     return (
-      <div role="status" className="rounded-2xl border border-[#BFD0C0] bg-[#F3F7F3] p-7">
+      <div role="status" className="rounded-3xl border border-[#BFD0C0] bg-[#F3F7F3] p-7">
         <CheckCircle2 className="h-7 w-7 text-[#5B7A5E]" aria-hidden="true" />
         <h3 className="mt-3 font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26]">
-          Your anonymous response was counted.
+          Your response was counted.
         </h3>
         <p className="mt-2 leading-relaxed text-[#5B4F3E]">
           Thank you. We do not ask for names, contact details, asset values, or document contents in this survey.
@@ -93,36 +109,79 @@ export function TexasReadinessSurvey() {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-7">
-      {questions.map((question, questionIndex) => (
-        <fieldset key={question.id} className="rounded-2xl border border-[#E8E0D6] bg-white p-5">
-          <legend className="px-1 font-semibold text-[#2D2A26]">
-            {questionIndex + 1}. {question.legend}
+    <div className="rounded-3xl border border-[#D8CDBF] bg-white p-5 shadow-sm sm:p-7">
+      <div className="border-b border-[#E8E0D6] pb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">
+          Help improve the report
+        </p>
+        <h2 className="mt-2 font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">
+          Share five account-unlinked answers
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-[#5B4F3E]">
+          This takes under a minute. Your answers contribute to the aggregate
+          Texas research—they do not generate a personal score.
+        </p>
+      </div>
+
+      <div className="mt-6">
+        <QuizProgress current={currentStep + 1} total={questions.length} />
+        <fieldset className="mt-7 min-h-[290px]">
+          <legend
+            ref={questionLegendRef}
+            tabIndex={-1}
+            className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
+          >
+            {currentQuestion.legend}
           </legend>
-          <div className="mt-4 grid gap-2">
-            {question.options.map(([value, label]) => (
-              <label key={value} className="flex cursor-pointer gap-3 rounded-xl border border-[#E8E0D6] px-4 py-3 text-sm text-[#5B4F3E] hover:bg-[#F7F4F0]">
-                <input
-                  required
-                  type="radio"
-                  name={question.id}
-                  value={value}
-                  checked={answers[question.id] === value}
-                  onChange={() => setAnswers((current) => ({ ...current, [question.id]: value }))}
-                  className="mt-0.5 accent-[#5B7A5E]"
-                />
-                <span>{label}</span>
-              </label>
-            ))}
+          <div className="mt-5 grid gap-2.5">
+            {currentQuestion.options.map(([value, label]) => {
+              const selected = answers[currentQuestion.id] === value;
+              return (
+                <label
+                  key={value}
+                  className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                    selected
+                      ? "border-[#5B7A5E] bg-[#F3F7F3] font-semibold text-[#2D2A26]"
+                      : "border-[#E8E0D6] text-[#5B4F3E] hover:bg-[#F7F4F0]"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={currentQuestion.id}
+                    value={value}
+                    checked={selected}
+                    onChange={() =>
+                      setAnswers((current) => ({
+                        ...current,
+                        [currentQuestion.id]: value,
+                      }))
+                    }
+                    className="h-4 w-4 shrink-0 accent-[#5B7A5E]"
+                  />
+                  <span>{label}</span>
+                </label>
+              );
+            })}
           </div>
         </fieldset>
-      ))}
-      <button type="submit" className="w-full rounded-full bg-[#5B7A5E] px-7 py-3.5 font-semibold text-white transition-colors hover:bg-[#4A6A4D]">
-        Contribute an anonymous response
-      </button>
-      <p className="text-center text-xs leading-relaxed text-[#7F7467]">
-        Five multiple-choice answers only. No name, email, precise location, asset value, or document content is requested.
+        <QuizNavigation
+          canContinue={Boolean(answers[currentQuestion.id])}
+          isFirst={currentStep === 0}
+          onBack={() => setCurrentStep((step) => Math.max(0, step - 1))}
+          onContinue={continueSurvey}
+          continueLabel={
+            currentStep === questions.length - 1
+              ? "Count my answers"
+              : "Continue"
+          }
+        />
+      </div>
+
+      <p className="mt-5 text-center text-xs leading-relaxed text-[#7F7467]">
+        We do not attach your WillBuddy account ID, name, or email to these
+        answers. No precise location, asset value, or document content is
+        requested.
       </p>
-    </form>
+    </div>
   );
 }

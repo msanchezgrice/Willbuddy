@@ -6,6 +6,9 @@ import {
   Handshake,
   Check,
   ChevronDown,
+  ArrowRight,
+  BookOpen,
+  Compass,
 } from "lucide-react";
 
 const CTA_PRIMARY_CLASS =
@@ -19,15 +22,15 @@ function HeroSection({ isAuthed }: { isAuthed: boolean }) {
     <section className="px-6 pt-20 pb-24 md:pt-32 md:pb-32">
       <div className="max-w-2xl mx-auto text-center">
         <p className="text-sm tracking-widest uppercase text-[#9B8E7E] mb-6">
-          Voice-first estate planning for Texas families
+          Guided estate planning for Texas families
         </p>
         <h1 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl md:text-5xl font-bold text-[#2D2A26] mb-6 leading-tight tracking-tight">
-          Talk through your estate plan like you&apos;re talking to a friend.
+          Talk it through or answer step by step.
         </h1>
         <p className="text-lg md:text-xl text-[#5B4F3E] mb-4 leading-relaxed max-w-xl mx-auto">
           WillBuddy is an AI coach that walks you and your partner through
           wills, guardianship, healthcare wishes, and powers of attorney —
-          using your voice, not forms.
+          by conversation or step-by-step answers.
         </p>
         <p className="text-base text-[#5B7A5E] font-medium mb-10">
           Draft documents generated. Ready for attorney review.
@@ -75,11 +78,14 @@ function HeroSection({ isAuthed }: { isAuthed: boolean }) {
             <p className="mt-4 text-sm text-[#9B8E7E]">
               Free to start · about 2 minutes to your first draft.
             </p>
+            <p className="mt-2 text-sm font-medium text-[#5B7A5E]">
+              Prefer not to use voice? Answer the same plan questions step by step.
+            </p>
           </div>
         )}
         <p className="text-sm text-[#9B8E7E] mt-5">
-          About 45 minutes together — or do it separately (25 min each) and
-          compare answers after.
+          Work at your pace, switch methods anytime, and come back without
+          starting over.
         </p>
       </div>
     </section>
@@ -110,6 +116,95 @@ function TrustBar() {
   );
 }
 
+function ResourcesSection() {
+  const tools = [
+    ["Readiness quiz", "/tools/estate-planning-readiness"],
+    ["Will vs. trust", "/blog/wills-vs-trusts-texas"],
+    ["Who inherits without a will?", "/tools/texas-intestacy-calculator"],
+    ["Estate-planning cost ranges", "/tools/texas-estate-planning-cost-calculator"],
+    ["Power of attorney navigator", "/tools/texas-power-of-attorney-navigator"],
+  ] as const;
+
+  const content = [
+    ["Texas estate-planning articles", "/blog"],
+    ["Source-linked planning guides", "/guides"],
+    ["Research and open methodology", "/research"],
+  ] as const;
+
+  return (
+    <section className="px-6 py-14 md:py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="max-w-2xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#5B7A5E]">
+            Start with one useful answer
+          </p>
+          <h2 className="mt-3 font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26] md:text-3xl">
+            Free tools and plain-English Texas guidance
+          </h2>
+          <p className="mt-3 leading-relaxed text-[#5B4F3E]">
+            Not ready to build documents yet? Use a focused tool or learn the
+            tradeoffs first. No account is required for any result below.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <article className="rounded-3xl border border-[#D8CDBF] bg-[#F4F7F3] p-6">
+            <Compass className="h-6 w-6 text-[#5B7A5E]" aria-hidden="true" />
+            <h3 className="mt-4 font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26]">
+              Find your next decision
+            </h3>
+            <div className="mt-4 divide-y divide-[#D8CDBF]">
+              {tools.map(([label, href]) => (
+                <TrackedLink
+                  key={href}
+                  href={href}
+                  event="homepage_resource_clicked"
+                  eventProperties={{ resource_type: "tool", href }}
+                  className="group flex min-h-11 items-center justify-between gap-3 py-3 text-sm font-semibold text-[#365239]"
+                >
+                  {label}
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </TrackedLink>
+              ))}
+            </div>
+          </article>
+
+          <article className="rounded-3xl border border-[#D8CDBF] bg-white p-6">
+            <BookOpen className="h-6 w-6 text-[#B07A53]" aria-hidden="true" />
+            <h3 className="mt-4 font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26]">
+              Read before you decide
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#5B4F3E]">
+              Browse practical explanations, primary Texas sources, and the
+              limits behind our research.
+            </p>
+            <div className="mt-4 divide-y divide-[#E8E0D6]">
+              {content.map(([label, href]) => (
+                <TrackedLink
+                  key={href}
+                  href={href}
+                  event="homepage_resource_clicked"
+                  eventProperties={{ resource_type: "content", href }}
+                  className="group flex min-h-11 items-center justify-between gap-3 py-3 text-sm font-semibold text-[#5B4F3E]"
+                >
+                  {label}
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </TrackedLink>
+              ))}
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HowItWorksSection() {
   const steps = [
     {
@@ -117,21 +212,21 @@ function HowItWorksSection() {
       icon: <Mic className="w-6 h-6" />,
       title: "Have a conversation",
       description:
-        "Open WillBuddy and start talking. It asks you questions about your family, your wishes, your worries — the way a good advisor would. You talk naturally. It listens and captures everything.",
+        "Choose a guided voice conversation or one focused question at a time. Both paths cover your family, wishes, worries, and the same planning decisions.",
     },
     {
       number: "02",
       icon: <ClipboardCheck className="w-6 h-6" />,
       title: "Review your decisions",
       description:
-        "When you're done talking, WillBuddy shows you a clear summary of every decision you made. Guardians, assets, healthcare preferences — all organized and editable before anything gets drafted.",
+        "When you're done, WillBuddy shows you a clear summary of every decision you made. Guardians, assets, healthcare preferences — all organized and editable before anything gets drafted.",
     },
     {
       number: "03",
       icon: <Handshake className="w-6 h-6" />,
       title: "Hand it to your lawyer",
       description:
-        "WillBuddy generates Texas-compliant draft documents from your conversation. Share them with an estate attorney for final review, execution, and filing. You've done the hard part.",
+        "WillBuddy generates Texas-compliant draft documents from your answers. Share them with an estate attorney for final review, execution, and filing. You've done the hard part.",
     },
   ];
 
@@ -234,7 +329,7 @@ function DocumentsSection() {
         </h2>
         <p className="text-center text-[#9B8E7E] mb-14 max-w-lg mx-auto">
           Five Texas-compliant draft documents, generated from a single
-          conversation.
+          guided plan.
         </p>
         <ul className="space-y-6">
           {documents.map((doc) => (
@@ -263,7 +358,7 @@ function WhyVoiceSection() {
     <section className="px-6 py-20 md:py-28 bg-[#F0EBE4]/50">
       <div className="max-w-2xl mx-auto">
         <h2 className="font-[family-name:var(--font-heading)] text-2xl md:text-3xl font-bold text-[#2D2A26] text-center mb-6">
-          These are conversations, not checkboxes.
+          Important decisions deserve a method that works for you.
         </h2>
         <div className="space-y-5 text-[#5B4F3E] leading-relaxed">
           <p>
@@ -272,19 +367,18 @@ function WhyVoiceSection() {
             be cared for.
           </p>
           <p>
-            Those decisions don&apos;t happen well inside a form with dropdown
-            menus. They happen on the couch, after the kids are asleep, when you
-            and your partner are finally talking it through.
+            Sometimes those decisions happen by talking on the couch after the
+            kids are asleep. Sometimes they are easier one focused question at
+            a time, with room to pause and think.
           </p>
           <p>
-            WillBuddy works like that. You talk. It listens. It asks follow-up
-            questions the way a thoughtful advisor would — not in the order a
-            database expects. If you need to think out loud, circle back, or
-            change your mind, that&apos;s the whole point.
+            WillBuddy supports both. Talk naturally and get thoughtful follow-up
+            questions, or type through the same plan step by step. You can switch,
+            circle back, or change your mind without losing your work.
           </p>
           <p className="text-[#5B7A5E] font-medium">
-            The best estate plan is the one you actually finish. Voice gets you
-            there.
+            The best estate plan is the one you actually finish. Choose the path
+            that helps you get there.
           </p>
         </div>
       </div>
@@ -295,7 +389,7 @@ function WhyVoiceSection() {
 function PricingSection({ isAuthed }: { isAuthed: boolean }) {
   const included = [
     "All 5 Texas-compliant draft documents",
-    "Full conversation transcript",
+    "Full answer history",
     "Shareable link for your attorney",
     "Resume your session anytime",
   ];
@@ -401,12 +495,12 @@ function FAQSection() {
     {
       question: "How long does it take?",
       answer:
-        "About 45 minutes for a couple working through everything together. Individual sessions tend to be a bit shorter. You can pause and come back anytime — your session saves automatically.",
+        "Plan on about 45 minutes for a couple working through everything together, whether you talk or type. Individual sessions tend to be shorter. You can pause and come back anytime — your session saves automatically.",
     },
     {
       question: "Can I do this alone?",
       answer:
-        "Absolutely. WillBuddy works for individuals too. The conversation adapts based on whether you're planning solo or with a partner.",
+        "Absolutely. WillBuddy works for individuals too. The guided plan adapts based on whether you're planning solo or with a partner.",
     },
     {
       question: "What if I need to come back later?",
@@ -426,7 +520,7 @@ function FAQSection() {
     {
       question: "What if I change my mind about a decision?",
       answer:
-        "You can edit any decision before generating your final documents. After your conversation, WillBuddy shows you a full summary where you can review and adjust anything.",
+        "You can edit any decision before generating your final documents. After the guided plan, WillBuddy shows you a full summary where you can review and adjust anything.",
     },
   ];
 
@@ -458,6 +552,7 @@ export default async function LandingPage() {
     <main className="flex-1">
       <HeroSection isAuthed={isAuthed} />
       <TrustBar />
+      <ResourcesSection />
       <HowItWorksSection />
       <DocumentsSection />
       <WhyVoiceSection />

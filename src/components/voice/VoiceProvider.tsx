@@ -42,11 +42,23 @@ interface VoiceContextValue {
   transcript: TranscriptEntry[];
   decisions: Decision[];
   sessionId: string | null;
+  isSessionReady: boolean;
   connect: () => Promise<void>;
   disconnect: () => void;
   toggleMic: () => void;
   sendTextMessage: (text: string) => void;
   updateDecision: (decisionId: string, newValue: string) => Promise<void>;
+  saveGuidedDecision: (input: {
+    section: Section;
+    key: string;
+    value: string;
+    reasoning?: string;
+  }) => Promise<void>;
+  completeGuidedSession: () => Promise<void>;
+  inputMethod: SessionGoals["inputMethod"];
+  selectInputMethod: (method: NonNullable<SessionGoals["inputMethod"]>) => Promise<void>;
+  operationError: string | null;
+  clearOperationError: () => void;
   isMicMuted: boolean;
   // Pause / section-breakpoint state
   isPaused: boolean;
@@ -54,9 +66,9 @@ interface VoiceContextValue {
   completedSection: Section | null;
   pendingNextSection: Section | null;
   resumeFromPause: () => Promise<void>;
-  saveAndExit: () => void;
+  saveAndExit: () => Promise<void>;
   pauseSession: () => void;
-  finishSession: () => void;
+  finishSession: () => Promise<void>;
   jumpToSection: (section: Section) => void;
 }
 
@@ -87,11 +99,14 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(initialSessionId ?? null);
+  const [isSessionReady, setIsSessionReady] = useState(!initialSessionId);
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [pauseReason, setPauseReason] = useState<'section' | 'user' | null>(null);
   const [completedSection, setCompletedSection] = useState<Section | null>(null);
   const [pendingNextSection, setPendingNextSection] = useState<Section | null>(null);
+  const [inputMethod, setInputMethod] = useState<SessionGoals["inputMethod"]>();
+  const [operationError, setOperationError] = useState<string | null>(null);
 
   const clientRef = useRef<GeminiLiveClient | null>(null);
   const recorderRef = useRef<AudioRecorder | null>(null);
@@ -120,6 +135,32 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   useEffect(() => { currentSectionRef.current = currentSection; }, [currentSection]);
   useEffect(() => { decisionsRef.current = decisions; }, [decisions]);
   useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
+
+  const clearOperationError = useCallback(() => setOperationError(null), []);
+
+  const stopVoiceTransport = useCallback(() => {
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+    recorderRef.current?.stop();
+    playerRef.current?.stop();
+    clientRef.current?.disconnect();
+    clientRef.current = null;
+    recorderRef.current = null;
+    playerRef.current = null;
+    setVoiceState('idle');
+  }, []);
+
+  const requireSuccessfulResponse = useCallback(
+    async (response: Response, fallbackMessage: string) => {
+      if (!response.ok) {
+        const body = await response.json().catch(() => null) as { error?: string } | null;
+        throw new Error(body?.error || fallbackMessage);
+      }
+    },
+    [],
+  );
 
   // Load onboarding answers + section goals from localStorage on mount
   // (captured pre-account, before the session row exists).
@@ -182,8 +223,8 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const saveDecision = useCallback(
     async (decision: Decision) => {
       const sid = sessionIdRef.current;
-      if (!sid) return;
-      await supabase.current
+      if (!sid) throw new Error('Session is not ready yet');
+      const { error } = await supabase.current
         .from('decisions')
         .upsert(
           {
@@ -200,6 +241,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
           },
           { onConflict: 'id' },
         );
+      if (error) throw error;
     },
     [],
   );
@@ -223,58 +265,71 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
           created_at: now,
           updated_at: now,
         };
-        setDecisions((prev) => {
-          const idx = prev.findIndex(
-            (d) => d.section === decision.section && d.key === decision.key,
-          );
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = decision;
-            return next;
+        void (async () => {
+          try {
+            await saveDecision(decision);
+            setDecisions((prev) => {
+              const idx = prev.findIndex(
+                (d) => d.section === decision.section && d.key === decision.key,
+              );
+              if (idx >= 0) {
+                const next = [...prev];
+                next[idx] = decision;
+                decisionsRef.current = next;
+                return next;
+              }
+              const next = [...prev, decision];
+              decisionsRef.current = next;
+              return next;
+            });
+          } catch (error) {
+            console.error('Could not save voice decision:', error);
+            setOperationError('We could not save that answer. Please retry before continuing.');
           }
-          return [...prev, decision];
-        });
-        saveDecision(decision);
+        })();
       }
 
       if (name === 'updateProgress') {
         const section = args.section as Section;
         const nextSection = args.nextSection as Section | undefined;
-        // Merge with previously completed sections rather than overwriting.
-        const mergedCompleted = [
-          ...new Set([...sectionsCompletedRef.current, section]),
-        ];
-        sectionsCompletedRef.current = mergedCompleted;
-        setSectionsCompleted(mergedCompleted);
-        // Persist section-complete to Supabase immediately
-        const sid = sessionIdRef.current;
-        if (sid) {
-          void fetch('/api/session', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId: sid,
-              sectionsCompleted: mergedCompleted,
-              currentSection: nextSection ?? section,
-            }),
-          });
-        }
-        // Show the section breakpoint instead of advancing immediately.
-        // Disconnect audio so the user can read in peace.
-        if (nextSection) {
-          setCompletedSection(section);
-          setPendingNextSection(nextSection);
-          setPauseReason('section');
-          setIsPaused(true);
-          // Stop audio + WS but keep state in provider for resume.
-          recorderRef.current?.stop();
-          playerRef.current?.stop();
-          clientRef.current?.disconnect();
-          clientRef.current = null;
-          recorderRef.current = null;
-          playerRef.current = null;
-          setVoiceState('idle');
-        }
+        void (async () => {
+          try {
+            // Merge with previously completed sections rather than overwriting.
+            const mergedCompleted = [
+              ...new Set([...sectionsCompletedRef.current, section]),
+            ];
+            const sid = sessionIdRef.current;
+            if (!sid) throw new Error('Session is not ready yet');
+            const response = await fetch('/api/session', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: sid,
+                sectionsCompleted: mergedCompleted,
+                currentSection: nextSection ?? section,
+              }),
+            });
+            await requireSuccessfulResponse(
+              response,
+              'Could not save section progress.',
+            );
+            sectionsCompletedRef.current = mergedCompleted;
+            setSectionsCompleted(mergedCompleted);
+            // Show the section breakpoint only after progress is durable.
+            if (nextSection) {
+              setCompletedSection(section);
+              setPendingNextSection(nextSection);
+              setPauseReason('section');
+              setIsPaused(true);
+              stopVoiceTransport();
+            }
+          } catch (error) {
+            console.error('Could not save section progress:', error);
+            setOperationError(
+              'We could not save this section, so your plan has not advanced. Please try again.',
+            );
+          }
+        })();
       }
 
       if (name === 'flagForReview') {
@@ -288,7 +343,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         }
       }
     },
-    [saveDecision],
+    [requireSuccessfulResponse, saveDecision, stopVoiceTransport],
   );
 
   // -----------------------------------------------------------------------
@@ -333,38 +388,44 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
     }
 
     async function loadSession() {
-      const res = await fetch(`/api/session?id=${sessionId}`);
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data.session) {
-        setCurrentSection(data.session.current_section ?? 'family');
-        const completed = (data.session.sections_completed ?? []) as Section[];
-        sectionsCompletedRef.current = completed;
-        setSectionsCompleted(completed);
-        resumeHandleRef.current = data.session.gemini_resume_handle ?? null;
-        // DB onboarding wins over localStorage (survives device switches) and
-        // means we don't need to re-persist it.
-        if (data.session.onboarding) {
-          onboardingRef.current = data.session.onboarding as OnboardingAnswers;
-          onboardingPersistedRef.current = true;
+      try {
+        const res = await fetch(`/api/session?id=${sessionId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.session) {
+          setCurrentSection(data.session.current_section ?? 'family');
+          const completed = (data.session.sections_completed ?? []) as Section[];
+          sectionsCompletedRef.current = completed;
+          setSectionsCompleted(completed);
+          resumeHandleRef.current = data.session.gemini_resume_handle ?? null;
+          // DB onboarding wins over localStorage (survives device switches) and
+          // means we don't need to re-persist it.
+          if (data.session.onboarding) {
+            onboardingRef.current = data.session.onboarding as OnboardingAnswers;
+            onboardingPersistedRef.current = true;
+          }
+          if (data.session.goals) {
+            goalsRef.current = data.session.goals as SessionGoals;
+            setInputMethod((data.session.goals as SessionGoals).inputMethod);
+          }
+          // A stored plan is authoritative for a returning session — don't
+          // recompute or overwrite it on connect.
+          if (data.session.section_plan?.length) {
+            const storedPlan = resolvePlan(data.session.section_plan as Section[]);
+            planRef.current = storedPlan;
+            setSectionPlan(storedPlan);
+            planPersistedRef.current = true;
+          }
         }
-        if (data.session.goals) {
-          goalsRef.current = data.session.goals as SessionGoals;
+        if (data.decisions?.length) {
+          decisionsRef.current = data.decisions;
+          setDecisions(data.decisions);
         }
-        // A stored plan is authoritative for a returning session — don't
-        // recompute or overwrite it on connect.
-        if (data.session.section_plan?.length) {
-          const storedPlan = resolvePlan(data.session.section_plan as Section[]);
-          planRef.current = storedPlan;
-          setSectionPlan(storedPlan);
-          planPersistedRef.current = true;
+        if (data.recentTranscript?.length) {
+          setTranscript(data.recentTranscript);
         }
-      }
-      if (data.decisions?.length) {
-        setDecisions(data.decisions);
-      }
-      if (data.recentTranscript?.length) {
-        setTranscript(data.recentTranscript);
+      } finally {
+        setIsSessionReady(true);
       }
     }
     void loadSession();
@@ -485,25 +546,36 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         }
       };
       gemini.onSessionComplete = () => {
-        // Mark session complete and redirect to summary
-        if (sid) {
-          if (!sessionCompletedTrackedRef.current) {
-            sessionCompletedTrackedRef.current = true;
-            captureAnalyticsEvent('session_completed', {
-              session_id: sid,
-              trigger: 'model',
+        if (!sid) return;
+        void (async () => {
+          try {
+            clearOperationError();
+            const response = await fetch('/api/session', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId: sid, status: 'completed' }),
             });
-          }
-          void fetch('/api/session', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, status: 'completed' }),
-          }).then(() => {
-            recorderRef.current?.stop();
-            clientRef.current?.disconnect();
+            await requireSuccessfulResponse(
+              response,
+              'Could not complete this session.',
+            );
+            if (!sessionCompletedTrackedRef.current) {
+              sessionCompletedTrackedRef.current = true;
+              captureAnalyticsEvent('session_completed', {
+                session_id: sid,
+                trigger: 'model',
+              });
+            }
+            stopVoiceTransport();
             router.push(`/summary/${sid}`);
-          });
-        }
+          } catch (error) {
+            console.error('Could not complete voice session:', error);
+            setOperationError(
+              'Your answers are still here, but we could not finish saving the session. Please try again.',
+            );
+            setVoiceState('error');
+          }
+        })();
       };
 
       recorder.onData = (base64Pcm: string) => {
@@ -529,24 +601,23 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       console.error('Voice connect error:', err);
       setVoiceState('error');
     }
-  }, [handleToolCall, isMicMuted, saveTranscript, persistOnboarding, router]);
+  }, [
+    clearOperationError,
+    handleToolCall,
+    isMicMuted,
+    persistOnboarding,
+    requireSuccessfulResponse,
+    router,
+    saveTranscript,
+    stopVoiceTransport,
+  ]);
 
   // -----------------------------------------------------------------------
   // Disconnect
   // -----------------------------------------------------------------------
   const disconnect = useCallback(() => {
-    if (reconnectTimerRef.current) {
-      clearTimeout(reconnectTimerRef.current);
-      reconnectTimerRef.current = null;
-    }
-    recorderRef.current?.stop();
-    playerRef.current?.stop();
-    clientRef.current?.disconnect();
-    clientRef.current = null;
-    recorderRef.current = null;
-    playerRef.current = null;
-    setVoiceState('idle');
-  }, []);
+    stopVoiceTransport();
+  }, [stopVoiceTransport]);
 
   // -----------------------------------------------------------------------
   // Toggle microphone mute
@@ -584,19 +655,155 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const updateDecision = useCallback(
     async (decisionId: string, newValue: string) => {
       const now = new Date().toISOString();
+      if (sessionId) {
+        const { error } = await supabase.current
+          .from('decisions')
+          .update({ value: newValue, updated_at: now })
+          .eq('id', decisionId);
+        if (error) {
+          setOperationError('We could not save that edit. Please try again.');
+          throw error;
+        }
+      }
       setDecisions((prev) =>
         prev.map((d) =>
           d.id === decisionId ? { ...d, value: newValue, updated_at: now } : d
         )
       );
-      if (sessionId) {
-        await supabase.current
-          .from('decisions')
-          .update({ value: newValue, updated_at: now })
-          .eq('id', decisionId);
-      }
     },
     [sessionId],
+  );
+
+  const saveGuidedDecision = useCallback(
+    async ({
+      section,
+      key,
+      value,
+      reasoning,
+    }: {
+      section: Section;
+      key: string;
+      value: string;
+      reasoning?: string;
+    }) => {
+      const sid = sessionIdRef.current;
+      if (!sid) throw new Error('Session is not ready yet');
+
+      const existing = decisionsRef.current.find(
+        (decision) => decision.section === section && decision.key === key,
+      );
+      const now = new Date().toISOString();
+      const decision: Decision = {
+        id: existing?.id ?? crypto.randomUUID(),
+        session_id: sid,
+        section,
+        key,
+        value,
+        reasoning: reasoning?.trim() || null,
+        user_confirmed: false,
+        confidence: value === 'Not sure yet' ? 'needs_discussion' : 'decisive',
+        created_at: existing?.created_at ?? now,
+        updated_at: now,
+      };
+
+      try {
+        clearOperationError();
+        await saveDecision(decision);
+        const next = existing
+          ? decisionsRef.current.map((item) =>
+              item.section === section && item.key === key ? decision : item,
+            )
+          : [...decisionsRef.current, decision];
+        decisionsRef.current = next;
+        setDecisions(next);
+        captureAnalyticsEvent('guided_plan_answer_saved', {
+          section,
+          question: key,
+        });
+      } catch (error) {
+        setOperationError('We could not save that answer. Please try again.');
+        throw error;
+      }
+    },
+    [clearOperationError, saveDecision],
+  );
+
+  const completeGuidedSession = useCallback(async () => {
+    const sid = sessionIdRef.current;
+    if (!sid) throw new Error('Session is not ready yet');
+    try {
+      clearOperationError();
+      const response = await fetch('/api/session', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: sid,
+          sectionsCompleted: planRef.current,
+          currentSection: planRef.current[planRef.current.length - 1],
+          status: 'completed',
+        }),
+      });
+      await requireSuccessfulResponse(response, 'Could not complete this plan.');
+      sectionsCompletedRef.current = planRef.current;
+      setSectionsCompleted(planRef.current);
+      captureAnalyticsEvent('guided_plan_completed', {
+        section_count: planRef.current.length,
+        decision_count: decisionsRef.current.length,
+      });
+      router.push(`/summary/${sid}`);
+    } catch (error) {
+      setOperationError(
+        'Your answer was saved, but we could not finish the plan. Please try again.',
+      );
+      throw error;
+    }
+  }, [clearOperationError, requireSuccessfulResponse, router]);
+
+  const selectInputMethod = useCallback(
+    async (method: NonNullable<SessionGoals['inputMethod']>) => {
+      clearOperationError();
+      if (method === 'guided') {
+        stopVoiceTransport();
+      }
+      const goals: SessionGoals = {
+        preset: goalsRef.current?.preset ?? null,
+        modules: planRef.current,
+        inputMethod: method,
+      };
+      const sid = sessionIdRef.current;
+      try {
+        if (sid) {
+          const response = await fetch('/api/session', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: sid, goals }),
+          });
+          await requireSuccessfulResponse(
+            response,
+            'Could not save your input preference.',
+          );
+        }
+      } catch (error) {
+        console.error('Could not switch planning methods:', error);
+        setOperationError(
+          'We could not switch planning methods because your preference did not save. Please try again.',
+        );
+        return;
+      }
+      goalsRef.current = goals;
+      try {
+        window.localStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(goals));
+      } catch {
+        // Storage may be unavailable; the session row remains authoritative.
+      }
+      setInputMethod(method);
+      captureAnalyticsEvent('session_input_method_selected', { method });
+      captureAnalyticsEvent(
+        method === 'guided' ? 'guided_plan_started' : 'voice_plan_started',
+        { source: 'session_method_selected' },
+      );
+    },
+    [clearOperationError, requireSuccessfulResponse, stopVoiceTransport],
   );
 
   // -----------------------------------------------------------------------
@@ -646,32 +853,45 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // Save current progress and redirect to home (section-break or user pause).
   // State is already persisted on each tool call; this just exits cleanly.
   // -----------------------------------------------------------------------
-  const saveAndExit = useCallback(() => {
-    // If we were mid-section, advance the section pointer so resume lands
-    // on the next section rather than replaying the just-finished one.
-    if (pendingNextSection && sessionId) {
-      void fetch('/api/session', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          currentSection: pendingNextSection,
-        }),
-      });
+  const saveAndExit = useCallback(async () => {
+    try {
+      clearOperationError();
+      // At a section breakpoint, persist the next pointer before leaving so
+      // resume never replays a section the user already completed.
+      if (pendingNextSection && sessionId) {
+        const response = await fetch('/api/session', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            currentSection: pendingNextSection,
+          }),
+        });
+        await requireSuccessfulResponse(
+          response,
+          'Could not save your current position.',
+        );
+      }
+      stopVoiceTransport();
+      setIsPaused(false);
+      setPauseReason(null);
+      setCompletedSection(null);
+      setPendingNextSection(null);
+      router.push('/');
+    } catch (error) {
+      console.error('Could not save and exit:', error);
+      setOperationError(
+        'We could not save your current position, so you have not been redirected. Please try again.',
+      );
     }
-    recorderRef.current?.stop();
-    playerRef.current?.stop();
-    clientRef.current?.disconnect();
-    clientRef.current = null;
-    recorderRef.current = null;
-    playerRef.current = null;
-    setVoiceState('idle');
-    setIsPaused(false);
-    setPauseReason(null);
-    setCompletedSection(null);
-    setPendingNextSection(null);
-    router.push('/');
-  }, [pendingNextSection, router, sessionId]);
+  }, [
+    clearOperationError,
+    pendingNextSection,
+    requireSuccessfulResponse,
+    router,
+    sessionId,
+    stopVoiceTransport,
+  ]);
 
   // -----------------------------------------------------------------------
   // Explicit user-initiated pause (button in VoiceControls).
@@ -680,57 +900,54 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // being dumped back to the landing page. All progress is already persisted.
   // -----------------------------------------------------------------------
   const pauseSession = useCallback(() => {
-    recorderRef.current?.stop();
-    playerRef.current?.stop();
-    clientRef.current?.disconnect();
-    clientRef.current = null;
-    recorderRef.current = null;
-    playerRef.current = null;
-    setVoiceState('idle');
+    stopVoiceTransport();
     setPauseReason('user');
     setIsPaused(true);
-  }, []);
+  }, [stopVoiceTransport]);
 
   // -----------------------------------------------------------------------
   // User-initiated finish: mark the session complete and go to the summary,
   // regardless of whether the model emitted its completion tool call. This is
   // the reliable "I'm done" path so completion never depends solely on the AI.
   // -----------------------------------------------------------------------
-  const finishSession = useCallback(() => {
+  const finishSession = useCallback(async () => {
     const sid = sessionIdRef.current;
-    recorderRef.current?.stop();
-    playerRef.current?.stop();
-    clientRef.current?.disconnect();
-    clientRef.current = null;
-    recorderRef.current = null;
-    playerRef.current = null;
-    setVoiceState('idle');
+    stopVoiceTransport();
     setIsPaused(false);
     setPauseReason(null);
     setCompletedSection(null);
     setPendingNextSection(null);
 
     if (!sid) {
-      router.push('/');
+      setOperationError(
+        'We could not find this session, so it has not been marked complete.',
+      );
       return;
     }
 
-    if (!sessionCompletedTrackedRef.current) {
-      sessionCompletedTrackedRef.current = true;
-      captureAnalyticsEvent('session_completed', {
-        session_id: sid,
-        trigger: 'user',
+    try {
+      clearOperationError();
+      const response = await fetch('/api/session', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sid, status: 'completed' }),
       });
-    }
-
-    void fetch('/api/session', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: sid, status: 'completed' }),
-    }).finally(() => {
+      await requireSuccessfulResponse(response, 'Could not complete this session.');
+      if (!sessionCompletedTrackedRef.current) {
+        sessionCompletedTrackedRef.current = true;
+        captureAnalyticsEvent('session_completed', {
+          session_id: sid,
+          trigger: 'user',
+        });
+      }
       router.push(`/summary/${sid}`);
-    });
-  }, [router]);
+    } catch (error) {
+      console.error('Could not finish session:', error);
+      setOperationError(
+        'Your answers are still here, but we could not finish saving the session. Please try again.',
+      );
+    }
+  }, [clearOperationError, requireSuccessfulResponse, router, stopVoiceTransport]);
 
   // -----------------------------------------------------------------------
   // Auto-reconnect on unexpected disconnect
@@ -775,11 +992,18 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         transcript,
         decisions,
         sessionId,
+        isSessionReady,
         connect,
         disconnect,
         toggleMic,
         sendTextMessage,
         updateDecision,
+        saveGuidedDecision,
+        completeGuidedSession,
+        inputMethod,
+        selectInputMethod,
+        operationError,
+        clearOperationError,
         isMicMuted,
         isPaused,
         pauseReason,
