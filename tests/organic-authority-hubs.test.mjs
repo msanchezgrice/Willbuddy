@@ -10,14 +10,16 @@ async function source(relativePath) {
   return readFile(path.join(repoRoot, relativePath), "utf8");
 }
 
-test("tools and research hubs are indexable discovery surfaces", async () => {
-  const [tools, research] = await Promise.all([
+test("tools, guides, and research hubs are indexable discovery surfaces", async () => {
+  const [tools, guides, research] = await Promise.all([
     source("src/app/(marketing)/tools/page.tsx"),
+    source("src/app/(marketing)/guides/page.tsx"),
     source("src/app/(marketing)/research/page.tsx"),
   ]);
 
   for (const [page, canonical] of [
     [tools, "/tools"],
+    [guides, "/guides"],
     [research, "/research"],
   ]) {
     assert.match(page, new RegExp(`canonical:\\s*["']${canonical}["']`));
@@ -33,6 +35,8 @@ test("tools and research hubs are indexable discovery surfaces", async () => {
   ]) {
     assert.match(tools, new RegExp(route));
   }
+  assert.match(guides, /\/guides\/living-trust-texas/);
+  assert.match(guides, /\/guides\/living-trust-cost-texas/);
   assert.match(research, /\/research\/texas-estate-planning-readiness/);
 });
 
@@ -65,6 +69,7 @@ test("all authority routes are in the sitemap and global discovery links", async
 
   const routes = [
     "/tools",
+    "/guides",
     "/research",
     "/research/texas-estate-planning-readiness",
     "/tools/texas-intestacy-calculator",
