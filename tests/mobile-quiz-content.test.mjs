@@ -74,6 +74,8 @@ test("homepage and roundup post expose every free planning tool", async () => {
     assert.match(post, new RegExp(route));
   }
 
+  assert.match(homepage, /View all free tools/);
+  assert.match(homepage, /href=["']\/tools["']/);
   assert.match(homepage, /["']\/blog["']/);
   assert.match(registry, /freeTexasEstatePlanningTools/);
   assert.match(post, /slug: "free-texas-estate-planning-tools"/);
