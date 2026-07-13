@@ -6,7 +6,7 @@ export const dyingWithoutWill: BlogPost = {
   description:
     "A source-backed guide to Texas intestacy rules for spouses, children, separate property, community property, and blended families.",
   date: "2026-06-24",
-  dateModified: "2026-07-12",
+  dateModified: "2026-07-13",
   category: "Texas Estate Law",
   author: "WillBuddy Editorial Team",
   editorialNote:
@@ -41,7 +41,9 @@ export const dyingWithoutWill: BlogPost = {
 
 That formula can be sensible for one family and a poor fit for another. A blended family, an unmarried partner, a close friend, a charity, or a child who needs long-term financial safeguards can expose gaps between the statute and a person's actual priorities.
 
-> **Educational information only.** This guide summarizes general Texas law as of July 12, 2026. It cannot determine how a particular asset or family relationship will be treated. WillBuddy is not a law firm and does not provide legal advice. Ask a licensed Texas attorney to evaluate your situation.
+> **Educational information only.** This guide summarizes general Texas law as of July 13, 2026. It cannot determine how a particular asset or family relationship will be treated. WillBuddy is not a law firm and does not provide legal advice. Ask a licensed Texas attorney to evaluate your situation.
+
+Want to see the statutory branches before reading every exception? Use the free [Texas intestacy visualizer](/tools/texas-intestacy-calculator) to walk through spouse, descendant, parent, and sibling scenarios. It is an educational issue-spotter, not a calculation of anyone's legal share, and it does not classify property or replace advice from a Texas attorney.
 
 ## Start with the property, not just the family tree
 

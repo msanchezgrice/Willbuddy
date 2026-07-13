@@ -45,6 +45,8 @@ test("living trust cost guide explains ranges and methodology without promising 
   assert.match(source, /fee agreement/i);
   assert.match(source, /WillBuddy does not create trusts/i);
   assert.match(source, /attorney conversation/i);
+  assert.match(source, /\/tools\/texas-estate-planning-cost-calculator/);
+  assert.match(source, /not a quote, fee prediction, or\s+legal recommendation/i);
   assert.match(source, /not a law firm/i);
   assert.match(source, /Is a living trust always cheaper than probate\?[\s\S]{0,160}No\./i);
   assert.doesNotMatch(source, /guaranteed savings/i);

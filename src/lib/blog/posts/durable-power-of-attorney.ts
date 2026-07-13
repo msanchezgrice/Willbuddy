@@ -6,7 +6,7 @@ export const durablePoa: BlogPost = {
   description:
     "Understand Texas durable power of attorney requirements, immediate and incapacity-triggered authority, agent selection, and safeguards.",
   date: "2026-06-16",
-  dateModified: "2026-07-12",
+  dateModified: "2026-07-13",
   category: "Roles & Responsibilities",
   author: "WillBuddy Editorial Team",
   editorialNote:
@@ -41,7 +41,9 @@ export const durablePoa: BlogPost = {
 
 The document is powerful because it can operate while the principal is alive. That is also why agent choice, scope, timing, and safeguards deserve more attention than simply filling every blank on a form.
 
-> **Educational information only.** This guide summarizes general Texas law as of July 12, 2026. WillBuddy is not a law firm and does not provide legal advice. Do not sign or rely on a power of attorney without advice about your facts, asset types, institutions, and risks from a licensed Texas attorney.
+> **Educational information only.** This guide summarizes general Texas law as of July 13, 2026. WillBuddy is not a law firm and does not provide legal advice. Do not sign or rely on a power of attorney without advice about your facts, asset types, institutions, and risks from a licensed Texas attorney.
+
+If you are unsure which incapacity document you are researching, start with the free [Texas power-of-attorney navigator](/tools/texas-power-of-attorney-navigator). It separates financial authority, healthcare decision-making, treatment instructions, and information access, then points to official Texas sources. It does not select, draft, or validate a document for you.
 
 ## What “durable” means in Texas
 

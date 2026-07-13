@@ -7,7 +7,7 @@ const lastModified = new Date("2026-07-13T00:00:00.000Z");
 export default function sitemap(): MetadataRoute.Sitemap {
   const blogPostEntries: MetadataRoute.Sitemap = getAllPosts().map((post) => ({
     url: absoluteUrl(`/blog/${post.slug}`),
-    lastModified: new Date(`${post.date}T00:00:00.000Z`),
+    lastModified: new Date(`${post.dateModified ?? post.date}T00:00:00.000Z`),
     changeFrequency: "yearly",
     priority: 0.6,
   }));

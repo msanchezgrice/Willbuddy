@@ -11,7 +11,7 @@ export const medicalPoa: BlogPost = {
   description:
     "Learn how a Texas medical power of attorney and directive to physicians work together, using current Texas HHS forms and law.",
   date: "2026-06-18",
-  dateModified: "2026-07-12",
+  dateModified: "2026-07-13",
   category: "Healthcare Directives",
   author: "WillBuddy Editorial Team",
   editorialNote:
@@ -47,7 +47,9 @@ export const medicalPoa: BlogPost = {
 
 Both documents are part of the Texas Advance Directives Act in [Health and Safety Code Chapter 166](https://tcss.legis.texas.gov/resources/HS/htm/HS.166.htm). Texas Health and Human Services publishes current statutory-form pages for a [Medical Power of Attorney](https://www.hhs.texas.gov/regulations/forms/advance-directives/medical-power-attorney-designation-health-care-agent-mpoa) and a [Directive to Physicians and Family or Surrogates](https://www.hhs.texas.gov/regulations/forms/advance-directives/directive-physicians-family-or-surrogates-living-will).
 
-> **Educational information only.** This guide summarizes general Texas law and the Texas HHS forms available as of July 12, 2026. WillBuddy is not a law firm and does not provide legal or medical advice. Discuss legal questions with a licensed Texas attorney and treatment questions with qualified healthcare professionals.
+> **Educational information only.** This guide summarizes general Texas law and the Texas HHS forms available as of July 13, 2026. WillBuddy is not a law firm and does not provide legal or medical advice. Discuss legal questions with a licensed Texas attorney and treatment questions with qualified healthcare professionals.
+
+Not sure whether your next conversation is about a medical agent, a financial agent, treatment instructions, or access to health information? The free [Texas power-of-attorney navigator](/tools/texas-power-of-attorney-navigator) explains the different document categories and links to current official forms. It is educational and does not recommend treatment or determine which document is legally sufficient for you.
 
 ## What the medical power of attorney does
 

@@ -6,7 +6,7 @@ export const choosingGuardian: BlogPost = {
   description:
     "A careful, source-backed process for Texas parents choosing primary and alternate guardians for minor children.",
   date: "2026-06-26",
-  dateModified: "2026-07-12",
+  dateModified: "2026-07-13",
   category: "Guardianship",
   author: "WillBuddy Editorial Team",
   editorialNote:
@@ -41,7 +41,9 @@ export const choosingGuardian: BlogPost = {
 
 Texas law allows a surviving parent of a minor to designate an eligible guardian by will or written declaration for the parent's death or incapacity. The court gives that person preference, but it may appoint someone else if the designee is disqualified, has died, refuses, or would not serve the children's best interests. Those rules appear in [Texas Estates Code Section 1104.053](https://tcss.legis.texas.gov/resources/ES/htm/ES.1104.htm). The distinction matters: parents **designate or nominate**; the court **appoints**.
 
-> **Educational information only.** This guide summarizes general Texas law as of July 12, 2026. WillBuddy is not a law firm and does not provide legal advice. Family structure, existing custody orders, parental rights, residency, and a proposed guardian's eligibility require advice from a licensed Texas attorney.
+> **Educational information only.** This guide summarizes general Texas law as of July 13, 2026. WillBuddy is not a law firm and does not provide legal advice. Family structure, existing custody orders, parental rights, residency, and a proposed guardian's eligibility require advice from a licensed Texas attorney.
+
+Guardian nominations are one part of a coordinated family plan. Use the free [estate-planning readiness checklist](/tools/estate-planning-readiness) to see which other planning actions may apply to your household, including backups, financial agents, healthcare documents, beneficiary reviews, and communication. The result is an educational checklist, not a legal assessment of your plan.
 
 ## Understand the two guardian roles
 
