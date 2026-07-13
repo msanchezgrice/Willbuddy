@@ -145,6 +145,15 @@ function ResourcesSection() {
             Not ready to build documents yet? Use a focused tool or learn the
             tradeoffs first. No account is required for any result below.
           </p>
+          <TrackedLink
+            href="/tools"
+            event="homepage_resource_clicked"
+            eventProperties={{ resource_type: "tools_hub", href: "/tools" }}
+            className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full border border-[#A8B9AA] bg-white px-5 py-2.5 text-sm font-semibold text-[#365239] transition hover:-translate-y-0.5 hover:border-[#5B7A5E] hover:shadow-sm"
+          >
+            View all free tools
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </TrackedLink>
         </div>
 
         <div className="mt-8 grid gap-5 md:grid-cols-2">
