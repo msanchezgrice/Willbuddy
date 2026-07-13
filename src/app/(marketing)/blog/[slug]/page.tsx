@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { getAllSlugs, getPostBySlug, getAllPosts } from "@/lib/blog";
 import { formatPostDate, getReadingTimeMinutes } from "@/lib/blog/types";
 import { PostBody } from "@/components/blog/PostBody";
+import { WillTrustDecisionEngine } from "@/components/tools/WillTrustDecisionEngine";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 
 interface Props {
@@ -157,6 +158,10 @@ export default async function BlogPostPage({ params }: Props) {
         )}
 
         <hr className="my-8 border-t border-[#E8E0D6]" />
+
+        {post.slug === "wills-vs-trusts-texas" && (
+          <WillTrustDecisionEngine />
+        )}
 
         <PostBody content={post.content} />
 

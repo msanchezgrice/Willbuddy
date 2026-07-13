@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/site";
 import { getAllPosts } from "@/lib/blog";
 
-const lastModified = new Date("2026-06-27T00:00:00.000Z");
+const lastModified = new Date("2026-07-13T00:00:00.000Z");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const blogPostEntries: MetadataRoute.Sitemap = getAllPosts().map((post) => ({
@@ -30,6 +30,60 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "weekly",
       priority: 0.7,
+    },
+    {
+      url: absoluteUrl("/tools"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: absoluteUrl("/tools/texas-intestacy-calculator"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: absoluteUrl("/tools/texas-estate-planning-cost-calculator"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: absoluteUrl("/tools/texas-power-of-attorney-navigator"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: absoluteUrl("/tools/estate-planning-readiness"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: absoluteUrl("/guides/living-trust-texas"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: absoluteUrl("/guides/living-trust-cost-texas"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: absoluteUrl("/research"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: absoluteUrl("/research/texas-estate-planning-readiness"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
     },
     ...blogPostEntries,
     {
