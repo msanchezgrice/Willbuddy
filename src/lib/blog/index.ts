@@ -1,5 +1,7 @@
 import type { BlogPost } from "./types";
 import { freeTexasEstatePlanningTools } from "./posts/free-texas-estate-planning-tools";
+import { texasEstatePlanningChecklist } from "./posts/texas-estate-planning-checklist";
+import { texasEstatePlanningReadinessStudy } from "./posts/texas-estate-planning-readiness-study";
 import { partnerConversation } from "./posts/talk-to-partner-about-estate-planning";
 import { bigDecisions } from "./posts/big-decisions-new-parents";
 import { choosingGuardian } from "./posts/choosing-a-guardian";
@@ -13,6 +15,8 @@ import { lifeChanges } from "./posts/updating-your-estate-plan";
 
 export const blogPosts: BlogPost[] = [
   freeTexasEstatePlanningTools,
+  texasEstatePlanningChecklist,
+  texasEstatePlanningReadinessStudy,
   partnerConversation,
   bigDecisions,
   choosingGuardian,

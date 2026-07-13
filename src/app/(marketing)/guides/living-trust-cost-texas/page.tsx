@@ -131,6 +131,18 @@ export default function LivingTrustCostTexasPage() {
             July 13, 2026; not attorney-reviewed. WillBuddy is not a law firm
             and does not provide legal advice.
           </div>
+          <Link
+            href="/tools/texas-estate-planning-cost-calculator"
+            className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#5B7A5E] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4A6A4D]"
+          >
+            Model a Texas planning-cost scenario
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+          <p className="mt-3 max-w-2xl text-xs leading-relaxed text-[#7F7467]">
+            The calculator uses published planning ranges and your selected
+            scenario for education only. It is not a quote, fee prediction, or
+            legal recommendation.
+          </p>
         </div>
       </header>
 

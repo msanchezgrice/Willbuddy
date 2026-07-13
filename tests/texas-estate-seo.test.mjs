@@ -5,21 +5,19 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
-const reviewedOn = "2026-07-12";
-
 const targets = [
-  ["dying-without-a-will-in-texas", "dyingWithoutWill"],
-  ["naming-an-executor", "namingExecutor"],
-  ["choosing-a-guardian", "choosingGuardian"],
-  ["wills-vs-trusts-texas", "willsVsTrusts"],
-  ["durable-power-of-attorney", "durablePoa"],
-  ["medical-power-of-attorney-living-will", "medicalPoa"],
+  ["dying-without-a-will-in-texas", "dyingWithoutWill", "2026-07-13"],
+  ["naming-an-executor", "namingExecutor", "2026-07-13"],
+  ["choosing-a-guardian", "choosingGuardian", "2026-07-13"],
+  ["wills-vs-trusts-texas", "willsVsTrusts", "2026-07-12"],
+  ["durable-power-of-attorney", "durablePoa", "2026-07-13"],
+  ["medical-power-of-attorney-living-will", "medicalPoa", "2026-07-13"],
 ];
 
 const officialSourcePattern =
   /https:\/\/(?:tcss\.legis\.texas\.gov|statutes\.capitol\.texas\.gov|(?:www\.)?sll\.texas\.gov|(?:www\.)?hhs\.texas\.gov|txcourts\.gov)\/[^\s)]+/g;
 
-for (const [slug, exportName] of targets) {
+for (const [slug, exportName, expectedModified] of targets) {
   test(`${slug} is substantial, source-backed, and internally connected`, async () => {
     const moduleUrl = pathToFileURL(
       path.join(repoRoot, "src/lib/blog/posts", `${slug}.ts`)
@@ -29,7 +27,7 @@ for (const [slug, exportName] of targets) {
 
     assert.ok(post, `expected ${exportName} export`);
     assert.equal(post.author, "WillBuddy Editorial Team");
-    assert.equal(post.dateModified, reviewedOn);
+    assert.equal(post.dateModified, expectedModified);
     assert.match(
       post.editorialNote,
       /source-checked[\s\S]*not attorney-reviewed/i

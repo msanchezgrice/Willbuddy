@@ -7,11 +7,14 @@ export const bigDecisions: BlogPost = {
   description:
     "Before you draft a single document, there are a handful of decisions that shape your entire estate plan. Here are the big ones every new parent should think through.",
   date: "2026-06-28",
+  dateModified: "2026-07-13",
   category: "Getting Started",
   author: "The WillBuddy Team",
   content: `Becoming a parent rearranges your priorities overnight. Suddenly the question isn't just "What happens to my stuff?" but "Who takes care of my child, and how, if I'm not here?" That shift is exactly why estate planning matters so much more once you have kids — and why it can feel overwhelming.
 
 The trick is to separate the *decisions* from the *documents*. Documents are the easy part; they're templates filled in with your choices. The hard part is making the choices. If you walk into the process having already thought through the big questions below, the paperwork practically writes itself.
+
+For a personalized starting list, take the free [estate-planning readiness checklist](/tools/estate-planning-readiness). It adapts the planning actions to your household and shows a score and next steps without requiring an account or email. It is an educational organizer, not legal advice or a review of any document.
 
 ## 1. Who raises your children if you can't?
 

@@ -6,7 +6,7 @@ export const namingExecutor: BlogPost = {
   description:
     "A practical Texas guide to executor qualifications, independent administration, backups, and the conversation to have before naming someone.",
   date: "2026-06-20",
-  dateModified: "2026-07-12",
+  dateModified: "2026-07-13",
   category: "Roles & Responsibilities",
   author: "WillBuddy Editorial Team",
   editorialNote:
@@ -41,7 +41,9 @@ export const namingExecutor: BlogPost = {
 
 Choosing well therefore means more than naming the oldest child or the relative who lives closest. The best candidate is eligible, trustworthy, organized, willing, and suited to your family's level of complexity.
 
-> **Educational information only.** This guide summarizes general Texas law as of July 12, 2026. WillBuddy is not a law firm and does not provide legal advice. A court controls appointment and qualification, and a licensed Texas attorney should advise you about your will and estate.
+> **Educational information only.** This guide summarizes general Texas law as of July 13, 2026. WillBuddy is not a law firm and does not provide legal advice. A court controls appointment and qualification, and a licensed Texas attorney should advise you about your will and estate.
+
+An executor is only one role in a complete plan. The free [estate-planning readiness checklist](/tools/estate-planning-readiness) can help you identify related decisions—such as backups, guardian nominations, lifetime financial and healthcare agents, beneficiary reviews, and where your plan can be found. It does not review a will or determine whether a nominee is legally qualified.
 
 ## What Texas law does with your nomination
 
