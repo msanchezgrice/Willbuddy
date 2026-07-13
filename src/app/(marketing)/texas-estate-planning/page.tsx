@@ -399,6 +399,35 @@ export default function TexasEstatePlanningPage() {
         </div>
       </section>
 
+      <section className="border-y border-[#E8E0D6] bg-[#F7F4F0] px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-4xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">
+            Put the guide to work
+          </p>
+          <h2 className="mt-3 font-[family-name:var(--font-heading)] text-3xl font-bold text-[#2D2A26]">
+            Free calculators and decision tools
+          </h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {[
+              ["See who may inherit without a will", "/tools/texas-intestacy-calculator"],
+              ["Compare planning and administration costs", "/tools/texas-estate-planning-cost-calculator"],
+              ["Match decisions to Texas documents", "/tools/texas-power-of-attorney-navigator"],
+              ["Build a personalized readiness checklist", "/tools/estate-planning-readiness"],
+              ["Understand living trusts in Texas", "/guides/living-trust-texas"],
+              ["Examine living-trust cost ranges", "/guides/living-trust-cost-texas"],
+            ].map(([label, href]) => (
+              <Link key={href} href={href} className="flex items-center justify-between gap-4 rounded-xl border border-[#E8E0D6] bg-white px-5 py-4 font-semibold text-[#2D2A26] transition hover:-translate-y-0.5 hover:shadow-sm">
+                <span>{label}</span>
+                <ArrowRight className="h-4 w-4 shrink-0 text-[#5B7A5E]" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+          <Link href="/tools" className="mt-7 inline-flex items-center gap-2 font-semibold text-[#4A6A4D] underline underline-offset-4">
+            Browse every free tool <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+
       <section className="border-y border-[#E8E0D6] bg-white px-6 py-16 md:py-20">
         <div className="mx-auto max-w-3xl">
           <h2 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-[#2D2A26]">

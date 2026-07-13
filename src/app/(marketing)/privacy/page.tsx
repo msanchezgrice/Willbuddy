@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "WillBuddy privacy policy for voice-first estate planning preparation.",
 };
 
-const updated = "June 11, 2026";
+const updated = "July 13, 2026";
 
 export default function PrivacyPage() {
   const supportEmail = getSupportEmail();
@@ -70,7 +70,10 @@ export default function PrivacyPage() {
               message bodies, transcripts, estate-planning answers, invite
               tokens, share tokens, and raw dynamic route identifiers.
               Analytics may include sanitized page paths, CTA clicks, contact
-              topics, and signup/session-start events.
+              topics, and signup/session-start events. The voluntary Texas
+              research project records responses to an anonymous multiple-choice
+              readiness survey as analytics events. It does not request names,
+              email addresses, asset values, precise locations, or document text.
             </p>
           </section>
 

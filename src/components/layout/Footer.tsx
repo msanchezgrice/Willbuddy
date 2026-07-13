@@ -31,6 +31,12 @@ export function Footer() {
           >
             Texas planning guide
           </Link>
+          <Link className="hover:text-[#2D2A26]" href="/tools">
+            Free tools
+          </Link>
+          <Link className="hover:text-[#2D2A26]" href="/research">
+            Research
+          </Link>
           <Link className="hover:text-[#2D2A26]" href="/contact">
             Contact
           </Link>

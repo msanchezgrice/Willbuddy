@@ -59,6 +59,31 @@ export default function BlogIndexPage() {
           </span>
         </Link>
 
+        <div className="mb-10 grid gap-4 sm:grid-cols-2">
+          <Link
+            href="/tools"
+            className="rounded-2xl border border-[#E8E0D6] bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#5B7A5E]">
+              Interactive resources
+            </span>
+            <h2 className="mt-1 font-[family-name:var(--font-heading)] text-lg font-bold text-[#2D2A26]">
+              Free Texas estate-planning tools →
+            </h2>
+          </Link>
+          <Link
+            href="/research"
+            className="rounded-2xl border border-[#E8E0D6] bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#5B7A5E]">
+              Data and methods
+            </span>
+            <h2 className="mt-1 font-[family-name:var(--font-heading)] text-lg font-bold text-[#2D2A26]">
+              Estate-planning research →
+            </h2>
+          </Link>
+        </div>
+
         {featured && (
           <Link
             href={`/blog/${featured.slug}`}
