@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, RotateCcw, ShieldCheck } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
 import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
 import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
+import { useQuizStepFocus } from "@/components/tools/useQuizStepFocus";
 import {
   buildReadinessResult,
   getApplicableReadinessItems,
@@ -84,7 +85,7 @@ export function EstateReadinessChecklist() {
   >({});
   const [showResult, setShowResult] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const activeLegendRef = useRef<HTMLLegendElement>(null);
+  const activeLegendRef = useQuizStepFocus(currentStep, !showResult);
 
   const applicable = useMemo(
     () => getApplicableReadinessItems(profile),
@@ -99,10 +100,6 @@ export function EstateReadinessChecklist() {
   const totalSteps = PROFILE_QUESTIONS.length + checklistGroups.length;
   const profileQuestion = PROFILE_QUESTIONS[currentStep];
   const checklistGroup = checklistGroups[currentStep - PROFILE_QUESTIONS.length];
-
-  useEffect(() => {
-    if (!showResult) activeLegendRef.current?.focus();
-  }, [currentStep, showResult]);
 
   function updateProfile<K extends keyof ReadinessProfile>(
     key: K,
@@ -162,8 +159,11 @@ export function EstateReadinessChecklist() {
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#D8CDBF] bg-white shadow-sm">
-      <div className="border-b border-[#E8E0D6] bg-[#F0EBE4]/60 px-5 py-6 sm:px-7">
+    <div
+      data-quiz-shell
+      className="scroll-mt-2 overflow-hidden rounded-2xl border border-[#D8CDBF] bg-white shadow-sm sm:rounded-3xl"
+    >
+      <div className="hidden border-b border-[#E8E0D6] bg-[#F0EBE4]/60 px-5 py-6 sm:block sm:px-7">
         <div className="flex items-start gap-3">
           <ShieldCheck className="mt-1 h-7 w-7 shrink-0 text-[#5B7A5E]" aria-hidden="true" />
           <div>
@@ -178,7 +178,7 @@ export function EstateReadinessChecklist() {
         </div>
       </div>
 
-      <div className="px-5 py-6 sm:px-7">
+      <div className="px-4 py-4 sm:px-7 sm:py-6">
         {!showResult && (
           <div className="mx-auto max-w-2xl">
             <QuizProgress
@@ -188,15 +188,15 @@ export function EstateReadinessChecklist() {
             />
 
             {profileQuestion ? (
-              <fieldset className="mt-7 min-h-[220px]">
+              <fieldset className="mt-4 min-h-0 sm:mt-7 sm:min-h-[220px]">
                 <legend
                   ref={activeLegendRef}
                   tabIndex={-1}
-                  className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
+                  className="font-[family-name:var(--font-heading)] text-lg font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
                 >
                   {profileQuestion.legend}
                 </legend>
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="mt-3 grid gap-2 sm:mt-5 sm:grid-cols-2 sm:gap-3">
                   {profileQuestion.options.map((option) => {
                     const selected = profile[profileQuestion.id] === option.value;
                     const id = `readiness-${profileQuestion.id}-${option.value}`;
@@ -204,7 +204,7 @@ export function EstateReadinessChecklist() {
                       <label
                         key={option.value}
                         htmlFor={id}
-                        className={`flex min-h-14 cursor-pointer items-center rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                        className={`flex min-h-11 cursor-pointer items-center rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 sm:min-h-14 sm:rounded-2xl sm:px-4 sm:py-3 ${
                           selected
                             ? "border-[#5B7A5E] bg-[#F3F7F3] text-[#2D2A26] shadow-sm"
                             : "border-[#D8CDBF] bg-white text-[#5B4F3E] hover:border-[#9CAF9E]"
@@ -231,25 +231,25 @@ export function EstateReadinessChecklist() {
                 </div>
               </fieldset>
             ) : (
-              <fieldset className="mt-7 min-h-[320px]">
+              <fieldset className="mt-4 min-h-0 sm:mt-7 sm:min-h-[320px]">
                 <legend
                   ref={activeLegendRef}
                   tabIndex={-1}
-                  className="font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26] outline-none sm:text-2xl"
+                  className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#2D2A26] outline-none sm:text-2xl"
                 >
                   What do you already have in place?
                 </legend>
-                <p className="mt-2 text-sm text-[#6F655A]">
+                <p className="mt-1 text-xs text-[#6F655A] sm:mt-2 sm:text-sm">
                   Check every item that is current and that the right people can find.
                 </p>
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="mt-3 grid gap-2 sm:mt-5 sm:grid-cols-2 sm:gap-3">
                   {(checklistGroup ?? []).map((item) => {
                     const checked = Boolean(completed[item.id]);
                     return (
                       <label
                         key={item.id}
                         htmlFor={`readiness-item-${item.id}`}
-                        className={`cursor-pointer rounded-2xl border p-4 transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                        className={`cursor-pointer rounded-xl border p-3 transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 sm:rounded-2xl sm:p-4 ${
                           checked
                             ? "border-[#9CAF9E] bg-[#F4F7F3]"
                             : "border-[#E8E0D6] bg-white hover:border-[#D8CDBF]"
@@ -269,7 +269,7 @@ export function EstateReadinessChecklist() {
                             <span className="block text-sm font-semibold text-[#2D2A26]">
                               {item.title}
                             </span>
-                            <span className="mt-1 block text-xs leading-relaxed text-[#6F655A]">
+                            <span className="sr-only text-xs leading-relaxed text-[#6F655A] sm:not-sr-only sm:mt-1 sm:block">
                               {item.description}
                             </span>
                           </span>

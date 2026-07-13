@@ -56,6 +56,7 @@ export default async function BlogPostPage({ params }: Props) {
   const related = getAllPosts()
     .filter((p) => p.slug !== post.slug)
     .slice(0, 3);
+  const hasDecisionTool = post.slug === "wills-vs-trusts-texas";
 
   const articleJsonLd = {
     "@type": "Article",
@@ -113,7 +114,11 @@ export default async function BlogPostPage({ params }: Props) {
   };
 
   return (
-    <main className="flex-1 px-6 py-12 md:py-16">
+    <main
+      className={`flex-1 px-6 py-12 md:py-16 ${
+        hasDecisionTool ? "max-md:px-3 max-md:py-3" : ""
+      }`}
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -121,7 +126,12 @@ export default async function BlogPostPage({ params }: Props) {
         }}
       />
       <article className="mx-auto max-w-2xl">
-        <nav aria-label="Breadcrumb" className="mb-8 flex flex-wrap items-center gap-2 text-sm font-medium text-[#9B8E7E]">
+        <nav
+          aria-label="Breadcrumb"
+          className={`mb-8 flex flex-wrap items-center gap-2 text-sm font-medium text-[#9B8E7E] ${
+            hasDecisionTool ? "max-md:hidden" : ""
+          }`}
+        >
           <Link href="/texas-estate-planning" className="inline-flex items-center gap-1.5 hover:text-[#2D2A26]">
             <ArrowLeft className="h-4 w-4" />
             Texas estate planning
@@ -132,7 +142,11 @@ export default async function BlogPostPage({ params }: Props) {
           </Link>
         </nav>
 
-        <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-[#9B8E7E]">
+        <div
+          className={`mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-[#9B8E7E] ${
+            hasDecisionTool ? "max-md:hidden" : ""
+          }`}
+        >
           <span className="rounded-full bg-[#5B7A5E]/10 px-3 py-1 text-[#5B7A5E]">
             {post.category}
           </span>
@@ -143,21 +157,42 @@ export default async function BlogPostPage({ params }: Props) {
           <span>{getReadingTimeMinutes(post.content)} min read</span>
         </div>
 
-        <h1 className="font-[family-name:var(--font-heading)] text-3xl font-bold leading-tight text-[#2D2A26] md:text-4xl">
+        {hasDecisionTool && (
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#5B7A5E] md:hidden">
+            Free Texas decision tool
+          </p>
+        )}
+        <h1
+          className={`font-[family-name:var(--font-heading)] font-bold leading-tight text-[#2D2A26] md:text-4xl ${
+            hasDecisionTool ? "text-2xl" : "text-3xl"
+          }`}
+        >
           {post.title}
         </h1>
-        <p className="mt-4 text-lg leading-relaxed text-[#5B4F3E]">
+        <p
+          className={`mt-4 text-lg leading-relaxed text-[#5B4F3E] ${
+            hasDecisionTool ? "max-md:hidden" : ""
+          }`}
+        >
           {post.description}
         </p>
 
         {post.editorialNote && (
-          <p className="mt-5 rounded-xl border border-[#E8E0D6] bg-white px-4 py-3 text-sm leading-relaxed text-[#5B4F3E]">
+          <p
+            className={`mt-5 rounded-xl border border-[#E8E0D6] bg-white px-4 py-3 text-sm leading-relaxed text-[#5B4F3E] ${
+              hasDecisionTool ? "max-md:hidden" : ""
+            }`}
+          >
             <strong className="text-[#2D2A26]">Editorial note:</strong>{" "}
             {post.editorialNote}
           </p>
         )}
 
-        <hr className="my-8 border-t border-[#E8E0D6]" />
+        <hr
+          className={`my-8 border-t border-[#E8E0D6] ${
+            hasDecisionTool ? "max-md:hidden" : ""
+          }`}
+        />
 
         {post.slug === "wills-vs-trusts-texas" && (
           <WillTrustDecisionEngine />

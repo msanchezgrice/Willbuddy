@@ -5,6 +5,7 @@ import { AlertTriangle, RotateCcw } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
 import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
 import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
+import { useQuizStepFocus } from "@/components/tools/useQuizStepFocus";
 import {
   calculateTexasIntestacy,
   type InheritanceShare,
@@ -128,6 +129,7 @@ export function TexasIntestacyCalculator() {
   const [collateral, setCollateral] = useState<BooleanChoice>("");
   const [submitted, setSubmitted] = useState<TexasIntestacyInputs | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const questionLegendRef = useQuizStepFocus(currentStep, !submitted);
 
   const needsShared = spouse === "yes" && descendants === "yes";
   const needsCollateral = descendants === "no";
@@ -194,24 +196,33 @@ export function TexasIntestacyCalculator() {
   }
 
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-[#D8CDBF] bg-[#FCFBF8] shadow-[0_24px_80px_rgba(68,54,41,0.10)]">
+    <div
+      data-quiz-shell
+      className="scroll-mt-2 overflow-hidden rounded-2xl border border-[#D8CDBF] bg-[#FCFBF8] shadow-[0_24px_80px_rgba(68,54,41,0.10)] sm:rounded-[1.75rem]"
+    >
       <div className="grid lg:grid-cols-[0.82fr_1.18fr]">
-        <section className="border-b border-[#D8CDBF] bg-[#F0EBE4]/70 p-5 sm:p-7 lg:border-b-0 lg:border-r">
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-[#5B7A5E]">
-            Family-tree inputs
-          </p>
-          <h2 className="mt-3 font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">
-            Who survives the person?
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-[#6A5D4E]">
-            Answer for a person who died without a valid will. The map changes
-            only when you select “Show the inheritance map.”
-          </p>
+        <section className="border-b border-[#D8CDBF] bg-[#F0EBE4]/70 p-4 sm:p-7 lg:border-b-0 lg:border-r">
+          <div className="hidden sm:block">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-[#5B7A5E]">
+              Family-tree inputs
+            </p>
+            <h2 className="mt-3 font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">
+              Who survives the person?
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#6A5D4E]">
+              Answer for a person who died without a valid will. The map changes
+              only when you select “Show the inheritance map.”
+            </p>
+          </div>
 
-          <div className="mt-7">
+          <div className="sm:mt-7">
             <QuizProgress current={currentStep + 1} total={steps.length} label="Step" />
-            <fieldset className="mt-7 min-h-[170px]">
-              <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26]">
+            <fieldset className="mt-4 min-h-0 sm:mt-7 sm:min-h-[170px]">
+              <legend
+                ref={questionLegendRef}
+                tabIndex={-1}
+                className="font-[family-name:var(--font-heading)] text-lg font-bold leading-snug text-[#2D2A26] outline-none sm:text-xl"
+              >
                 {currentQuestion === "spouse"
                   ? "Is there a surviving spouse?"
                   : currentQuestion === "descendants"
@@ -225,7 +236,7 @@ export function TexasIntestacyCalculator() {
                   Select no if either spouse has a child from another relationship.
                 </p>
               )}
-              <div className="mt-5 grid grid-cols-2 gap-2">
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-5">
                 <Choice
                   name={currentQuestion}
                   value="yes"

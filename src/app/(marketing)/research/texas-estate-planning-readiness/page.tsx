@@ -59,27 +59,27 @@ export default function TexasReadinessReportPage() {
   };
 
   return (
-    <main className="flex-1">
+    <main className="flex flex-1 flex-col">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/55 px-6 py-10 md:py-14">
+      <section className="order-1 border-b border-[#E8E0D6] bg-[#F0EBE4]/55 px-4 py-3 md:px-6 md:py-14">
         <div className="mx-auto max-w-4xl">
-          <nav aria-label="Breadcrumb" className="mb-7 text-sm text-[#7F7467]">
+          <nav aria-label="Breadcrumb" className="mb-7 hidden text-sm text-[#7F7467] md:block">
             <Link href="/">Home</Link> <span aria-hidden="true">/</span> <Link href="/research">Research</Link> <span aria-hidden="true">/</span> <span>Readiness report</span>
           </nav>
-          <div className="inline-flex rounded-full bg-[#DDE8DE] px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[#4A6A4D]">Data collection in progress</div>
-          <h1 className="mt-5 max-w-3xl font-[family-name:var(--font-heading)] text-4xl font-bold leading-tight text-[#2D2A26] md:text-5xl">Texas Estate Planning Readiness Report</h1>
-          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-[#5B4F3E]">A living research project designed to measure whether Texans have made, updated, and communicated the decisions their families may need.</p>
+          <div className="inline-flex rounded-full bg-[#DDE8DE] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#4A6A4D] md:px-4 md:py-2 md:text-xs">Data collection in progress</div>
+          <h1 className="mt-1 max-w-3xl font-[family-name:var(--font-heading)] text-2xl font-bold leading-tight text-[#2D2A26] md:mt-5 md:text-5xl">Texas Estate Planning Readiness Report</h1>
+          <p className="mt-4 hidden max-w-3xl text-lg leading-relaxed text-[#5B4F3E] md:block">A living research project designed to measure whether Texans have made, updated, and communicated the decisions their families may need.</p>
           <Link
-            href="#contribute"
-            className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#5B7A5E] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#4A6A4D]"
+            href="#readiness-survey"
+            className="mt-5 hidden min-h-11 items-center rounded-full bg-[#5B7A5E] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#4A6A4D] md:inline-flex"
           >
             Help by answering five questions
           </Link>
-          <div className="mt-5 rounded-2xl border border-[#D8CDBF] bg-white/80 p-4 text-sm leading-relaxed text-[#5B4F3E]"><strong className="text-[#2D2A26]">Status and editorial note:</strong> No original Texas findings are published yet. The figures below are clearly labeled national baselines. This page was source-checked July 13, 2026 and was not attorney-reviewed. WillBuddy is not a law firm and does not provide legal advice.</div>
+          <div className="mt-5 hidden rounded-2xl border border-[#D8CDBF] bg-white/80 p-4 text-sm leading-relaxed text-[#5B4F3E] md:block"><strong className="text-[#2D2A26]">Status and editorial note:</strong> No original Texas findings are published yet. The figures below are clearly labeled national baselines. This page was source-checked July 13, 2026 and was not attorney-reviewed. WillBuddy is not a law firm and does not provide legal advice.</div>
         </div>
       </section>
 
-      <section className="px-6 py-12 md:py-16">
+      <section className="order-3 px-6 py-12 md:order-2 md:py-16">
         <div className="mx-auto max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">National context, not Texas estimates</p>
           <h2 className="mt-3 font-[family-name:var(--font-heading)] text-3xl font-bold text-[#2D2A26]">The documented readiness gap</h2>
@@ -100,12 +100,12 @@ export default function TexasReadinessReportPage() {
         </div>
       </section>
 
-      <section id="contribute" className="scroll-mt-6 bg-[#F0EBE4]/45 px-6 py-12 md:py-16">
+      <section id="contribute" className="order-2 scroll-mt-6 bg-[#F0EBE4]/45 px-3 py-3 md:order-3 md:px-6 md:py-16">
         <div className="mx-auto max-w-4xl">
           <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">Help us understand readiness in Texas</p>
-            <h2 className="mt-3 font-[family-name:var(--font-heading)] text-3xl font-bold text-[#2D2A26]">Answer five questions to help build the report</h2>
-            <p className="mt-4 leading-relaxed text-[#5B4F3E]">
+            <p className="hidden text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E] md:block">Help us understand readiness in Texas</p>
+            <h2 className="font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26] md:mt-3 md:text-3xl">Answer five questions to help build the report</h2>
+            <p className="mt-4 hidden leading-relaxed text-[#5B4F3E] md:block">
               This short account-unlinked survey helps us understand which planning
               decisions Texans have completed and where people get stuck. It
               contributes to research; it is not the personalized readiness
@@ -113,13 +113,13 @@ export default function TexasReadinessReportPage() {
             </p>
             <Link
               href="/tools/estate-planning-readiness"
-              className="mt-4 inline-flex text-sm font-semibold text-[#4A6A4D] underline underline-offset-2"
+              className="mt-4 hidden text-sm font-semibold text-[#4A6A4D] underline underline-offset-2 md:inline-flex"
             >
               Looking for your personal score? Use the readiness quiz →
             </Link>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-3 md:mt-8">
             <TexasReadinessSurvey />
           </div>
 

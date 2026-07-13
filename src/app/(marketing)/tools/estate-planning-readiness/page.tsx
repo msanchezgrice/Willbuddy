@@ -94,27 +94,27 @@ export default function EstatePlanningReadinessPage() {
         }}
       />
 
-      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/55 px-6 py-8 md:py-10">
+      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/55 px-4 py-3 md:px-6 md:py-10">
         <div className="mx-auto max-w-4xl">
-          <nav aria-label="Breadcrumb" className="mb-5 text-sm text-[#7F7467]">
+          <nav aria-label="Breadcrumb" className="mb-5 hidden text-sm text-[#7F7467] md:block">
             <Link href="/" className="hover:text-[#2D2A26]">Home</Link>{" "}
             <span aria-hidden="true">/</span>{" "}
             <Link href="/tools" className="hover:text-[#2D2A26]">Tools</Link>{" "}
             <span aria-hidden="true">/</span>{" "}
             <span>Readiness checklist</span>
           </nav>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#5B7A5E]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5B7A5E] md:text-sm">
             Free personalized tool
           </p>
-          <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-heading)] text-4xl font-bold leading-tight text-[#2D2A26] md:text-5xl">
+          <h1 className="mt-1 max-w-3xl font-[family-name:var(--font-heading)] text-2xl font-bold leading-tight text-[#2D2A26] md:mt-4 md:text-5xl">
             How ready is your estate plan?
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#5B4F3E] md:text-lg">
+          <p className="mt-4 hidden max-w-2xl text-base leading-relaxed text-[#5B4F3E] md:block md:text-lg">
             Get a situation-aware checklist, a simple readiness score, and your
             next three actions. No account or email is required to see the
             result.
           </p>
-          <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-[#4A6A4D]">
+          <div className="mt-5 hidden flex-wrap gap-2 text-xs font-semibold text-[#4A6A4D] md:flex">
             <span className="rounded-full bg-white px-3 py-1.5">About 3 minutes</span>
             <span className="rounded-full bg-white px-3 py-1.5">No email gate</span>
             <span className="rounded-full bg-white px-3 py-1.5">Privacy-safe analytics</span>
@@ -122,7 +122,7 @@ export default function EstatePlanningReadinessPage() {
         </div>
       </section>
 
-      <section className="px-6 py-8 md:py-10">
+      <section className="px-3 py-3 md:px-6 md:py-10">
         <div className="mx-auto max-w-3xl">
           <EstateReadinessChecklist />
         </div>

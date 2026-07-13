@@ -6,6 +6,7 @@ import { ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
 import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
 import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
+import { useQuizStepFocus } from "@/components/tools/useQuizStepFocus";
 
 type Response = boolean | null;
 
@@ -65,6 +66,7 @@ export function TexasPowerOfAttorneyNavigator() {
   const [responses, setResponses] = useState(initialResponses);
   const [showResult, setShowResult] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const questionLegendRef = useQuizStepFocus(currentStep, !showResult);
   const currentQuestion = questions[currentStep];
 
   const completed = Object.values(responses).every(
@@ -107,10 +109,13 @@ export function TexasPowerOfAttorneyNavigator() {
   }
 
   return (
-    <div className="rounded-3xl border border-[#D8CDBF] bg-white p-5 shadow-sm sm:p-7">
+    <div
+      data-quiz-shell
+      className="scroll-mt-2 rounded-2xl border border-[#D8CDBF] bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7"
+    >
       {!showResult && (
         <div className="mx-auto max-w-2xl">
-          <div className="mb-6 border-b border-[#E8E0D6] pb-5">
+          <div className="mb-6 hidden border-b border-[#E8E0D6] pb-5 sm:block">
             <h2 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">
               Five jobs, five different documents
             </h2>
@@ -121,17 +126,21 @@ export function TexasPowerOfAttorneyNavigator() {
           </div>
 
           <QuizProgress current={currentStep + 1} total={questions.length} />
-          <fieldset className="mt-7 min-h-[190px]">
-            <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] sm:text-2xl">
+          <fieldset className="mt-4 min-h-0 sm:mt-7 sm:min-h-[190px]">
+            <legend
+              ref={questionLegendRef}
+              tabIndex={-1}
+              className="font-[family-name:var(--font-heading)] text-lg font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
+            >
               {currentQuestion.prompt}
             </legend>
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-3">
               {[true, false].map((value) => {
                 const selected = responses[currentQuestion.id] === value;
                 return (
                   <label
                     key={String(value)}
-                    className={`flex min-h-14 cursor-pointer items-center justify-center rounded-2xl border px-4 py-3 text-center text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                    className={`flex min-h-11 cursor-pointer items-center justify-center rounded-xl border px-3 py-2.5 text-center text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 sm:min-h-14 sm:rounded-2xl sm:px-4 sm:py-3 ${
                       selected
                         ? "border-[#5B7A5E] bg-[#EAF0E8] text-[#365239] shadow-sm"
                         : "border-[#D8CDBF] bg-white text-[#5B4F3E] hover:border-[#8CA18D]"
