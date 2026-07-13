@@ -139,7 +139,7 @@ Use only after the deployed collection event, privacy copy, durable count, and e
 
 Hi [team],
 
-WillBuddy is collecting five anonymous multiple-choice answers for an openly documented Texas estate-planning readiness project. The survey does not request names, emails, asset values, or document text, and the report will describe the sample as voluntary rather than representative.
+WillBuddy is collecting five account-unlinked multiple-choice answers for an openly documented Texas estate-planning readiness project. The survey does not attach a WillBuddy account ID, request names, emails, asset values, or document text, and the report will describe the sample as voluntary rather than representative.
 
 [tracked research URL]
 
@@ -160,6 +160,10 @@ Here is the resource again: [tracked URL]
 If this is outside your scope, I am happy to close the loop.
 
 [signature]
+
+[postal address]
+
+You can reply “no more outreach” and I will remove this address.
 
 ### 7. Final follow-up
 
@@ -250,4 +254,3 @@ Stop outreach immediately when:
 - [Texas Association of Regional Councils: Area Agencies on Aging](https://txregionalcouncil.org/regional-programs/health-and-human-services/area-agencies-on-aging/)
 - [Financial Planning Association chapter directory](https://www.financialplanningassociation.org/networking/find-your-chapter)
 - [TXCPA chapter directory](https://www.tx.cpa/community/find-your-chapter)
-

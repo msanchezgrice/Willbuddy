@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 
+// Keep in sync with the slugs in src/data/tools.ts.
 const tools = ["readiness", "will-trust", "intestacy", "cost", "poa"];
 
 for (const tool of tools) {

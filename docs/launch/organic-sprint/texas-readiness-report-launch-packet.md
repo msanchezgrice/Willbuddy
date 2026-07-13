@@ -13,7 +13,7 @@ All boxes must be checked by two people: the analysis owner and editorial/legal 
 - [ ] The deployed survey event fires once per completed five-question submission.
 - [ ] A durable, exportable response source exists. The current interface records `texas_readiness_survey_completed` through the analytics client; do not assume analytics event volume alone is a durable research dataset.
 - [ ] The exported properties match the five published questions and `survey_version`.
-- [ ] The team has documented whether analytics identifiers, IP-derived properties, cookies, or session metadata accompany the event. Public “anonymous” language matches the deployed reality.
+- [ ] The team has documented whether analytics identifiers, IP-derived properties, cookies, or session metadata accompany the event. Public account-unlinked language matches the deployed reality.
 - [ ] Test and staff events are excluded by a documented rule.
 - [ ] The frozen dataset contains at least 200 complete eligible responses.
 - [ ] Every published subgroup contains at least 25 complete responses.
@@ -76,7 +76,7 @@ Avoid “Texans say” unless the sentence immediately states that the responden
 
 ### Standfirst
 
-WillBuddy collected five anonymous multiple-choice answers from [N] self-identified Texas adults who voluntarily reached the survey between [start] and [end]. The results describe this group only; they are not a representative estimate of all Texans.
+WillBuddy collected five account-unlinked multiple-choice answers from [N] self-identified Texas adults who voluntarily reached the survey between [start] and [end]. The results describe this group only; they are not a representative estimate of all Texans.
 
 ### Key findings template
 
@@ -194,7 +194,7 @@ No. The instrument records self-reported multiple-choice answers. It does not in
 
 ### What personal information did the survey request?
 
-The instrument did not request names, emails, precise locations, asset values, or document text. Before release, the team will also disclose relevant analytics metadata and retention practices so “anonymous” is not broader than the deployed implementation supports.
+The instrument did not attach a WillBuddy account ID or request names, emails, precise locations, asset values, or document text. Before release, the team will also disclose relevant analytics metadata and retention practices so the privacy description does not exceed the deployed implementation.
 
 ### Why publish this data?
 
@@ -230,4 +230,3 @@ Start with the public routes already verified in the prospect sheet:
 - KERA, Houston Public Media, and Texas Public Radio through their public newsroom routes.
 
 Pitch the report only after release gates pass. Until then, invite organizations to review the methodology or share the survey—never preview findings from an incomplete sample.
-

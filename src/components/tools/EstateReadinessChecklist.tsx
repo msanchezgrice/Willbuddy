@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, RotateCcw, ShieldCheck } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
@@ -84,6 +84,7 @@ export function EstateReadinessChecklist() {
   >({});
   const [showResult, setShowResult] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const activeLegendRef = useRef<HTMLLegendElement>(null);
 
   const applicable = useMemo(
     () => getApplicableReadinessItems(profile),
@@ -98,6 +99,10 @@ export function EstateReadinessChecklist() {
   const totalSteps = PROFILE_QUESTIONS.length + checklistGroups.length;
   const profileQuestion = PROFILE_QUESTIONS[currentStep];
   const checklistGroup = checklistGroups[currentStep - PROFILE_QUESTIONS.length];
+
+  useEffect(() => {
+    if (!showResult) activeLegendRef.current?.focus();
+  }, [currentStep, showResult]);
 
   function updateProfile<K extends keyof ReadinessProfile>(
     key: K,
@@ -184,7 +189,11 @@ export function EstateReadinessChecklist() {
 
             {profileQuestion ? (
               <fieldset className="mt-7 min-h-[220px]">
-                <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] sm:text-2xl">
+                <legend
+                  ref={activeLegendRef}
+                  tabIndex={-1}
+                  className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
+                >
                   {profileQuestion.legend}
                 </legend>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -223,7 +232,11 @@ export function EstateReadinessChecklist() {
               </fieldset>
             ) : (
               <fieldset className="mt-7 min-h-[320px]">
-                <legend className="font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26] sm:text-2xl">
+                <legend
+                  ref={activeLegendRef}
+                  tabIndex={-1}
+                  className="font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26] outline-none sm:text-2xl"
+                >
                   What do you already have in place?
                 </legend>
                 <p className="mt-2 text-sm text-[#6F655A]">

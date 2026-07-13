@@ -42,7 +42,10 @@ test("onboarding, plan creation, and guided mode expose conversion events", asyn
   assert.match(onboarding, /onboarding_completed/);
   assert.match(sessionRoute, /captureServerEvent\("plan_started"/);
   assert.match(sessionRoute, /captureServerEvent\("plan_completed"/);
-  assert.match(serverAnalytics, /properties:\s*{\s*distinct_id: distinctId/);
+  assert.match(
+    serverAnalytics,
+    /properties:\s*{\s*\.\.\.stripSensitiveProperties\(properties\),\s*distinct_id: distinctId/
+  );
   assert.match(voiceProvider, /guided_plan_started/);
   assert.match(voiceProvider, /guided_plan_answer_saved/);
   assert.match(voiceProvider, /guided_plan_completed/);

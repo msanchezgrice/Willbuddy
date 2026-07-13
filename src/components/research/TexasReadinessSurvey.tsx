@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
 import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
@@ -64,7 +64,12 @@ export function TexasReadinessSurvey() {
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const questionLegendRef = useRef<HTMLLegendElement>(null);
   const currentQuestion = questions[currentStep];
+
+  useEffect(() => {
+    questionLegendRef.current?.focus();
+  }, [currentStep]);
 
   function submit() {
     if (questions.some((question) => !answers[question.id])) return;
@@ -121,7 +126,11 @@ export function TexasReadinessSurvey() {
       <div className="mt-6">
         <QuizProgress current={currentStep + 1} total={questions.length} />
         <fieldset className="mt-7 min-h-[290px]">
-          <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] sm:text-2xl">
+          <legend
+            ref={questionLegendRef}
+            tabIndex={-1}
+            className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
+          >
             {currentQuestion.legend}
           </legend>
           <div className="mt-5 grid gap-2.5">

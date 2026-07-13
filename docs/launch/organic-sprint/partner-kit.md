@@ -23,7 +23,7 @@ WillBuddy helps Texas families prepare for estate-planning conversations. Its fr
 | “When might estate-planning costs occur?” | [Texas estate-planning cost calculator](https://mywillbuddy.com/tools/texas-estate-planning-cost-calculator) | An editable comparison of preparation and possible later-administration cost ranges. It is not a quote or savings guarantee. |
 | “Which document handles finances, healthcare, privacy, or guardian preferences?” | [Texas power-of-attorney navigator](https://mywillbuddy.com/tools/texas-power-of-attorney-navigator) | A document-role map covering five commonly confused incapacity jobs. It does not validate or prepare a signed legal instrument. |
 | “Where can I see all five?” | [Free Texas estate-planning tools](https://mywillbuddy.com/blog/free-texas-estate-planning-tools) | An introduction to the suite and guidance on which tool to use first. Confirm this URL returns `200` before sharing it. |
-| “Can I help with the Texas readiness report?” | [Texas readiness research](https://mywillbuddy.com/research/texas-estate-planning-readiness) | A five-question anonymous contribution to an openly described convenience sample. It does not produce a personal score. |
+| “Can I help with the Texas readiness report?” | [Texas readiness research](https://mywillbuddy.com/research/texas-estate-planning-readiness) | A five-question account-unlinked contribution to an openly described convenience sample. It does not produce a personal score. |
 
 ## Approved copy blocks
 
@@ -85,9 +85,9 @@ https://mywillbuddy.com/blog/free-texas-estate-planning-tools?utm_source=<partne
 
 **Headline:** Help build a clearer picture of estate-planning readiness in Texas
 
-**Body:** WillBuddy is collecting five anonymous multiple-choice answers from Texas adults. The project does not ask for names, emails, asset values, or document text. Results will not be published before at least 200 complete responses, and the final report will describe the sample as voluntary rather than representative.
+**Body:** WillBuddy is collecting five account-unlinked multiple-choice answers from Texas adults. The project does not attach a WillBuddy account ID or ask for names, emails, asset values, or document text. Results will not be published before at least 200 complete responses, and the final report will describe the sample as voluntary rather than representative.
 
-**CTA:** Answer five anonymous questions
+**CTA:** Answer five account-unlinked questions
 
 **URL template:**
 
@@ -115,7 +115,7 @@ Financial authority, healthcare decisions, treatment wishes, health-information 
 
 ### Research
 
-Texas adults: help build an openly described estate-planning readiness report by answering five anonymous questions. No name, email, asset value, or document text is requested: https://mywillbuddy.com/research/texas-estate-planning-readiness
+Texas adults: help build an openly described estate-planning readiness report by answering five account-unlinked questions. No WillBuddy account ID, name, email, asset value, or document text is attached: https://mywillbuddy.com/research/texas-estate-planning-readiness
 
 ## Suggested linked-resource card
 
@@ -160,4 +160,3 @@ Do not publish any of these statements:
 - “Know exactly who inherits.”
 - “Attorney approved,” unless the named reviewer, date, scope, and permission are documented.
 - “Anonymous survey,” if the deployed analytics configuration or exported event data contains identifiers beyond the published privacy description.
-

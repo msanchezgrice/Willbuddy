@@ -40,6 +40,18 @@ test("research survey clearly distinguishes contribution from a personal score",
   assert.match(page, /\/tools\/estate-planning-readiness/);
   assert.match(survey, /contribute to the aggregate\s+Texas research/i);
   assert.match(survey, /do not generate a personal score/i);
+  assert.match(survey, /questionLegendRef\.current\?\.focus\(\)/);
+});
+
+test("stepped tool flows manage focus and do not double-count results", async () => {
+  const [readiness, intestacy] = await Promise.all([
+    read("src/components/tools/EstateReadinessChecklist.tsx"),
+    read("src/components/tools/TexasIntestacyCalculator.tsx"),
+  ]);
+
+  assert.match(readiness, /activeLegendRef\.current\?\.focus\(\)/);
+  assert.match(readiness, /tabIndex=\{-1\}/);
+  assert.match(intestacy, /if \(!complete \|\| submitted\) return/);
 });
 
 test("homepage and roundup post expose every free planning tool", async () => {

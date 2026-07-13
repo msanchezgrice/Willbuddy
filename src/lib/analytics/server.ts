@@ -25,8 +25,8 @@ export async function captureServerEvent(
         api_key: token,
         event,
         properties: {
-          distinct_id: distinctId,
           ...stripSensitiveProperties(properties),
+          distinct_id: distinctId,
         },
       }),
       cache: "no-store",

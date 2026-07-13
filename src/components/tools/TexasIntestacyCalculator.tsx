@@ -153,7 +153,7 @@ export function TexasIntestacyCalculator() {
           : collateral;
 
   function showMap() {
-    if (!complete) return;
+    if (!complete || submitted) return;
     setSubmitted({
       hasSpouse: toBoolean(spouse),
       hasDescendants: toBoolean(descendants),
