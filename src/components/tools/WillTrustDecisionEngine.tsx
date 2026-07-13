@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
+import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
+import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
 import {
   getWillTrustRecommendation,
   type WillTrustAnswers,
@@ -62,20 +64,24 @@ const QUESTIONS: BinaryQuestion[] = [
 ];
 
 export function WillTrustDecisionEngine() {
+  const { recordStart, recordComplete } = useToolAnalytics("will_trust_decision");
   const [answers, setAnswers] = useState<Partial<WillTrustAnswers>>({});
   const [result, setResult] = useState<WillTrustRecommendation | null>(null);
-  const isComplete = QUESTIONS.every((question) => question.id in answers);
+  const [currentStep, setCurrentStep] = useState(0);
+  const currentQuestion = QUESTIONS[currentStep];
+  const currentAnswer = answers[currentQuestion.id];
 
   function setAnswer(
     id: keyof WillTrustAnswers,
     value: boolean | "low" | "high"
   ) {
+    recordStart();
     setAnswers((current) => ({ ...current, [id]: value }));
     setResult(null);
   }
 
   function showResult() {
-    if (!isComplete) return;
+    if (!QUESTIONS.every((question) => question.id in answers)) return;
     const recommendation = getWillTrustRecommendation(
       answers as WillTrustAnswers
     );
@@ -83,25 +89,41 @@ export function WillTrustDecisionEngine() {
     captureAnalyticsEvent("will_trust_decision_completed", {
       result_id: recommendation.id,
     });
+    recordComplete({ result_id: recommendation.id });
   }
 
   function reset() {
     setAnswers({});
     setResult(null);
+    setCurrentStep(0);
+  }
+
+  function continueQuiz() {
+    if (currentAnswer === undefined) return;
+    if (currentStep === QUESTIONS.length - 1) {
+      showResult();
+      return;
+    }
+    setCurrentStep((step) => step + 1);
+  }
+
+  function goBack() {
+    setResult(null);
+    setCurrentStep((step) => Math.max(0, step - 1));
   }
 
   return (
     <section
       aria-labelledby="will-trust-tool-heading"
-      className="my-10 overflow-hidden rounded-3xl border border-[#D8CDBF] bg-[#F0EBE4]/70 shadow-sm"
+      className="my-8 overflow-hidden rounded-3xl border border-[#D8CDBF] bg-[#F0EBE4]/70 shadow-sm"
     >
-      <div className="border-b border-[#D8CDBF] bg-[#5B7A5E] px-6 py-7 text-white md:px-8">
+      <div className="border-b border-[#D8CDBF] bg-[#5B7A5E] px-5 py-6 text-white sm:px-7">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
           Free Texas decision tool
         </p>
         <h2
           id="will-trust-tool-heading"
-          className="mt-2 font-[family-name:var(--font-heading)] text-2xl font-bold md:text-3xl"
+          className="mt-2 font-[family-name:var(--font-heading)] text-2xl font-bold"
         >
           Should you start with a will or discuss a trust?
         </h2>
@@ -111,52 +133,55 @@ export function WillTrustDecisionEngine() {
         </p>
       </div>
 
-      <div className="space-y-7 px-6 py-7 md:px-8">
-        {QUESTIONS.map((question, index) => (
-          <fieldset key={question.id}>
-            <legend className="font-semibold leading-snug text-[#2D2A26]">
-              <span className="mr-2 text-[#5B7A5E]">{index + 1}.</span>
-              {question.legend}
-            </legend>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {question.options.map((option) => {
-                const optionId = `${question.id}-${String(option.value)}`;
-                const checked = answers[question.id] === option.value;
-                return (
-                  <label
-                    key={optionId}
-                    htmlFor={optionId}
-                    className={`cursor-pointer rounded-xl border px-4 py-3 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
-                      checked
-                        ? "border-[#5B7A5E] bg-white text-[#2D2A26]"
-                        : "border-[#D8CDBF] bg-white/60 text-[#5B4F3E] hover:border-[#9CAF9E]"
-                    }`}
-                  >
-                    <input
-                      id={optionId}
-                      type="radio"
-                      name={question.id}
-                      checked={checked}
-                      onChange={() => setAnswer(question.id, option.value)}
-                      className="mr-2 accent-[#5B7A5E]"
-                    />
-                    {option.label}
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-        ))}
-
-        <button
-          type="button"
-          onClick={showResult}
-          disabled={!isComplete}
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#2D2A26] px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 sm:w-auto"
-        >
-          See my result
-          <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-        </button>
+      <div className="px-5 py-6 sm:px-7">
+        {!result && (
+          <div className="mx-auto max-w-xl">
+            <QuizProgress current={currentStep + 1} total={QUESTIONS.length} />
+            <fieldset className="mt-7 min-h-[190px]">
+              <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] sm:text-2xl">
+                {currentQuestion.legend}
+              </legend>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {currentQuestion.options.map((option) => {
+                  const optionId = `${currentQuestion.id}-${String(option.value)}`;
+                  const checked = currentAnswer === option.value;
+                  return (
+                    <label
+                      key={optionId}
+                      htmlFor={optionId}
+                      className={`flex min-h-14 cursor-pointer items-center rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                        checked
+                          ? "border-[#5B7A5E] bg-white text-[#2D2A26] shadow-sm"
+                          : "border-[#D8CDBF] bg-white/60 text-[#5B4F3E] hover:border-[#9CAF9E]"
+                      }`}
+                    >
+                      <input
+                        id={optionId}
+                        type="radio"
+                        name={currentQuestion.id}
+                        checked={checked}
+                        onChange={() => setAnswer(currentQuestion.id, option.value)}
+                        className="mr-3 h-4 w-4 accent-[#5B7A5E]"
+                      />
+                      {option.label}
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+            <QuizNavigation
+              canContinue={currentAnswer !== undefined}
+              isFirst={currentStep === 0}
+              onBack={goBack}
+              onContinue={continueQuiz}
+              continueLabel={
+                currentStep === QUESTIONS.length - 1
+                  ? "See my result"
+                  : "Continue"
+              }
+            />
+          </div>
+        )}
 
         {result && (
           <div
@@ -226,7 +251,7 @@ export function WillTrustDecisionEngine() {
           </div>
         )}
 
-        <div className="border-t border-[#D8CDBF] pt-5 text-xs leading-relaxed text-[#6F655A]">
+        <div className="mt-6 border-t border-[#D8CDBF] pt-5 text-xs leading-relaxed text-[#6F655A]">
           <p>
             Educational only, not legal advice. This tool cannot determine
             whether a trust is appropriate for your facts. WillBuddy prepares

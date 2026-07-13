@@ -5,10 +5,7 @@ import {
   getAttributionProperties,
   stripSensitiveProperties,
 } from "@/lib/analytics/properties";
-import {
-  loadPostHogClient,
-  scheduleAnalyticsWork,
-} from "@/lib/analytics/posthog-client";
+import { loadPostHogClient } from "@/lib/analytics/posthog-client";
 import { normalizeAnalyticsRoute } from "@/lib/analytics/routes";
 
 type SearchParamsReader = {
@@ -45,10 +42,8 @@ export function capturePageview(
     ? getAttributionProperties(searchParams)
     : {};
 
-  scheduleAnalyticsWork(() => {
-    void capturePostHogEvent("$pageview", attributionProperties, pathname, {
-      registerProperties: attributionProperties,
-    });
+  void capturePostHogEvent("$pageview", attributionProperties, pathname, {
+    registerProperties: attributionProperties,
   });
 }
 

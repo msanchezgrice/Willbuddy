@@ -24,8 +24,10 @@ export async function captureServerEvent(
       body: JSON.stringify({
         api_key: token,
         event,
-        distinct_id: distinctId,
-        properties: stripSensitiveProperties(properties),
+        properties: {
+          distinct_id: distinctId,
+          ...stripSensitiveProperties(properties),
+        },
       }),
       cache: "no-store",
     });

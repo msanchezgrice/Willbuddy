@@ -20,7 +20,11 @@ new Script(compiled).runInNewContext({
   require,
 });
 
-const { getAttributionProperties, stripSensitiveProperties } = cjsModule.exports;
+const {
+  getAttributionProperties,
+  sanitizeTransportProperties,
+  stripSensitiveProperties,
+} = cjsModule.exports;
 
 assert.deepEqual(
   normalize(stripSensitiveProperties({
@@ -34,6 +38,30 @@ assert.deepEqual(
     route: "/",
     topic: "Support",
   }
+);
+
+assert.deepEqual(
+  normalize(
+    sanitizeTransportProperties({
+      token: "phc_publicProjectToken123",
+      email: "person@example.com",
+      route: "/tools/example",
+    })
+  ),
+  {
+    token: "phc_publicProjectToken123",
+    route: "/tools/example",
+  }
+);
+
+assert.deepEqual(
+  normalize(
+    sanitizeTransportProperties({
+      token: "private-session-token",
+      route: "/tools/example",
+    })
+  ),
+  { route: "/tools/example" }
 );
 
 const longValue = "a".repeat(200);

@@ -8,7 +8,7 @@ const publishedOn = "2026-07-13";
 
 export const metadata: Metadata = {
   title: "Texas Estate Planning Readiness Report",
-  description: "A transparent, evolving study of estate-planning readiness, with sourced national benchmarks and an anonymous Texas data-collection methodology.",
+  description: "A transparent, evolving study of estate-planning readiness, with sourced national benchmarks and a privacy-minimizing Texas data-collection methodology.",
   alternates: { canonical: "/research/texas-estate-planning-readiness" },
   openGraph: {
     title: "Texas Estate Planning Readiness Report",
@@ -44,7 +44,7 @@ export default function TexasReadinessReportPage() {
       {
         "@type": "DataCatalog",
         name: "WillBuddy Texas Estate Planning Readiness Research",
-        description: "A planned aggregate dataset of anonymous multiple-choice readiness responses from Texas adults. Publication begins only after the stated minimum sample threshold.",
+        description: "A planned aggregate dataset of account-unlinked multiple-choice readiness responses from Texas adults. Publication begins only after the stated minimum sample threshold.",
         url: absoluteUrl("/research/texas-estate-planning-readiness"),
       },
       {
@@ -61,19 +61,25 @@ export default function TexasReadinessReportPage() {
   return (
     <main className="flex-1">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/55 px-6 py-16 md:py-24">
+      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/55 px-6 py-10 md:py-14">
         <div className="mx-auto max-w-4xl">
           <nav aria-label="Breadcrumb" className="mb-7 text-sm text-[#7F7467]">
             <Link href="/">Home</Link> <span aria-hidden="true">/</span> <Link href="/research">Research</Link> <span aria-hidden="true">/</span> <span>Readiness report</span>
           </nav>
           <div className="inline-flex rounded-full bg-[#DDE8DE] px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[#4A6A4D]">Data collection in progress</div>
-          <h1 className="mt-5 max-w-3xl font-[family-name:var(--font-heading)] text-4xl font-bold leading-tight text-[#2D2A26] md:text-6xl">Texas Estate Planning Readiness Report</h1>
-          <p className="mt-6 max-w-3xl text-lg leading-relaxed text-[#5B4F3E]">A living research project designed to measure whether Texans have made, updated, and communicated the decisions their families may need.</p>
-          <div className="mt-8 rounded-2xl border border-[#D8CDBF] bg-white/80 p-5 text-sm leading-relaxed text-[#5B4F3E]"><strong className="text-[#2D2A26]">Status and editorial note:</strong> No original Texas findings are published yet. The figures below are clearly labeled national baselines. This page was source-checked July 13, 2026 and was not attorney-reviewed. WillBuddy is not a law firm and does not provide legal advice.</div>
+          <h1 className="mt-5 max-w-3xl font-[family-name:var(--font-heading)] text-4xl font-bold leading-tight text-[#2D2A26] md:text-5xl">Texas Estate Planning Readiness Report</h1>
+          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-[#5B4F3E]">A living research project designed to measure whether Texans have made, updated, and communicated the decisions their families may need.</p>
+          <Link
+            href="#contribute"
+            className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#5B7A5E] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#4A6A4D]"
+          >
+            Help by answering five questions
+          </Link>
+          <div className="mt-5 rounded-2xl border border-[#D8CDBF] bg-white/80 p-4 text-sm leading-relaxed text-[#5B4F3E]"><strong className="text-[#2D2A26]">Status and editorial note:</strong> No original Texas findings are published yet. The figures below are clearly labeled national baselines. This page was source-checked July 13, 2026 and was not attorney-reviewed. WillBuddy is not a law firm and does not provide legal advice.</div>
         </div>
       </section>
 
-      <section className="px-6 py-16 md:py-20">
+      <section className="px-6 py-12 md:py-16">
         <div className="mx-auto max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">National context, not Texas estimates</p>
           <h2 className="mt-3 font-[family-name:var(--font-heading)] text-3xl font-bold text-[#2D2A26]">The documented readiness gap</h2>
@@ -94,20 +100,40 @@ export default function TexasReadinessReportPage() {
         </div>
       </section>
 
-      <section className="bg-[#F0EBE4]/45 px-6 py-16 md:py-20">
-        <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[0.85fr_1.15fr]">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">Open methodology</p>
-            <h2 className="mt-3 font-[family-name:var(--font-heading)] text-3xl font-bold text-[#2D2A26]">How Texas results will be published</h2>
-            <ul className="mt-6 space-y-4 text-sm leading-relaxed text-[#5B4F3E]">
+      <section id="contribute" className="scroll-mt-6 bg-[#F0EBE4]/45 px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-4xl">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">Help us understand readiness in Texas</p>
+            <h2 className="mt-3 font-[family-name:var(--font-heading)] text-3xl font-bold text-[#2D2A26]">Answer five questions to help build the report</h2>
+            <p className="mt-4 leading-relaxed text-[#5B4F3E]">
+              This short account-unlinked survey helps us understand which planning
+              decisions Texans have completed and where people get stuck. It
+              contributes to research; it is not the personalized readiness
+              quiz.
+            </p>
+            <Link
+              href="/tools/estate-planning-readiness"
+              className="mt-4 inline-flex text-sm font-semibold text-[#4A6A4D] underline underline-offset-2"
+            >
+              Looking for your personal score? Use the readiness quiz →
+            </Link>
+          </div>
+
+          <div className="mt-8">
+            <TexasReadinessSurvey />
+          </div>
+
+          <aside className="mt-8 rounded-2xl border border-[#D8CDBF] bg-white/65 p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">How we will use the answers</p>
+            <h3 className="mt-2 font-[family-name:var(--font-heading)] text-2xl font-bold text-[#2D2A26]">Open methodology and privacy limits</h3>
+            <ul className="mt-5 grid gap-4 text-sm leading-relaxed text-[#5B4F3E] md:grid-cols-2">
               <li><strong className="text-[#2D2A26]">Eligibility:</strong> self-identified Texas adults who voluntarily reach this page.</li>
-              <li><strong className="text-[#2D2A26]">Instrument:</strong> five multiple-choice readiness questions; no names, emails, asset values, or document text.</li>
+              <li><strong className="text-[#2D2A26]">Questions:</strong> five multiple-choice readiness questions; no names, emails, asset values, or document text.</li>
               <li><strong className="text-[#2D2A26]">Publication threshold:</strong> a minimum of 200 complete responses before any Texas aggregate is reported.</li>
               <li><strong className="text-[#2D2A26]">Small-group rule:</strong> no subgroup result with fewer than 25 responses.</li>
-              <li><strong className="text-[#2D2A26]">Limitations:</strong> this is a voluntary convenience sample, not a representative poll. Results will not be weighted or generalized to all Texans.</li>
+              <li className="md:col-span-2"><strong className="text-[#2D2A26]">Limitations:</strong> this is a voluntary convenience sample, not a representative poll. Results will not be weighted or generalized to all Texans.</li>
             </ul>
-          </div>
-          <TexasReadinessSurvey />
+          </aside>
         </div>
       </section>
     </main>

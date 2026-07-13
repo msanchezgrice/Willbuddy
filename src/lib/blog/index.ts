@@ -1,4 +1,5 @@
 import type { BlogPost } from "./types";
+import { freeTexasEstatePlanningTools } from "./posts/free-texas-estate-planning-tools";
 import { partnerConversation } from "./posts/talk-to-partner-about-estate-planning";
 import { bigDecisions } from "./posts/big-decisions-new-parents";
 import { choosingGuardian } from "./posts/choosing-a-guardian";
@@ -11,6 +12,7 @@ import { agingParents } from "./posts/talk-to-aging-parents";
 import { lifeChanges } from "./posts/updating-your-estate-plan";
 
 export const blogPosts: BlogPost[] = [
+  freeTexasEstatePlanningTools,
   partnerConversation,
   bigDecisions,
   choosingGuardian,

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, ArrowRight, RotateCcw } from "lucide-react";
+import { AlertTriangle, RotateCcw } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
+import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
+import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
 import {
   calculateTexasIntestacy,
   type InheritanceShare,
@@ -117,11 +119,15 @@ function PropertyMap({
 }
 
 export function TexasIntestacyCalculator() {
+  const { recordStart, recordComplete } = useToolAnalytics(
+    "texas_intestacy_calculator"
+  );
   const [spouse, setSpouse] = useState<BooleanChoice>("");
   const [descendants, setDescendants] = useState<BooleanChoice>("");
   const [allShared, setAllShared] = useState<BooleanChoice>("");
   const [collateral, setCollateral] = useState<BooleanChoice>("");
   const [submitted, setSubmitted] = useState<TexasIntestacyInputs | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const needsShared = spouse === "yes" && descendants === "yes";
   const needsCollateral = descendants === "no";
@@ -131,6 +137,20 @@ export function TexasIntestacyCalculator() {
     (!needsShared || allShared !== "") &&
     (!needsCollateral || collateral !== "");
   const result = submitted ? calculateTexasIntestacy(submitted) : null;
+  const steps = [
+    "spouse",
+    "descendants",
+    ...(needsShared ? ["shared"] : needsCollateral ? ["collateral"] : []),
+  ] as const;
+  const currentQuestion = steps[currentStep];
+  const currentValue =
+    currentQuestion === "spouse"
+      ? spouse
+      : currentQuestion === "descendants"
+        ? descendants
+        : currentQuestion === "shared"
+          ? allShared
+          : collateral;
 
   function showMap() {
     if (!complete) return;
@@ -145,6 +165,13 @@ export function TexasIntestacyCalculator() {
     captureAnalyticsEvent("texas_intestacy_map_completed", {
       tool: "texas_intestacy_calculator",
     });
+    recordComplete({
+      family_path: needsShared
+        ? "spouse_descendants"
+        : needsCollateral
+          ? "collateral"
+          : "direct",
+    });
   }
 
   function reset() {
@@ -153,6 +180,17 @@ export function TexasIntestacyCalculator() {
     setAllShared("");
     setCollateral("");
     setSubmitted(null);
+    setCurrentStep(0);
+  }
+
+  function continueQuiz() {
+    if (currentValue === "") return;
+    recordStart();
+    if (currentStep === steps.length - 1) {
+      showMap();
+      return;
+    }
+    setCurrentStep((step) => step + 1);
   }
 
   return (
@@ -170,83 +208,88 @@ export function TexasIntestacyCalculator() {
             only when you select “Show the inheritance map.”
           </p>
 
-          <div className="mt-7 space-y-6">
-            <fieldset>
-              <legend className="text-sm font-semibold text-[#2D2A26]">
-                A surviving spouse?
+          <div className="mt-7">
+            <QuizProgress current={currentStep + 1} total={steps.length} label="Step" />
+            <fieldset className="mt-7 min-h-[170px]">
+              <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26]">
+                {currentQuestion === "spouse"
+                  ? "Is there a surviving spouse?"
+                  : currentQuestion === "descendants"
+                    ? "Are there children, grandchildren, or other descendants?"
+                    : currentQuestion === "shared"
+                      ? "Is every descendant also a descendant of the surviving spouse?"
+                      : "Is there at least one parent, sibling, or descendant of a sibling?"}
               </legend>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <Choice name="spouse" value="yes" selected={spouse === "yes"} onChange={setSpouse}>
-                  Yes
-                </Choice>
-                <Choice name="spouse" value="no" selected={spouse === "no"} onChange={setSpouse}>
-                  No
-                </Choice>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend className="text-sm font-semibold text-[#2D2A26]">
-                Children, grandchildren, or other descendants?
-              </legend>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <Choice name="descendants" value="yes" selected={descendants === "yes"} onChange={setDescendants}>
-                  Yes
-                </Choice>
-                <Choice name="descendants" value="no" selected={descendants === "no"} onChange={setDescendants}>
-                  No
-                </Choice>
-              </div>
-            </fieldset>
-
-            {needsShared && (
-              <fieldset>
-                <legend className="text-sm font-semibold text-[#2D2A26]">
-                  Is every descendant also a descendant of the surviving spouse?
-                </legend>
-                <p className="mt-1 text-xs leading-relaxed text-[#7F7467]">
+              {currentQuestion === "shared" && (
+                <p className="mt-2 text-xs leading-relaxed text-[#7F7467]">
                   Select no if either spouse has a child from another relationship.
                 </p>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <Choice name="shared" value="yes" selected={allShared === "yes"} onChange={setAllShared}>
-                    Yes, all shared
-                  </Choice>
-                  <Choice name="shared" value="no" selected={allShared === "no"} onChange={setAllShared}>
-                    No
-                  </Choice>
-                </div>
-              </fieldset>
-            )}
-
-            {needsCollateral && (
-              <fieldset>
-                <legend className="text-sm font-semibold text-[#2D2A26]">
-                  At least one parent, sibling, or descendant of a sibling?
-                </legend>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <Choice name="collateral" value="yes" selected={collateral === "yes"} onChange={setCollateral}>
-                    Yes
-                  </Choice>
-                  <Choice name="collateral" value="no" selected={collateral === "no"} onChange={setCollateral}>
-                    No / unsure
-                  </Choice>
-                </div>
-              </fieldset>
-            )}
+              )}
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <Choice
+                  name={currentQuestion}
+                  value="yes"
+                  selected={currentValue === "yes"}
+                  onChange={(value) => {
+                    if (currentQuestion === "spouse") {
+                      setSpouse(value);
+                      setAllShared("");
+                    } else if (currentQuestion === "descendants") {
+                      setDescendants(value);
+                      setAllShared("");
+                      setCollateral("");
+                    } else if (currentQuestion === "shared") {
+                      setAllShared(value);
+                    } else {
+                      setCollateral(value);
+                    }
+                    setSubmitted(null);
+                  }}
+                >
+                  {currentQuestion === "shared" ? "Yes, all shared" : "Yes"}
+                </Choice>
+                <Choice
+                  name={currentQuestion}
+                  value="no"
+                  selected={currentValue === "no"}
+                  onChange={(value) => {
+                    if (currentQuestion === "spouse") {
+                      setSpouse(value);
+                      setAllShared("");
+                    } else if (currentQuestion === "descendants") {
+                      setDescendants(value);
+                      setAllShared("");
+                      setCollateral("");
+                    } else if (currentQuestion === "shared") {
+                      setAllShared(value);
+                    } else {
+                      setCollateral(value);
+                    }
+                    setSubmitted(null);
+                  }}
+                >
+                  {currentQuestion === "collateral" ? "No / unsure" : "No"}
+                </Choice>
+              </div>
+            </fieldset>
+            <QuizNavigation
+              canContinue={currentValue !== ""}
+              isFirst={currentStep === 0}
+              onBack={() => setCurrentStep((step) => Math.max(0, step - 1))}
+              onContinue={continueQuiz}
+              continueLabel={
+                currentStep === steps.length - 1
+                  ? "Show the inheritance map"
+                  : "Continue"
+              }
+            />
           </div>
-
-          <button
-            type="button"
-            onClick={showMap}
-            disabled={!complete}
-            className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#304733] px-5 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#243727] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B7A5E] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Show the inheritance map
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </button>
         </section>
 
-        <section className="p-5 sm:p-7" aria-live="polite">
+        <section
+          className={`p-5 sm:p-7 ${!result ? "hidden lg:block" : ""}`}
+          aria-live="polite"
+        >
           {!result ? (
             <div className="flex min-h-[28rem] items-center justify-center rounded-2xl border border-dashed border-[#CFC2B2] bg-white/65 p-8 text-center">
               <div className="max-w-sm">

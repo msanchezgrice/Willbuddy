@@ -153,6 +153,7 @@ export interface OnboardingQuizAnswers {
 export interface SessionGoals {
   preset: string | null;
   modules: Section[];
+  inputMethod?: "voice" | "guided";
 }
 
 export interface Decision {

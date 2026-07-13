@@ -100,26 +100,26 @@ export default function TexasPowerOfAttorneyNavigatorPage() {
         }}
       />
 
-      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/60 px-6 py-14 md:py-20">
+      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/60 px-6 py-8 md:py-10">
         <div className="mx-auto max-w-4xl">
           <nav aria-label="Breadcrumb" className="text-sm text-[#7F7467]">
             <Link href="/">Home</Link> <span aria-hidden="true">/</span>{" "}
             <Link href="/tools">Tools</Link> <span aria-hidden="true">/</span>{" "}
             <span>Texas POA navigator</span>
           </nav>
-          <p className="mt-8 text-sm font-semibold uppercase tracking-[0.18em] text-[#5B7A5E]">
+          <p className="mt-5 text-sm font-semibold uppercase tracking-[0.18em] text-[#5B7A5E]">
             Free Texas decision tool
           </p>
-          <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-heading)] text-4xl font-bold leading-tight text-[#2D2A26] md:text-6xl">
+          <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-heading)] text-4xl font-bold leading-tight text-[#2D2A26] md:text-5xl">
             Which power of attorney or advance directive does what?
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[#5B4F3E]">
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#5B4F3E] md:text-lg">
             Texas uses separate documents for financial authority, medical
             decision-making, treatment instructions, health-information access,
             and future guardian preferences. Build a document map without
             entering names, medical details, or financial information.
           </p>
-          <p className="mt-6 max-w-2xl rounded-2xl border border-[#D8CDBF] bg-white/80 p-5 text-sm leading-relaxed text-[#5B4F3E]">
+          <p className="mt-4 max-w-2xl rounded-2xl border border-[#D8CDBF] bg-white/80 p-4 text-sm leading-relaxed text-[#5B4F3E]">
             <strong className="text-[#2D2A26]">Educational disclaimer:</strong>{" "}
             This navigator provides general educational information, not legal
             advice. It cannot determine whether a form is valid or suitable for
@@ -129,13 +129,13 @@ export default function TexasPowerOfAttorneyNavigatorPage() {
         </div>
       </section>
 
-      <section className="px-6 py-14 md:py-20">
-        <div className="mx-auto max-w-4xl">
+      <section className="px-6 py-8 md:py-10">
+        <div className="mx-auto max-w-3xl">
           <TexasPowerOfAttorneyNavigator />
         </div>
       </section>
 
-      <section className="border-y border-[#E8E0D6] bg-white px-6 py-14 md:py-20">
+      <section className="border-y border-[#E8E0D6] bg-white px-6 py-12 md:py-16">
         <div className="mx-auto max-w-4xl">
           <h2 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-[#2D2A26]">
             The five documents are not interchangeable

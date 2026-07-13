@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, RotateCcw, ShieldCheck } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
+import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
+import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
 import {
   buildReadinessResult,
   getApplicableReadinessItems,
@@ -68,6 +70,9 @@ const BAND_COPY = {
 } as const;
 
 export function EstateReadinessChecklist() {
+  const { recordStart, recordComplete } = useToolAnalytics(
+    "estate_planning_readiness"
+  );
   const [profile, setProfile] = useState<ReadinessProfile>({
     planningFor: "individual",
     children: "no_children",
@@ -78,6 +83,7 @@ export function EstateReadinessChecklist() {
     Partial<Record<ReadinessItem["id"], boolean>>
   >({});
   const [showResult, setShowResult] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const applicable = useMemo(
     () => getApplicableReadinessItems(profile),
@@ -88,16 +94,25 @@ export function EstateReadinessChecklist() {
     [profile, completed]
   );
   const bandCopy = BAND_COPY[result.band];
+  const checklistGroups = [applicable.slice(0, 4), applicable.slice(4)];
+  const totalSteps = PROFILE_QUESTIONS.length + checklistGroups.length;
+  const profileQuestion = PROFILE_QUESTIONS[currentStep];
+  const checklistGroup = checklistGroups[currentStep - PROFILE_QUESTIONS.length];
 
   function updateProfile<K extends keyof ReadinessProfile>(
     key: K,
     value: ReadinessProfile[K]
   ) {
+    recordStart();
     setProfile((current) => ({ ...current, [key]: value }));
+    if (key === "children" && value !== "minor_children") {
+      setCompleted((current) => ({ ...current, guardian: false }));
+    }
     setShowResult(false);
   }
 
   function toggle(id: ReadinessItem["id"]) {
+    recordStart();
     setCompleted((current) => ({ ...current, [id]: !current[id] }));
     setShowResult(false);
   }
@@ -105,6 +120,13 @@ export function EstateReadinessChecklist() {
   function calculate() {
     setShowResult(true);
     captureAnalyticsEvent("estate_readiness_completed", {
+      score_band: result.band,
+      score_bucket:
+        result.score >= 75 ? "75_100" : result.score >= 40 ? "40_74" : "0_39",
+      applicable_item_count: result.totalCount,
+      completed_item_count: result.completedCount,
+    });
+    recordComplete({
       score_band: result.band,
       score_bucket:
         result.score >= 75 ? "75_100" : result.score >= 40 ? "40_74" : "0_39",
@@ -122,11 +144,21 @@ export function EstateReadinessChecklist() {
     });
     setCompleted({});
     setShowResult(false);
+    setCurrentStep(0);
+  }
+
+  function continueQuiz() {
+    recordStart();
+    if (currentStep === totalSteps - 1) {
+      calculate();
+      return;
+    }
+    setCurrentStep((step) => step + 1);
   }
 
   return (
     <div className="overflow-hidden rounded-3xl border border-[#D8CDBF] bg-white shadow-sm">
-      <div className="border-b border-[#E8E0D6] bg-[#F0EBE4]/60 px-6 py-7 md:px-9">
+      <div className="border-b border-[#E8E0D6] bg-[#F0EBE4]/60 px-5 py-6 sm:px-7">
         <div className="flex items-start gap-3">
           <ShieldCheck className="mt-1 h-7 w-7 shrink-0 text-[#5B7A5E]" aria-hidden="true" />
           <div>
@@ -141,118 +173,129 @@ export function EstateReadinessChecklist() {
         </div>
       </div>
 
-      <div className="space-y-10 px-6 py-8 md:px-9">
-        <div className="grid gap-6 md:grid-cols-2">
-          {PROFILE_QUESTIONS.map((question) => (
-            <fieldset key={question.id}>
-              <legend className="text-sm font-semibold text-[#2D2A26]">
-                {question.legend}
-              </legend>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {question.options.map((option) => {
-                  const selected = profile[question.id] === option.value;
-                  const id = `readiness-${question.id}-${option.value}`;
-                  return (
-                    <label
-                      key={option.value}
-                      htmlFor={id}
-                      className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
-                        selected
-                          ? "border-[#5B7A5E] bg-[#5B7A5E] text-white"
-                          : "border-[#D8CDBF] bg-white text-[#5B4F3E] hover:border-[#9CAF9E]"
-                      }`}
-                    >
-                      <input
-                        id={id}
-                        type="radio"
-                        name={question.id}
-                        value={option.value}
-                        checked={selected}
-                        onChange={() =>
-                          updateProfile(
-                            question.id,
-                            option.value as ReadinessProfile[typeof question.id]
-                          )
-                        }
-                        className="sr-only"
-                      />
-                      {option.label}
-                    </label>
-                  );
-                })}
-              </div>
-            </fieldset>
-          ))}
-        </div>
+      <div className="px-5 py-6 sm:px-7">
+        {!showResult && (
+          <div className="mx-auto max-w-2xl">
+            <QuizProgress
+              current={currentStep + 1}
+              total={totalSteps}
+              label="Step"
+            />
 
-        {profile.texas === "no" && (
-          <p className="rounded-xl border border-[#D8CDBF] bg-[#FFF9EE] px-4 py-3 text-sm leading-relaxed text-[#5B4F3E]">
-            This checklist is generally useful, but WillBuddy&apos;s documents
-            and legal sources are Texas-specific. Use a lawyer or official
-            resources in your state before acting on it.
-          </p>
-        )}
+            {profileQuestion ? (
+              <fieldset className="mt-7 min-h-[220px]">
+                <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] sm:text-2xl">
+                  {profileQuestion.legend}
+                </legend>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {profileQuestion.options.map((option) => {
+                    const selected = profile[profileQuestion.id] === option.value;
+                    const id = `readiness-${profileQuestion.id}-${option.value}`;
+                    return (
+                      <label
+                        key={option.value}
+                        htmlFor={id}
+                        className={`flex min-h-14 cursor-pointer items-center rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                          selected
+                            ? "border-[#5B7A5E] bg-[#F3F7F3] text-[#2D2A26] shadow-sm"
+                            : "border-[#D8CDBF] bg-white text-[#5B4F3E] hover:border-[#9CAF9E]"
+                        }`}
+                      >
+                        <input
+                          id={id}
+                          type="radio"
+                          name={profileQuestion.id}
+                          value={option.value}
+                          checked={selected}
+                          onChange={() =>
+                            updateProfile(
+                              profileQuestion.id,
+                              option.value as ReadinessProfile[typeof profileQuestion.id]
+                            )
+                          }
+                          className="mr-3 h-4 w-4 accent-[#5B7A5E]"
+                        />
+                        {option.label}
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            ) : (
+              <fieldset className="mt-7 min-h-[320px]">
+                <legend className="font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26] sm:text-2xl">
+                  What do you already have in place?
+                </legend>
+                <p className="mt-2 text-sm text-[#6F655A]">
+                  Check every item that is current and that the right people can find.
+                </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {(checklistGroup ?? []).map((item) => {
+                    const checked = Boolean(completed[item.id]);
+                    return (
+                      <label
+                        key={item.id}
+                        htmlFor={`readiness-item-${item.id}`}
+                        className={`cursor-pointer rounded-2xl border p-4 transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                          checked
+                            ? "border-[#9CAF9E] bg-[#F4F7F3]"
+                            : "border-[#E8E0D6] bg-white hover:border-[#D8CDBF]"
+                        }`}
+                      >
+                        <span className="flex items-start gap-3">
+                          <span
+                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+                              checked
+                                ? "border-[#5B7A5E] bg-[#5B7A5E] text-white"
+                                : "border-[#C8BDAF] bg-white"
+                            }`}
+                          >
+                            {checked && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+                          </span>
+                          <span>
+                            <span className="block text-sm font-semibold text-[#2D2A26]">
+                              {item.title}
+                            </span>
+                            <span className="mt-1 block text-xs leading-relaxed text-[#6F655A]">
+                              {item.description}
+                            </span>
+                          </span>
+                        </span>
+                        <input
+                          id={`readiness-item-${item.id}`}
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggle(item.id)}
+                          className="sr-only"
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            )}
 
-        <fieldset>
-          <legend className="font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26]">
-            What do you already have in place?
-          </legend>
-          <p className="mt-2 text-sm text-[#6F655A]">
-            Check an item only if it is current and the right people can find it.
-          </p>
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
-            {applicable.map((item) => {
-              const checked = Boolean(completed[item.id]);
-              return (
-                <label
-                  key={item.id}
-                  htmlFor={`readiness-item-${item.id}`}
-                  className={`cursor-pointer rounded-2xl border p-4 transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
-                    checked
-                      ? "border-[#9CAF9E] bg-[#F4F7F3]"
-                      : "border-[#E8E0D6] bg-white hover:border-[#D8CDBF]"
-                  }`}
-                >
-                  <span className="flex items-start gap-3">
-                    <span
-                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
-                        checked
-                          ? "border-[#5B7A5E] bg-[#5B7A5E] text-white"
-                          : "border-[#C8BDAF] bg-white"
-                      }`}
-                    >
-                      {checked && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-[#2D2A26]">
-                        {item.title}
-                      </span>
-                      <span className="mt-1 block text-xs leading-relaxed text-[#6F655A]">
-                        {item.description}
-                      </span>
-                    </span>
-                  </span>
-                  <input
-                    id={`readiness-item-${item.id}`}
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggle(item.id)}
-                    className="sr-only"
-                  />
-                </label>
-              );
-            })}
+            {profile.texas === "no" && currentStep >= PROFILE_QUESTIONS.length && (
+              <p className="mt-5 rounded-xl border border-[#D8CDBF] bg-[#FFF9EE] px-4 py-3 text-sm leading-relaxed text-[#5B4F3E]">
+                This checklist is generally useful, but WillBuddy&apos;s documents
+                and legal sources are Texas-specific. Use official resources in
+                your state before acting on it.
+              </p>
+            )}
+
+            <QuizNavigation
+              canContinue={true}
+              isFirst={currentStep === 0}
+              onBack={() => setCurrentStep((step) => Math.max(0, step - 1))}
+              onContinue={continueQuiz}
+              continueLabel={
+                currentStep === totalSteps - 1
+                  ? "Calculate my score"
+                  : "Continue"
+              }
+            />
           </div>
-        </fieldset>
-
-        <button
-          type="button"
-          onClick={calculate}
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#2D2A26] px-7 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 sm:w-auto"
-        >
-          Calculate my readiness score
-          <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-        </button>
+        )}
 
         {showResult && (
           <section
@@ -326,7 +369,7 @@ export function EstateReadinessChecklist() {
           </section>
         )}
 
-        <p className="border-t border-[#E8E0D6] pt-5 text-xs leading-relaxed text-[#6F655A]">
+        <p className="mt-6 border-t border-[#E8E0D6] pt-5 text-xs leading-relaxed text-[#6F655A]">
           Privacy note: your checklist answers stay in this browser session. Our
           analytics receive only the score band and item counts—not your
           individual selections. Educational only; this is not legal advice or

@@ -1,7 +1,7 @@
 "use client";
 
 import type { CaptureResult } from "posthog-js";
-import { stripSensitiveProperties } from "@/lib/analytics/properties";
+import { sanitizeTransportProperties } from "@/lib/analytics/properties";
 import { normalizeAnalyticsRoute } from "@/lib/analytics/routes";
 
 const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com";
@@ -58,25 +58,12 @@ export function loadPostHogClient(): Promise<PostHogClient | null> {
   return clientPromise;
 }
 
-export function scheduleAnalyticsWork(work: () => void) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(work, { timeout: 3000 });
-    return;
-  }
-
-  globalThis.setTimeout(work, 1200);
-}
-
 function sanitizePostHogEvent(event: CaptureResult | null): CaptureResult | null {
   if (!event) {
     return null;
   }
 
-  const properties = stripSensitiveProperties(event.properties ?? {});
+  const properties = sanitizeTransportProperties(event.properties ?? {});
   const path = getString(properties.$pathname) ?? window.location.pathname;
   const route = normalizeAnalyticsRoute(path);
 

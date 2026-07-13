@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { SignUp } from "@clerk/nextjs";
 import { ArrowLeft, Check } from "lucide-react";
@@ -92,6 +92,7 @@ export function OnboardingFlow({
 }: {
   initialPlanningFor?: string;
 }) {
+  const startedTrackedRef = useRef(false);
   // If the visitor picked "who are you planning for?" on the landing hero,
   // seed that answer and skip straight to the next question (commitment effect).
   const seededPlanningFor =
@@ -124,6 +125,14 @@ export function OnboardingFlow({
     [answers]
   );
   const selectedModules = planModules ?? inferredModules;
+
+  useEffect(() => {
+    if (startedTrackedRef.current) return;
+    startedTrackedRef.current = true;
+    captureAnalyticsEvent("onboarding_started", {
+      onboarding_version: "2026-07-13",
+    });
+  }, []);
 
   const persistAnswers = useMemo(
     () => (final: Record<string, string>) => {
