@@ -11,7 +11,8 @@ This is an instrumentation baseline captured immediately after the tool launch a
 
 ## PostHog instrumentation proof
 
-Project: `willbuddy-voice-first-estate-planning` (`464452`)  
+Project: `willbuddy-voice-first-estate-planning` (`464452`)
+
 Window start: `2026-07-13 00:00:00 UTC`
 
 | Event | Count | Distinct people | Notes |
