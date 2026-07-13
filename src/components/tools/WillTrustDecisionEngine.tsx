@@ -6,6 +6,7 @@ import { ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
 import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
 import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
+import { useQuizStepFocus } from "@/components/tools/useQuizStepFocus";
 import {
   getWillTrustRecommendation,
   type WillTrustAnswers,
@@ -68,6 +69,7 @@ export function WillTrustDecisionEngine() {
   const [answers, setAnswers] = useState<Partial<WillTrustAnswers>>({});
   const [result, setResult] = useState<WillTrustRecommendation | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const questionLegendRef = useQuizStepFocus(currentStep, !result);
   const currentQuestion = QUESTIONS[currentStep];
   const currentAnswer = answers[currentQuestion.id];
 
@@ -115,9 +117,10 @@ export function WillTrustDecisionEngine() {
   return (
     <section
       aria-labelledby="will-trust-tool-heading"
-      className="my-8 overflow-hidden rounded-3xl border border-[#D8CDBF] bg-[#F0EBE4]/70 shadow-sm"
+      data-quiz-shell
+      className="my-3 scroll-mt-2 overflow-hidden rounded-2xl border border-[#D8CDBF] bg-[#F0EBE4]/70 shadow-sm sm:my-8 sm:rounded-3xl"
     >
-      <div className="border-b border-[#D8CDBF] bg-[#5B7A5E] px-5 py-6 text-white sm:px-7">
+      <div className="hidden border-b border-[#D8CDBF] bg-[#5B7A5E] px-5 py-6 text-white sm:block sm:px-7">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
           Free Texas decision tool
         </p>
@@ -133,15 +136,19 @@ export function WillTrustDecisionEngine() {
         </p>
       </div>
 
-      <div className="px-5 py-6 sm:px-7">
+      <div className="px-4 py-4 sm:px-7 sm:py-6">
         {!result && (
           <div className="mx-auto max-w-xl">
             <QuizProgress current={currentStep + 1} total={QUESTIONS.length} />
-            <fieldset className="mt-7 min-h-[190px]">
-              <legend className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] sm:text-2xl">
+            <fieldset className="mt-4 min-h-0 sm:mt-7 sm:min-h-[190px]">
+              <legend
+                ref={questionLegendRef}
+                tabIndex={-1}
+                className="font-[family-name:var(--font-heading)] text-lg font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
+              >
                 {currentQuestion.legend}
               </legend>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="mt-3 grid gap-2 sm:mt-5 sm:grid-cols-2 sm:gap-3">
                 {currentQuestion.options.map((option) => {
                   const optionId = `${currentQuestion.id}-${String(option.value)}`;
                   const checked = currentAnswer === option.value;
@@ -149,7 +156,7 @@ export function WillTrustDecisionEngine() {
                     <label
                       key={optionId}
                       htmlFor={optionId}
-                      className={`flex min-h-14 cursor-pointer items-center rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                      className={`flex min-h-11 cursor-pointer items-center rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 sm:min-h-14 sm:rounded-2xl sm:px-4 sm:py-3 ${
                         checked
                           ? "border-[#5B7A5E] bg-white text-[#2D2A26] shadow-sm"
                           : "border-[#D8CDBF] bg-white/60 text-[#5B4F3E] hover:border-[#9CAF9E]"

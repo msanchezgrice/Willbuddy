@@ -26,6 +26,8 @@ test("questionnaires use a shared step flow with progress and back navigation", 
     assert.match(questionnaire, /QuizProgress/);
     assert.match(questionnaire, /QuizNavigation/);
     assert.match(questionnaire, /currentStep/);
+    assert.match(questionnaire, /data-quiz-shell/);
+    assert.match(questionnaire, /min-h-0/);
   }
 });
 
@@ -40,18 +42,49 @@ test("research survey clearly distinguishes contribution from a personal score",
   assert.match(page, /\/tools\/estate-planning-readiness/);
   assert.match(survey, /contribute to the aggregate\s+Texas research/i);
   assert.match(survey, /do not generate a personal score/i);
-  assert.match(survey, /questionLegendRef\.current\?\.focus\(\)/);
+  assert.match(survey, /useQuizStepFocus\(currentStep, !submitted\)/);
+  assert.match(survey, /id="readiness-survey"/);
+  assert.match(page, /href="#readiness-survey"/);
 });
 
 test("stepped tool flows manage focus and do not double-count results", async () => {
-  const [readiness, intestacy] = await Promise.all([
+  const [readiness, intestacy, focusHook] = await Promise.all([
     read("src/components/tools/EstateReadinessChecklist.tsx"),
     read("src/components/tools/TexasIntestacyCalculator.tsx"),
+    read("src/components/tools/useQuizStepFocus.ts"),
   ]);
 
-  assert.match(readiness, /activeLegendRef\.current\?\.focus\(\)/);
+  assert.match(readiness, /useQuizStepFocus\(currentStep, !showResult\)/);
   assert.match(readiness, /tabIndex=\{-1\}/);
   assert.match(intestacy, /if \(!complete \|\| submitted\) return/);
+  assert.match(focusHook, /focus\(\{ preventScroll: true \}\)/);
+  assert.match(focusHook, /step === 0/);
+  assert.match(focusHook, /scrollIntoView/);
+  assert.match(focusHook, /prefers-reduced-motion/);
+});
+
+test("quiz pages prioritize the active question on small screens", async () => {
+  const [readinessPage, poaPage, intestacyPage, reportPage, blogPage] =
+    await Promise.all([
+      read("src/app/(marketing)/tools/estate-planning-readiness/page.tsx"),
+      read("src/app/(marketing)/tools/texas-power-of-attorney-navigator/page.tsx"),
+      read("src/app/(marketing)/tools/texas-intestacy-calculator/page.tsx"),
+      read(
+        "src/app/(marketing)/research/texas-estate-planning-readiness/page.tsx"
+      ),
+      read("src/app/(marketing)/blog/[slug]/page.tsx"),
+    ]);
+
+  for (const page of [readinessPage, poaPage, intestacyPage]) {
+    assert.match(page, /px-4 py-3/);
+    assert.match(page, /hidden[^"]*md:block/);
+    assert.match(page, /px-3 py-3/);
+  }
+
+  assert.match(reportPage, /order-2/);
+  assert.match(reportPage, /md:order-3/);
+  assert.match(blogPage, /hasDecisionTool/);
+  assert.match(blogPage, /max-md:hidden/);
 });
 
 test("homepage and roundup post expose every free planning tool", async () => {

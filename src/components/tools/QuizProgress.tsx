@@ -16,7 +16,7 @@ export function QuizProgress({
   return (
     <div>
       <div
-        className="flex items-center justify-between gap-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#5B7A5E]"
+        className="flex items-center justify-between gap-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5B7A5E] sm:text-xs"
         aria-live="polite"
       >
         <span>
@@ -25,7 +25,7 @@ export function QuizProgress({
         <span aria-hidden="true">{percent}%</span>
       </div>
       <div
-        className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#E8E0D6]"
+        className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#E8E0D6] sm:mt-3"
         role="progressbar"
         aria-label={`${label} progress`}
         aria-valuemin={1}
@@ -57,12 +57,12 @@ export function QuizNavigation({
   continueLabel = "Continue",
 }: QuizNavigationProps) {
   return (
-    <div className="mt-7 flex items-center justify-between gap-3 border-t border-[#E8E0D6] pt-5">
+    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#E8E0D6] pt-3 sm:mt-7 sm:pt-5">
       <button
         type="button"
         onClick={onBack}
         disabled={isFirst}
-        className="inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#5B4F3E] hover:bg-[#F0EBE4] disabled:pointer-events-none disabled:opacity-0"
+        className="inline-flex min-h-11 items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-[#5B4F3E] hover:bg-[#F0EBE4] disabled:pointer-events-none disabled:opacity-0 sm:px-4 sm:py-2.5"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Back
@@ -71,7 +71,7 @@ export function QuizNavigation({
         type="button"
         onClick={onContinue}
         disabled={!canContinue}
-        className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#2D2A26] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#433F39] disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
+        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-[#2D2A26] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#433F39] disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-12 sm:flex-none sm:px-6 sm:py-3"
       >
         {continueLabel}
         <ArrowRight className="h-4 w-4" aria-hidden="true" />

@@ -84,34 +84,37 @@ export default function TexasIntestacyCalculatorPage() {
         }}
       />
 
-      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/55 px-6 py-14 md:py-20">
+      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/55 px-4 py-3 md:px-6 md:py-20">
         <div className="mx-auto max-w-5xl">
-          <nav aria-label="Breadcrumb" className="mb-7 text-sm text-[#7F7467]">
+          <nav aria-label="Breadcrumb" className="mb-7 hidden text-sm text-[#7F7467] md:block">
             <Link href="/tools" className="inline-flex items-center gap-1.5 hover:text-[#2D2A26]">
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               Estate-planning tools
             </Link>
           </nav>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[#5B7A5E] md:text-xs">
             Texas Estates Code Chapter 201
           </p>
-          <h1 className="mt-4 max-w-4xl font-[family-name:var(--font-heading)] text-4xl font-bold leading-tight text-[#2D2A26] md:text-6xl">
+          <h1 className="mt-1 max-w-4xl font-[family-name:var(--font-heading)] text-2xl font-bold leading-tight text-[#2D2A26] md:mt-4 md:text-6xl">
             Who inherits in Texas without a will?
           </h1>
-          <p className="mt-6 max-w-3xl text-lg leading-relaxed text-[#5B4F3E]">
+          <p className="mt-6 hidden max-w-3xl text-lg leading-relaxed text-[#5B4F3E] md:block">
             Trace a simplified family tree across the three property categories
             that people often blur together. The result shows why “the spouse
             gets everything” is not a safe universal rule.
           </p>
-          <p className="mt-5 max-w-3xl rounded-xl border border-[#D8CDBF] bg-white/80 px-4 py-3 text-sm leading-relaxed text-[#5B4F3E]">
+          <p className="mt-5 hidden max-w-3xl rounded-xl border border-[#D8CDBF] bg-white/80 px-4 py-3 text-sm leading-relaxed text-[#5B4F3E] md:block">
             <strong className="text-[#2D2A26]">Educational tool:</strong> Source-checked
             by the WillBuddy Editorial Team on July 13, 2026. Not attorney-reviewed.
             WillBuddy is not a law firm and does not provide legal advice or determine heirship.
           </p>
+          <p className="mt-1 text-xs text-[#6F655A] md:hidden">
+            Educational only · Not legal advice
+          </p>
         </div>
       </section>
 
-      <section className="px-4 py-10 sm:px-6 md:py-16" aria-label="Texas intestacy calculator">
+      <section className="px-3 py-3 sm:px-6 md:py-16" aria-label="Texas intestacy calculator">
         <div className="mx-auto max-w-6xl">
           <TexasIntestacyCalculator />
         </div>

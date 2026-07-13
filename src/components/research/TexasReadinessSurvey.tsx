@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { captureAnalyticsEvent } from "@/lib/analytics/client";
 import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
+import { useQuizStepFocus } from "@/components/tools/useQuizStepFocus";
 
 const questions = [
   {
@@ -64,12 +65,8 @@ export function TexasReadinessSurvey() {
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const questionLegendRef = useRef<HTMLLegendElement>(null);
+  const questionLegendRef = useQuizStepFocus(currentStep, !submitted);
   const currentQuestion = questions[currentStep];
-
-  useEffect(() => {
-    questionLegendRef.current?.focus();
-  }, [currentStep]);
 
   function submit() {
     if (questions.some((question) => !answers[question.id])) return;
@@ -109,8 +106,12 @@ export function TexasReadinessSurvey() {
   }
 
   return (
-    <div className="rounded-3xl border border-[#D8CDBF] bg-white p-5 shadow-sm sm:p-7">
-      <div className="border-b border-[#E8E0D6] pb-5">
+    <div
+      id="readiness-survey"
+      data-quiz-shell
+      className="scroll-mt-2 rounded-2xl border border-[#D8CDBF] bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7"
+    >
+      <div className="hidden border-b border-[#E8E0D6] pb-5 sm:block">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5B7A5E]">
           Help improve the report
         </p>
@@ -123,23 +124,23 @@ export function TexasReadinessSurvey() {
         </p>
       </div>
 
-      <div className="mt-6">
+      <div className="sm:mt-6">
         <QuizProgress current={currentStep + 1} total={questions.length} />
-        <fieldset className="mt-7 min-h-[290px]">
+        <fieldset className="mt-4 min-h-0 sm:mt-7 sm:min-h-[290px]">
           <legend
             ref={questionLegendRef}
             tabIndex={-1}
-            className="font-[family-name:var(--font-heading)] text-xl font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
+            className="font-[family-name:var(--font-heading)] text-lg font-bold leading-snug text-[#2D2A26] outline-none sm:text-2xl"
           >
             {currentQuestion.legend}
           </legend>
-          <div className="mt-5 grid gap-2.5">
+          <div className="mt-3 grid gap-2 sm:mt-5 sm:gap-2.5">
             {currentQuestion.options.map(([value, label]) => {
               const selected = answers[currentQuestion.id] === value;
               return (
                 <label
                   key={value}
-                  className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 ${
+                  className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors focus-within:ring-2 focus-within:ring-[#5B7A5E] focus-within:ring-offset-2 sm:min-h-12 sm:px-4 sm:py-3 ${
                     selected
                       ? "border-[#5B7A5E] bg-[#F3F7F3] font-semibold text-[#2D2A26]"
                       : "border-[#E8E0D6] text-[#5B4F3E] hover:bg-[#F7F4F0]"
@@ -177,7 +178,7 @@ export function TexasReadinessSurvey() {
         />
       </div>
 
-      <p className="mt-5 text-center text-xs leading-relaxed text-[#7F7467]">
+      <p className="mt-5 hidden text-center text-xs leading-relaxed text-[#7F7467] sm:block">
         We do not attach your WillBuddy account ID, name, or email to these
         answers. No precise location, asset value, or document content is
         requested.

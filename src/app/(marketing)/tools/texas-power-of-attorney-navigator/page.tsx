@@ -100,36 +100,42 @@ export default function TexasPowerOfAttorneyNavigatorPage() {
         }}
       />
 
-      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/60 px-6 py-8 md:py-10">
+      <section className="border-b border-[#E8E0D6] bg-[#F0EBE4]/60 px-4 py-3 md:px-6 md:py-10">
         <div className="mx-auto max-w-4xl">
-          <nav aria-label="Breadcrumb" className="text-sm text-[#7F7467]">
+          <nav aria-label="Breadcrumb" className="hidden text-sm text-[#7F7467] md:block">
             <Link href="/">Home</Link> <span aria-hidden="true">/</span>{" "}
             <Link href="/tools">Tools</Link> <span aria-hidden="true">/</span>{" "}
             <span>Texas POA navigator</span>
           </nav>
-          <p className="mt-5 text-sm font-semibold uppercase tracking-[0.18em] text-[#5B7A5E]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5B7A5E] md:mt-5 md:text-sm">
             Free Texas decision tool
           </p>
-          <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-heading)] text-4xl font-bold leading-tight text-[#2D2A26] md:text-5xl">
-            Which power of attorney or advance directive does what?
+          <h1 className="mt-1 max-w-3xl font-[family-name:var(--font-heading)] text-2xl font-bold leading-tight text-[#2D2A26] md:mt-4 md:text-5xl">
+            <span className="md:hidden">Texas document navigator</span>
+            <span className="hidden md:inline">
+              Which power of attorney or advance directive does what?
+            </span>
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#5B4F3E] md:text-lg">
+          <p className="mt-4 hidden max-w-2xl text-base leading-relaxed text-[#5B4F3E] md:block md:text-lg">
             Texas uses separate documents for financial authority, medical
             decision-making, treatment instructions, health-information access,
             and future guardian preferences. Build a document map without
             entering names, medical details, or financial information.
           </p>
-          <p className="mt-4 max-w-2xl rounded-2xl border border-[#D8CDBF] bg-white/80 p-4 text-sm leading-relaxed text-[#5B4F3E]">
+          <p className="mt-4 hidden max-w-2xl rounded-2xl border border-[#D8CDBF] bg-white/80 p-4 text-sm leading-relaxed text-[#5B4F3E] md:block">
             <strong className="text-[#2D2A26]">Educational disclaimer:</strong>{" "}
             This navigator provides general educational information, not legal
             advice. It cannot determine whether a form is valid or suitable for
             you. WillBuddy is not a law firm. Source-checked by the WillBuddy
             Editorial Team on July 13, 2026; not attorney-reviewed.
           </p>
+          <p className="mt-1 text-xs text-[#6F655A] md:hidden">
+            Educational only · Not legal advice
+          </p>
         </div>
       </section>
 
-      <section className="px-6 py-8 md:py-10">
+      <section className="px-3 py-3 md:px-6 md:py-10">
         <div className="mx-auto max-w-3xl">
           <TexasPowerOfAttorneyNavigator />
         </div>
