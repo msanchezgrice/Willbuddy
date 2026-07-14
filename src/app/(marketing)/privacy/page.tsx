@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "WillBuddy privacy policy for voice-first estate planning preparation.",
 };
 
-const updated = "July 13, 2026";
+const updated = "July 14, 2026";
 
 export default function PrivacyPage() {
   const supportEmail = getSupportEmail();
@@ -55,9 +55,12 @@ export default function PrivacyPage() {
             <p>
               WillBuddy uses Clerk for authentication, Supabase for application
               data, Google Gemini for voice and AI conversation features, Stripe
-              for checkout, Resend for email, Vercel for hosting, and PostHog
-              for product analytics. These providers process information only
-              as needed to provide their services to WillBuddy.
+              for checkout, Resend for email, Vercel for hosting, PostHog for
+              product analytics, Google Analytics and Ahrefs for website
+              measurement, and Meta for advertising measurement on public
+              marketing and free-tool pages. These providers process
+              information only as needed to provide their services to
+              WillBuddy.
             </p>
           </section>
 
@@ -74,6 +77,11 @@ export default function PrivacyPage() {
               research project records responses to an anonymous multiple-choice
               readiness survey as analytics events. It does not request names,
               email addresses, asset values, precise locations, or document text.
+              Meta receives page views only on selected public marketing and
+              free-tool pages, plus privacy-safe tool start and completion event
+              names. WillBuddy does not send Meta estate-planning answers,
+              transcripts, document contents, asset values, account pages, or
+              private session and summary routes.
             </p>
           </section>
 

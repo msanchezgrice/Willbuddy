@@ -6,6 +6,7 @@ import {
   stripSensitiveProperties,
 } from "@/lib/analytics/properties";
 import { loadPostHogClient } from "@/lib/analytics/posthog-client";
+import { captureMetaEvent } from "@/lib/analytics/meta-pixel";
 import { normalizeAnalyticsRoute } from "@/lib/analytics/routes";
 
 type SearchParamsReader = {
@@ -28,6 +29,7 @@ export function captureAnalyticsEvent(
     ...properties,
     ...attributionProperties,
   });
+  captureMetaEvent(event, properties);
 }
 
 export function capturePageview(

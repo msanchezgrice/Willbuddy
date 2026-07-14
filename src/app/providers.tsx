@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { capturePageview } from "@/lib/analytics/client";
 import { loadPostHogClient } from "@/lib/analytics/posthog-client";
+import { captureMetaPageview } from "@/lib/analytics/meta-pixel";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -76,6 +77,7 @@ function AnalyticsTracker() {
     if (lastPageviewRef.current === pageviewKey) return;
     lastPageviewRef.current = pageviewKey;
     capturePageview(pathname, searchParams);
+    captureMetaPageview(pathname);
   }, [pathname, searchParams]);
 
   return null;
