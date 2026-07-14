@@ -13,11 +13,11 @@ Prepared July 14, 2026 for the Texas tools campaign. Nothing in this folder auth
 
 | Concept | Static | Video | Destination |
 | --- | --- | --- | --- |
-| A: Texas law decides | `stills/a-intestacy-4x5.png` | `../remotion-ads/out/toolshook-vertical.mp4` and `toolshook-square.mp4` | `/tools/texas-intestacy-calculator` |
-| B: cost transparency | `stills/b-cost-1x1.png` | — | `/tools/texas-estate-planning-cost-calculator` |
-| C: voice ease | `stills/c-voice-4x5.png` | `videos/higgsfield-ugc-voice-vertical.mp4` | `/tools` |
+| A: Texas law decides | `stills/a-intestacy-lifestyle-v2.png` | `../remotion-ads/out/toolshook-vertical.mp4` and `toolshook-square.mp4` | `/tools/texas-intestacy-calculator` |
+| B: cost transparency | `stills/b-cost-editorial-v2.png` | — | `/tools/texas-estate-planning-cost-calculator` |
+| C: voice ease | `stills/c-voice-lifestyle-v2.png` | `videos/higgsfield-ugc-voice-vertical.mp4` | `/tools` |
 
-Generated portrait stills are 1003×1568 source masters and should use placement-safe cropping in Meta. The square is 1254×1254. Remotion exports are 1080×1920 and 1080×1080; the Higgsfield UGC export is 720×1280 with audio.
+The V2 lifestyle stills are high-resolution portrait masters and should use placement-safe cropping in Meta; the cost still is native 4:5. Remotion exports are 1080×1920 and 1080×1080; the Higgsfield UGC export is 720×1280 with audio.
 
 QA contact sheets are in `qa/`. The image and video masters contain no claims that WillBuddy replaces a lawyer. Use this compliance line in primary text or the first comment:
 
