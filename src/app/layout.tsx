@@ -110,7 +110,8 @@ window.dispatchEvent(new Event('willbuddy:meta-pixel-ready'));`}
             {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'G-T00BH5C80B');`}
+gtag('config', 'G-T00BH5C80B');
+gtag('config', 'AW-18323307402', {'send_page_view': false});`}
           </Script>
         </body>
       </html>
