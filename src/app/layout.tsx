@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville } from "next/font/google";
+import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import { siteConfig } from "@/lib/site";
 import { Providers } from "./providers";
@@ -88,6 +89,17 @@ export default function RootLayout({
         </head>
         <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#2D2A26]">
           <Providers>{children}</Providers>
+          <Script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-T00BH5C80B"
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-T00BH5C80B');`}
+          </Script>
         </body>
       </html>
     </ClerkProvider>

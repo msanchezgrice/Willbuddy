@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:analytics": "node tests/analytics-properties.mjs && node --test tests/analytics-funnel.mjs",
+    "test:google-analytics": "node --test tests/google-analytics-tag.test.mjs",
     "test:email": "node --test --experimental-transform-types tests/resend-config.test.mjs",
     "smoke:launch": "node tests/launch-smoke.mjs"
   },
