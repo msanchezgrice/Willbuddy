@@ -1,0 +1,21 @@
+{
+  "name": "willbuddy-remotion-ads",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "render:vertical": "remotion render ToolsHook-Vertical out/toolshook-vertical.mp4",
+    "render:square": "remotion render ToolsHook-Square out/toolshook-square.mp4",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@types/react": "^18.3.3",
+    "typescript": "^5.5.0"
+  }
+}

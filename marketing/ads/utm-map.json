@@ -1,0 +1,30 @@
+{
+  "campaign": "tools_test_jul26",
+  "sources": {
+    "facebook": {
+      "utm_source": "fb",
+      "utm_medium": "paid_social"
+    },
+    "instagram": {
+      "utm_source": "ig",
+      "utm_medium": "paid_social"
+    },
+    "google": {
+      "utm_source": "google",
+      "utm_medium": "cpc"
+    }
+  },
+  "content": [
+    "a_intestacy_static_v1",
+    "a_intestacy_video_v1",
+    "b_cost_static_v1",
+    "c_voice_static_v1",
+    "c_voice_video_v1",
+    "rt_tools_video_v1",
+    "search_tools_rsa_v1",
+    "sitelink_intestacy",
+    "sitelink_cost",
+    "sitelink_readiness",
+    "sitelink_poa"
+  ]
+}
