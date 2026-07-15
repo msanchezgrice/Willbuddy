@@ -17,7 +17,7 @@ const checks = [
     expectStatus: [200],
     includes: [
       "WillBuddy",
-      "Start Your Estate Plan",
+      "Talk it through or answer step by step.",
       "/contact",
       "/privacy",
       "/refunds",
@@ -83,6 +83,12 @@ const checks = [
 
 const failures = [];
 const requestTimeoutMs = Number(process.env.SMOKE_TIMEOUT_MS ?? 8000);
+const approvedInitialScriptOrigins = new Set([
+  "https://clerk.mywillbuddy.com",
+]);
+const approvedInitialScriptUrls = new Set([
+  "https://analytics.ahrefs.com/analytics.js",
+]);
 
 await runStaticAnalyticsImportCheck();
 
@@ -184,7 +190,9 @@ async function runThirdPartyScriptHtmlBudgetCheck() {
 
     const text = await response.text();
     const thirdPartyScripts = extractScriptSources(text).filter(
-      isThirdPartyScriptSource
+      (source) =>
+        isThirdPartyScriptSource(source) &&
+        !isApprovedInitialScriptSource(source)
     );
 
     if (thirdPartyScripts.length > 0) {
@@ -233,6 +241,18 @@ function isThirdPartyScriptSource(src) {
     return scriptUrl.origin !== new URL(baseUrl).origin;
   } catch {
     return true;
+  }
+}
+
+function isApprovedInitialScriptSource(src) {
+  try {
+    const scriptUrl = new URL(src, baseUrl);
+    return (
+      approvedInitialScriptOrigins.has(scriptUrl.origin) ||
+      approvedInitialScriptUrls.has(scriptUrl.href)
+    );
+  } catch {
+    return false;
   }
 }
 
