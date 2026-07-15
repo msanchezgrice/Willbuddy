@@ -242,6 +242,7 @@ export function TexasIntestacyCalculator() {
                   value="yes"
                   selected={currentValue === "yes"}
                   onChange={(value) => {
+                    recordStart();
                     if (currentQuestion === "spouse") {
                       setSpouse(value);
                       setAllShared("");
@@ -264,6 +265,7 @@ export function TexasIntestacyCalculator() {
                   value="no"
                   selected={currentValue === "no"}
                   onChange={(value) => {
+                    recordStart();
                     if (currentQuestion === "spouse") {
                       setSpouse(value);
                       setAllShared("");

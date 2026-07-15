@@ -109,6 +109,9 @@ Keywords: `medical power of attorney texas`, `texas power of attorney form`, `gu
 
 - **UTMs:** `?utm_source={fb|ig|google}&utm_medium={paid_social|cpc}&utm_campaign=tools_test_jul26&utm_content={a_intestacy|b_cost|c_voice}_{static|video}_{v1|v2}`
 - **PostHog events to confirm before launch:** `tool_started`, `tool_completed` (per tool), `signup`, `checkout_completed`. Meta Pixel + Google tag mapped to the same.
+- **Primary experiment KPI (July 15 iteration):** `ToolStart` and `ToolComplete`, segmented by destination and `utm_content`. Landing-page views are delivery diagnostics, not the success metric.
+- **Optimization guardrail:** Keep the current LPV campaign as the control until `ToolStart` has enough observed volume for Meta to optimize reliably. If that threshold is reached, test a duplicate ad set within the same $30/day campaign ceiling; do not rewrite the control or increase spend.
+- **Message-match decision:** Keep A and B on their matching direct tool routes. Pause C until a public voice-first route can deliver the advertised experience without an account wall; generic `/tools` is not a valid destination for that promise.
 - **Success criteria @ 4 weeks:** CPC < $2.50 Meta / < $6 Google; tool completion rate > 35% of clicks; cost per signup < $40; any paid conversions = bonus at this budget.
 - **Week 1–2:** all 3 concepts live, equal-ish spend. **Week 3:** kill bottom concept, move budget to winner + new variant of it. **Week 4:** landing page test (tools index vs. direct-to-tool).
 - One variable at a time: concept first, then format (static vs video), then copy length.

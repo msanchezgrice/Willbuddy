@@ -98,6 +98,9 @@ export default function TexasIntestacyCalculatorPage() {
           <h1 className="mt-1 max-w-4xl font-[family-name:var(--font-heading)] text-2xl font-bold leading-tight text-[#2D2A26] md:mt-4 md:text-6xl">
             Who inherits in Texas without a will?
           </h1>
+          <p className="mt-2 text-sm font-semibold text-[#304733] md:mt-4 md:text-base">
+            Free · No signup · See the simplified map in about two minutes
+          </p>
           <p className="mt-6 hidden max-w-3xl text-lg leading-relaxed text-[#5B4F3E] md:block">
             Trace a simplified family tree across the three property categories
             that people often blur together. The result shows why “the spouse
@@ -114,7 +117,7 @@ export default function TexasIntestacyCalculatorPage() {
         </div>
       </section>
 
-      <section className="px-3 py-3 sm:px-6 md:py-16" aria-label="Texas intestacy calculator">
+      <section id="calculator" className="px-3 py-3 sm:px-6 md:py-16" aria-label="Texas intestacy calculator">
         <div className="mx-auto max-w-6xl">
           <TexasIntestacyCalculator />
         </div>

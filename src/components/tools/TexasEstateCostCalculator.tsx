@@ -166,6 +166,9 @@ export function TexasEstateCostCalculator() {
           </div>
 
           <div className="mt-6">
+            <p className="mb-2 text-xs font-semibold text-[#304733]">
+              Start here — change this number to match the estate you want to model.
+            </p>
             <NumberField
               label="Estate value used only for the percentage illustration"
               value={inputs.estateValue}

@@ -11,6 +11,7 @@
     "test:google-analytics": "node --test tests/google-analytics-tag.test.mjs",
     "test:meta-pixel": "node --test tests/meta-pixel.test.mjs",
     "test:paid-tracking": "node --test tests/paid-ad-tracking.test.mjs",
+    "test:paid-landing": "node --test tests/paid-landing-message-match.test.mjs",
     "test:email": "node --test --experimental-transform-types tests/resend-config.test.mjs",
     "smoke:launch": "node tests/launch-smoke.mjs"
   },
