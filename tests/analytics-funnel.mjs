@@ -44,12 +44,29 @@ test("onboarding, plan creation, and guided mode expose conversion events", asyn
   assert.match(sessionRoute, /captureServerEvent\("plan_completed"/);
   assert.match(
     serverAnalytics,
-    /properties:\s*{\s*\.\.\.stripSensitiveProperties\(properties\),\s*distinct_id: distinctId/
+    /properties:\s*{\s*\.\.\.ANALYTICS_CONTEXT_PROPERTIES,\s*\.\.\.stripSensitiveProperties\(properties\),\s*distinct_id: distinctId/
   );
   assert.match(voiceProvider, /guided_plan_started/);
   assert.match(voiceProvider, /guided_plan_answer_saved/);
   assert.match(voiceProvider, /guided_plan_completed/);
   assert.match(providers, /posthog\.identify\(user\.id/);
+});
+
+test("PostHog events are scoped to the WillBuddy app and first-party ingestion", async () => {
+  const [client, posthogClient, server, config] = await Promise.all([
+    read("src/lib/analytics/client.ts"),
+    read("src/lib/analytics/posthog-client.ts"),
+    read("src/lib/analytics/server.ts"),
+    read("next.config.ts"),
+  ]);
+
+  assert.match(client, /ANALYTICS_CONTEXT_PROPERTIES/);
+  assert.match(posthogClient, /api_host: POSTHOG_HOST/);
+  assert.match(posthogClient, /process\.env\.NODE_ENV === "production"/);
+  assert.match(posthogClient, /"\/ingest"/);
+  assert.match(server, /ANALYTICS_CONTEXT_PROPERTIES/);
+  assert.match(config, /source: "\/ingest\/static\/:path\*"/);
+  assert.match(config, /source: "\/ingest\/:path\*"/);
 });
 
 test("homepage resource links retain explicit click tracking", async () => {

@@ -30,11 +30,16 @@ test("limits Meta signals to public marketing and free-tool routes", async () =>
   assert.doesNotMatch(pixel, /"\/summary"/);
 });
 
-test("maps only privacy-safe tool lifecycle events to Meta", async () => {
+test("maps privacy-safe lead, checkout, and purchase events to Meta", async () => {
   const pixel = await readFile(pixelPath, "utf8");
 
   assert.match(pixel, /event === "tool_started"/);
   assert.match(pixel, /event === "tool_completed"/);
-  assert.match(pixel, /"trackCustom", metaEvent/);
+  assert.match(pixel, /"trackCustom", "ToolStart"/);
+  assert.match(pixel, /"trackCustom", "ToolComplete"/);
+  assert.match(pixel, /"track", "Lead"/);
+  assert.match(pixel, /"track", "CompleteRegistration"/);
+  assert.match(pixel, /"track", "InitiateCheckout"/);
+  assert.match(pixel, /"track", "Purchase"/);
   assert.doesNotMatch(pixel, /transcript|answers|asset_value|session_id/);
 });

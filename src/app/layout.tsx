@@ -100,7 +100,6 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 fbq('init', '2542612909548568');
 window.dispatchEvent(new Event('willbuddy:meta-pixel-ready'));`}
           </Script>
-          <Providers>{children}</Providers>
           <Script
             async
             src="https://www.googletagmanager.com/gtag/js?id=G-T00BH5C80B"
@@ -110,9 +109,11 @@ window.dispatchEvent(new Event('willbuddy:meta-pixel-ready'));`}
             {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'G-T00BH5C80B');
-gtag('config', 'AW-18323307402', {'send_page_view': false});`}
+gtag('config', 'G-T00BH5C80B', {'send_page_view': false});
+gtag('config', 'AW-18323307402', {'send_page_view': false});
+window.dispatchEvent(new Event('willbuddy:google-tag-ready'));`}
           </Script>
+          <Providers>{children}</Providers>
         </body>
       </html>
     </ClerkProvider>

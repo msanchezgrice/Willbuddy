@@ -18,13 +18,21 @@ new Script(compiled).runInNewContext({
   exports: cjsModule.exports,
   module: cjsModule,
   require,
+  URLSearchParams,
 });
 
 const {
+  ANALYTICS_CONTEXT_PROPERTIES,
   getAttributionProperties,
+  getSafeAttributionQuery,
   sanitizeTransportProperties,
   stripSensitiveProperties,
 } = cjsModule.exports;
+
+assert.deepEqual(normalize(ANALYTICS_CONTEXT_PROPERTIES), {
+  app: "willbuddy",
+  site_domain: "mywillbuddy.com",
+});
 
 assert.deepEqual(
   normalize(stripSensitiveProperties({
@@ -79,7 +87,18 @@ assert.deepEqual(
     utm_source: "google",
     utm_medium: "cpc",
     gclid: "a".repeat(160),
+    paid_source: "google_ads",
   }
+);
+
+assert.equal(
+  getSafeAttributionQuery({
+    utm_source: "fb",
+    utm_medium: "paid_social",
+    paid_source: "meta_ads",
+    session_id: "must-not-leak",
+  }),
+  "?utm_source=fb&utm_medium=paid_social"
 );
 
 console.log("analytics property tests passed");

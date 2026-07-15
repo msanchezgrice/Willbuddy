@@ -1,12 +1,17 @@
 "use client";
 
 import type { CaptureResult } from "posthog-js";
-import { sanitizeTransportProperties } from "@/lib/analytics/properties";
+import {
+  ANALYTICS_CONTEXT_PROPERTIES,
+  sanitizeTransportProperties,
+} from "@/lib/analytics/properties";
 import { normalizeAnalyticsRoute } from "@/lib/analytics/routes";
 
 const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com";
 const POSTHOG_HOST =
-  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? DEFAULT_POSTHOG_HOST;
+  process.env.NODE_ENV === "production"
+    ? "/ingest"
+    : process.env.NEXT_PUBLIC_POSTHOG_HOST ?? DEFAULT_POSTHOG_HOST;
 
 type PostHogClient = typeof import("posthog-js").default;
 
@@ -24,6 +29,7 @@ export function loadPostHogClient(): Promise<PostHogClient | null> {
       if (!initialized) {
         posthog.init(token, {
           api_host: POSTHOG_HOST,
+          ui_host: "https://us.posthog.com",
           defaults: "2026-01-30",
           autocapture: false,
           capture_pageview: false,
@@ -69,6 +75,8 @@ function sanitizePostHogEvent(event: CaptureResult | null): CaptureResult | null
 
   properties.route = route;
   properties.path = route;
+  properties.app = ANALYTICS_CONTEXT_PROPERTIES.app;
+  properties.site_domain = ANALYTICS_CONTEXT_PROPERTIES.site_domain;
   properties.$pathname = route;
   properties.$current_url = `${window.location.origin}${route}`;
 

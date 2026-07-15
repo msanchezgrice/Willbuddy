@@ -9,11 +9,12 @@ const SAFE_MARKETING_ROUTES = new Set([
   "/contact",
   "/texas-estate-planning",
 ]);
+const PURCHASE_VALUE_USD = 49;
 
 type MetaPixel = (
   command: "track" | "trackCustom",
   event: string,
-  properties?: Record<string, string>,
+  properties?: Record<string, string | number>,
 ) => void;
 
 declare global {
@@ -31,25 +32,51 @@ export function captureMetaPageview(pathname: string | null) {
 }
 
 export function captureMetaEvent(event: string, properties: Properties = {}) {
-  if (typeof window === "undefined" || !isSafeMarketingRoute(window.location.pathname)) {
+  if (typeof window === "undefined") return;
+
+  const tool = cleanToolName(properties.tool);
+  const toolProperties = tool ? { content_name: tool } : undefined;
+
+  if (event === "tool_started" && isSafeMarketingRoute(window.location.pathname)) {
+    runWhenMetaPixelReady(() => {
+      window.fbq?.("trackCustom", "ToolStart", toolProperties);
+    });
     return;
   }
 
-  const metaEvent =
-    event === "tool_started"
-      ? "ToolStart"
-      : event === "tool_completed"
-        ? "ToolComplete"
-        : null;
+  if (event === "tool_completed" && isSafeMarketingRoute(window.location.pathname)) {
+    runWhenMetaPixelReady(() => {
+      window.fbq?.("trackCustom", "ToolComplete", toolProperties);
+      window.fbq?.("track", "Lead", toolProperties);
+    });
+    return;
+  }
 
-  if (!metaEvent) return;
+  if (event === "onboarding_completed") {
+    runWhenMetaPixelReady(() => {
+      window.fbq?.("track", "CompleteRegistration");
+    });
+    return;
+  }
 
-  const tool = cleanToolName(properties.tool);
-  const safeProperties = tool ? { tool } : undefined;
+  if (event === "checkout_started") {
+    runWhenMetaPixelReady(() => {
+      window.fbq?.("track", "InitiateCheckout", {
+        value: PURCHASE_VALUE_USD,
+        currency: "USD",
+      });
+    });
+    return;
+  }
 
-  runWhenMetaPixelReady(() => {
-    window.fbq?.("trackCustom", metaEvent, safeProperties);
-  });
+  if (event === "payment_completed") {
+    runWhenMetaPixelReady(() => {
+      window.fbq?.("track", "Purchase", {
+        value: PURCHASE_VALUE_USD,
+        currency: "USD",
+      });
+    });
+  }
 }
 
 function isSafeMarketingRoute(pathname: string) {

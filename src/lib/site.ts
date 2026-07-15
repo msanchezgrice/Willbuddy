@@ -7,11 +7,11 @@ export const siteConfig = {
 };
 
 export function getSiteUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.NEXT_PUBLIC_APP_URL ??
-    "https://mywillbuddy.com"
-  ).replace(/\/+$/, "");
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+  return (configuredUrl || "https://mywillbuddy.com").replace(/\/+$/, "");
 }
 
 export function absoluteUrl(path = "/"): string {

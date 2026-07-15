@@ -1,5 +1,8 @@
 import type { Properties } from "posthog-js";
-import { stripSensitiveProperties } from "@/lib/analytics/properties";
+import {
+  ANALYTICS_CONTEXT_PROPERTIES,
+  stripSensitiveProperties,
+} from "@/lib/analytics/properties";
 
 const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com";
 
@@ -13,9 +16,10 @@ export async function captureServerEvent(
     return { ok: false, reason: "missing_posthog_token" };
   }
 
-  const host = (
-    process.env.NEXT_PUBLIC_POSTHOG_HOST ?? DEFAULT_POSTHOG_HOST
-  ).replace(/\/$/, "");
+  const host = (process.env.POSTHOG_INGEST_HOST ?? DEFAULT_POSTHOG_HOST).replace(
+    /\/$/,
+    ""
+  );
 
   try {
     const response = await fetch(`${host}/capture/`, {
@@ -25,6 +29,7 @@ export async function captureServerEvent(
         api_key: token,
         event,
         properties: {
+          ...ANALYTICS_CONTEXT_PROPERTIES,
           ...stripSensitiveProperties(properties),
           distinct_id: distinctId,
         },

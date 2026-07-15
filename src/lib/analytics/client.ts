@@ -2,11 +2,15 @@
 
 import type { Properties } from "posthog-js";
 import {
+  ANALYTICS_CONTEXT_PROPERTIES,
   getAttributionProperties,
   stripSensitiveProperties,
 } from "@/lib/analytics/properties";
 import { loadPostHogClient } from "@/lib/analytics/posthog-client";
-import { captureGoogleAdsEvent } from "@/lib/analytics/google-ads";
+import {
+  captureGoogleAdsEvent,
+  captureGooglePageview,
+} from "@/lib/analytics/google-ads";
 import { captureMetaEvent } from "@/lib/analytics/meta-pixel";
 import { normalizeAnalyticsRoute } from "@/lib/analytics/routes";
 
@@ -30,7 +34,7 @@ export function captureAnalyticsEvent(
     ...properties,
     ...attributionProperties,
   });
-  captureGoogleAdsEvent(event);
+  captureGoogleAdsEvent(event, properties);
   captureMetaEvent(event, properties);
 }
 
@@ -49,6 +53,7 @@ export function capturePageview(
   void capturePostHogEvent("$pageview", attributionProperties, pathname, {
     registerProperties: attributionProperties,
   });
+  captureGooglePageview(pathname, attributionProperties);
 }
 
 async function capturePostHogEvent(
@@ -73,6 +78,7 @@ async function capturePostHogEvent(
 
   try {
     posthog.capture(event, {
+      ...ANALYTICS_CONTEXT_PROPERTIES,
       ...stripSensitiveProperties(properties),
       route,
       path: route,
