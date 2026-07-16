@@ -45,7 +45,7 @@ export function JoinInviteClient({ token, primaryName, alreadyJoined }: Props) {
             : `${primaryName} wants to plan your estate together`}
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-[#5A5550]">
-          You&apos;ll do your own 25-minute voice session with WillBuddy. When
+          You&apos;ll do your own 15-minute voice session with WillBuddy. When
           you&apos;re done, we&apos;ll show you where you and {primaryName}{" "}
           agree and where you need to talk. Take your time — there&apos;s no
           lawyer clock ticking.

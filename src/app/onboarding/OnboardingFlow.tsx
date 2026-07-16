@@ -10,7 +10,9 @@ import {
   PLAN_PRESETS,
   buildSectionPlan,
   defaultModules,
+  sectionIsAvailable,
 } from "@/lib/sections/plan";
+import { minorChildGuardianshipIsAvailable } from "@/lib/family/children";
 import { SECTION_LABELS, type OnboardingQuizAnswers, type Section } from "@/types";
 
 type Question = {
@@ -40,12 +42,25 @@ const QUESTIONS: Question[] = [
   },
   {
     id: "children",
-    title: "Do you have children?",
-    subtitle: "Guardianship is the decision most parents lose sleep over.",
+    title: "Which best describes your children?",
+    subtitle:
+      "Minor-child guardianship questions only apply when you have or are expecting a child under 18.",
     options: [
-      { value: "have_kids", label: "Yes, kids at home" },
-      { value: "expecting", label: "We're expecting" },
-      { value: "no_kids", label: "Not yet" },
+      {
+        value: "minor_children",
+        label: "Minor children only (under 18)",
+      },
+      {
+        value: "adult_children",
+        label: "Adult children only (18+)",
+        description: "We’ll skip questions about who would raise a minor child.",
+      },
+      {
+        value: "minor_and_adult_children",
+        label: "Both minor and adult children",
+      },
+      { value: "expecting", label: "Expecting a child" },
+      { value: "no_children", label: "No children" },
     ],
   },
   {
@@ -81,7 +96,7 @@ const OPTION_LABELS: Record<string, string> = Object.fromEntries(
 // Short, friendly one-liners for the "what do you want to cover" checklist.
 const MODULE_BLURBS: Record<Section, string> = {
   family: "The basics — names, kids, and where you live",
-  guardianship: "Who would raise your children",
+  guardianship: "Who would raise your minor children",
   assets: "What you own and who gets what",
   healthcare: "Medical decisions & end-of-life wishes",
   executor: "Who settles your affairs + financial power of attorney",
@@ -118,19 +133,20 @@ export function OnboardingFlow({
   const progress = Math.round((step / totalSteps) * 100);
 
   const notInTexas = answers.texas === "no";
+  const onboardingAnswers = answers as OnboardingQuizAnswers;
+  const guardianshipAvailable = minorChildGuardianshipIsAvailable(
+    onboardingAnswers.children
+  );
 
   // Default coverage inferred from the quiz answers (e.g. no kids → no guardianship).
-  const inferredModules = useMemo(
-    () => defaultModules(answers as OnboardingQuizAnswers),
-    [answers]
-  );
+  const inferredModules = defaultModules(onboardingAnswers);
   const selectedModules = planModules ?? inferredModules;
 
   useEffect(() => {
     if (startedTrackedRef.current) return;
     startedTrackedRef.current = true;
     captureAnalyticsEvent("onboarding_started", {
-      onboarding_version: "2026-07-13",
+      onboarding_version: "2026-07-16",
     });
   }, []);
 
@@ -161,6 +177,14 @@ export function OnboardingFlow({
 
   function selectOption(question: Question, value: string) {
     const next = { ...answers, [question.id]: value };
+    if (
+      question.id === "children" &&
+      !minorChildGuardianshipIsAvailable(value)
+    ) {
+      delete next.priority;
+      setPlanModules(null);
+      setPlanPreset(null);
+    }
     setAnswers(next);
     captureAnalyticsEvent("onboarding_step_completed", {
       step: step + 1,
@@ -178,11 +202,12 @@ export function OnboardingFlow({
 
   function selectPreset(presetId: string, modules: Section[]) {
     setPlanPreset(presetId);
-    setPlanModules(modules);
+    setPlanModules(buildSectionPlan(onboardingAnswers, modules));
   }
 
   function toggleModule(section: Section) {
     if (section === "family") return; // required
+    if (!sectionIsAvailable(section, onboardingAnswers)) return;
     setPlanPreset(null); // customizing → no longer a named preset
     const set = new Set(selectedModules);
     if (set.has(section)) set.delete(section);
@@ -192,9 +217,7 @@ export function OnboardingFlow({
   }
 
   function confirmPlan() {
-    const modules = CANONICAL_ORDER.filter((s) =>
-      new Set(selectedModules).add("family").has(s)
-    );
+    const modules = buildSectionPlan(onboardingAnswers, selectedModules);
     persistGoals(planPreset, modules);
     captureAnalyticsEvent("onboarding_plan_selected", {
       preset: planPreset,
@@ -273,7 +296,7 @@ export function OnboardingFlow({
               <p className="mx-auto mb-6 max-w-md text-xs text-[#9B8E7E]">
                 Your session will cover:{" "}
                 <span className="font-medium text-[#5B4F3E]">
-                  {buildSectionPlan(answers as OnboardingQuizAnswers, selectedModules)
+                  {buildSectionPlan(onboardingAnswers, selectedModules)
                     .map((s) => SECTION_LABELS[s])
                     .join(" → ")}
                 </span>
@@ -312,10 +335,11 @@ export function OnboardingFlow({
               onToggleModule={toggleModule}
               onContinue={confirmPlan}
               onBack={goBack}
+              guardianshipAvailable={guardianshipAvailable}
             />
           ) : (
             <QuestionStep
-              question={QUESTIONS[step]}
+              question={questionForAnswers(QUESTIONS[step], onboardingAnswers)}
               selected={answers[QUESTIONS[step].id]}
               onSelect={(value) => selectOption(QUESTIONS[step], value)}
               onBack={step > 0 ? goBack : undefined}
@@ -325,6 +349,23 @@ export function OnboardingFlow({
       </div>
     </main>
   );
+}
+
+function questionForAnswers(
+  question: Question,
+  onboarding: OnboardingQuizAnswers
+): Question {
+  if (
+    question.id !== "priority" ||
+    minorChildGuardianshipIsAvailable(onboarding.children)
+  ) {
+    return question;
+  }
+
+  return {
+    ...question,
+    options: question.options.filter((option) => option.value !== "guardianship"),
+  };
 }
 
 function QuestionStep({
@@ -406,6 +447,7 @@ function PlanStep({
   onToggleModule,
   onContinue,
   onBack,
+  guardianshipAvailable,
 }: {
   selected: Section[];
   activePreset: string | null;
@@ -413,8 +455,17 @@ function PlanStep({
   onToggleModule: (section: Section) => void;
   onContinue: () => void;
   onBack: () => void;
+  guardianshipAvailable: boolean;
 }) {
   const selectedSet = new Set(selected);
+  const visiblePresets = PLAN_PRESETS.filter(
+    (preset) =>
+      guardianshipAvailable ||
+      (preset.id !== "essentials" && preset.id !== "guardianship")
+  );
+  const visibleSections = CANONICAL_ORDER.filter(
+    (section) => guardianshipAvailable || section !== "guardianship"
+  );
 
   return (
     <div>
@@ -428,7 +479,7 @@ function PlanStep({
 
       {/* Presets */}
       <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {PLAN_PRESETS.map((preset) => {
+        {visiblePresets.map((preset) => {
           const isActive = activePreset === preset.id;
           return (
             <button
@@ -457,7 +508,7 @@ function PlanStep({
         Fine-tune your plan
       </p>
       <div className="mt-3 space-y-2">
-        {CANONICAL_ORDER.map((section) => {
+        {visibleSections.map((section) => {
           const isSelected = selectedSet.has(section);
           const isRequired = section === "family";
           return (

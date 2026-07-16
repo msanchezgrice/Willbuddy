@@ -7,6 +7,7 @@ import { captureAnalyticsEvent } from "@/lib/analytics/client";
 import { useToolAnalytics } from "@/lib/analytics/use-tool-analytics";
 import { QuizNavigation, QuizProgress } from "@/components/tools/QuizProgress";
 import { useQuizStepFocus } from "@/components/tools/useQuizStepFocus";
+import { childStatusIncludesMinor } from "@/lib/family/children";
 import {
   buildReadinessResult,
   getApplicableReadinessItems,
@@ -27,8 +28,13 @@ const PROFILE_QUESTIONS = [
     id: "children",
     legend: "Which describes your family?",
     options: [
-      { value: "minor_children", label: "Minor children" },
-      { value: "adult_children", label: "Adult children only" },
+      { value: "minor_children", label: "Minor children only (under 18)" },
+      { value: "adult_children", label: "Adult children only (18+)" },
+      {
+        value: "minor_and_adult_children",
+        label: "Both minor and adult children",
+      },
+      { value: "expecting", label: "Expecting a child" },
       { value: "no_children", label: "No children" },
     ],
   },
@@ -44,7 +50,7 @@ const PROFILE_QUESTIONS = [
     id: "priority",
     legend: "What is most on your mind?",
     options: [
-      { value: "guardianship", label: "Guardianship" },
+      { value: "guardianship", label: "Guardianship for a minor child" },
       { value: "assets", label: "Who gets what" },
       { value: "healthcare", label: "Healthcare wishes" },
       { value: "getting_started", label: "Getting started" },
@@ -99,6 +105,14 @@ export function EstateReadinessChecklist() {
   const checklistGroups = [applicable.slice(0, 4), applicable.slice(4)];
   const totalSteps = PROFILE_QUESTIONS.length + checklistGroups.length;
   const profileQuestion = PROFILE_QUESTIONS[currentStep];
+  const profileOptions = profileQuestion
+    ? profileQuestion.id === "priority" &&
+      !childStatusIncludesMinor(profile.children)
+      ? profileQuestion.options.filter(
+          (option) => option.value !== "guardianship"
+        )
+      : profileQuestion.options
+    : [];
   const checklistGroup = checklistGroups[currentStep - PROFILE_QUESTIONS.length];
 
   function updateProfile<K extends keyof ReadinessProfile>(
@@ -107,8 +121,11 @@ export function EstateReadinessChecklist() {
   ) {
     recordStart();
     setProfile((current) => ({ ...current, [key]: value }));
-    if (key === "children" && value !== "minor_children") {
+    if (key === "children" && !childStatusIncludesMinor(value as string)) {
       setCompleted((current) => ({ ...current, guardian: false }));
+      if (profile.priority === "guardianship") {
+        setProfile((current) => ({ ...current, priority: "getting_started" }));
+      }
     }
     setShowResult(false);
   }
@@ -197,7 +214,7 @@ export function EstateReadinessChecklist() {
                   {profileQuestion.legend}
                 </legend>
                 <div className="mt-3 grid gap-2 sm:mt-5 sm:grid-cols-2 sm:gap-3">
-                  {profileQuestion.options.map((option) => {
+                  {profileOptions.map((option) => {
                     const selected = profile[profileQuestion.id] === option.value;
                     const id = `readiness-${profileQuestion.id}-${option.value}`;
                     return (

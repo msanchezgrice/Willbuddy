@@ -11,7 +11,10 @@ function d(decisions: Decision[], section: string, key: string): string {
  * from the user's decisions. This is NOT legal advice — it is a
  * starting point for attorney review.
  */
-export function generateWillText(decisions: Decision[]): string {
+export function generateWillText(
+  decisions: Decision[],
+  options: { includeMinorChildGuardianship?: boolean } = {}
+): string {
   const testatorName = d(decisions, "family", "full_name");
   const partnerName = d(decisions, "family", "partner_name");
   const maritalStatus = d(decisions, "family", "marital_status");
@@ -24,6 +27,17 @@ export function generateWillText(decisions: Decision[]): string {
   const business = d(decisions, "assets", "business");
   const digitalAssets = d(decisions, "assets", "digital_assets");
   const inheritanceAge = d(decisions, "assets", "inheritance_age");
+  const hasAgeBasedHold = !/^\s*(?:\[NOT SPECIFIED\]|not applicable|n\/?a|none)\s*$/i.test(
+    inheritanceAge
+  );
+  const beneficiaryTrustLanguage = hasAgeBasedHold
+    ? `If any beneficiary under this will has not reached the age of ${inheritanceAge} at the time of my passing, their share shall be held in trust until they reach that age.
+
+Until then, the trustee (my executor, unless otherwise specified) may use income and principal for that beneficiary's health, education, maintenance, and support.`
+    : `No age-based hold was specified during the planning session. My attorney should confirm whether any beneficiary's circumstances call for a trust, custodianship, or other managed distribution.`;
+  const guardianshipReference = options.includeMinorChildGuardianship
+    ? `\n\nFor preferences about the care of any minor children, please see the separate Minor-Child Guardianship Designation draft.`
+    : "";
 
   return `
 ================================================================================
@@ -85,18 +99,10 @@ session:
   Digital assets: ${digitalAssets}
 
 
-ARTICLE 5 — MINOR CHILDREN
----------------------------
+ARTICLE 5 — BENEFICIARY TRUSTS
+--------------------------------
 
-If any beneficiary under this will is a minor at the time of my passing, their
-share shall be held in trust until they reach the age of ${inheritanceAge}.
-
-Until that age, the trustee (my executor, unless otherwise specified) may use
-income and principal from the trust for the beneficiary's health, education,
-maintenance, and support.
-
-For guardianship of my minor children, please see the separate Guardianship
-Designation document.
+${beneficiaryTrustLanguage}${guardianshipReference}
 
 
 ARTICLE 6 — RESIDUARY ESTATE

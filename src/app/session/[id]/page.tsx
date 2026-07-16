@@ -57,6 +57,9 @@ function SessionLayout() {
             Both paths save the same decisions and lead to the same review and
             document flow. You can switch methods later without starting over.
           </p>
+          <p className="mt-3 text-sm font-semibold text-[#5B7A5E]">
+            About 15 minutes total. Most sections take 4 minutes or less.
+          </p>
 
           {operationError && (
             <p

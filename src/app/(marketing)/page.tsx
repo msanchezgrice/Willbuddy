@@ -504,7 +504,7 @@ function FAQSection() {
     {
       question: "How long does it take?",
       answer:
-        "Plan on about 45 minutes for a couple working through everything together, whether you talk or type. Individual sessions tend to be shorter. You can pause and come back anytime — your session saves automatically.",
+        "Plan on about 15 minutes total, whether you talk or type. Most sections take 4 minutes or less, and you can skip around, pause, or come back anytime — your session saves automatically.",
     },
     {
       question: "Can I do this alone?",

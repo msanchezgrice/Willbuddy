@@ -69,7 +69,7 @@ interface VoiceContextValue {
   saveAndExit: () => Promise<void>;
   pauseSession: () => void;
   finishSession: () => Promise<void>;
-  jumpToSection: (section: Section) => void;
+  jumpToSection: (section: Section) => Promise<void>;
 }
 
 const VoiceContext = createContext<VoiceContextValue | null>(null);
@@ -160,6 +160,94 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       }
     },
     [],
+  );
+
+  const navigateToSummary = useCallback(
+    (sid: string) => {
+      const destination = `/summary/${sid}`;
+      router.replace(destination);
+
+      // Client transitions can occasionally stall after a long audio session on
+      // mobile Safari. Fall back to a normal navigation only if the route has
+      // not changed, so a completed plan never leaves the user stranded.
+      window.setTimeout(() => {
+        if (window.location.pathname !== destination) {
+          window.location.assign(destination);
+        }
+      }, 2000);
+    },
+    [router],
+  );
+
+  const completeSessionPersistently = useCallback(
+    async (sid: string, trigger: 'guided' | 'model' | 'user') => {
+      clearOperationError();
+      const completedPlan = [...planRef.current];
+      const finalSection = completedPlan[completedPlan.length - 1] ?? 'family';
+      let lastError: unknown;
+
+      // Completion is idempotent. One retry covers a transient mobile-network
+      // drop, including the case where the server committed but the response was
+      // lost before the browser received it.
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const response = await fetch('/api/session', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: sid,
+              sectionsCompleted: completedPlan,
+              currentSection: finalSection,
+              status: 'completed',
+            }),
+          });
+          await requireSuccessfulResponse(
+            response,
+            trigger === 'guided'
+              ? 'Could not complete this plan.'
+              : 'Could not complete this session.',
+          );
+          lastError = undefined;
+          break;
+        } catch (error) {
+          lastError = error;
+          if (attempt === 0) {
+            await new Promise<void>((resolve) => window.setTimeout(resolve, 350));
+          }
+        }
+      }
+
+      if (lastError) throw lastError;
+
+      sectionsCompletedRef.current = completedPlan;
+      currentSectionRef.current = finalSection;
+      setSectionsCompleted(completedPlan);
+      setCurrentSection(finalSection);
+
+      if (!sessionCompletedTrackedRef.current) {
+        sessionCompletedTrackedRef.current = true;
+        if (trigger === 'guided') {
+          captureAnalyticsEvent('guided_plan_completed', {
+            section_count: completedPlan.length,
+            decision_count: decisionsRef.current.length,
+          });
+        } else {
+          captureAnalyticsEvent('session_completed', {
+            session_id: sid,
+            trigger,
+          });
+        }
+      }
+
+      stopVoiceTransport();
+      navigateToSummary(sid);
+    },
+    [
+      clearOperationError,
+      navigateToSummary,
+      requireSuccessfulResponse,
+      stopVoiceTransport,
+    ],
   );
 
   // Load onboarding answers + section goals from localStorage on mount
@@ -351,11 +439,12 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // -----------------------------------------------------------------------
   useEffect(() => {
     if (!sessionId) return;
+    const activeSessionId = sessionId;
 
     // Instant paint: hydrate from the last cached snapshot while the network
     // fetch is in flight. The DB response below reconciles authoritatively.
     try {
-      const raw = window.localStorage.getItem(sessionCacheKey(sessionId));
+      const raw = window.localStorage.getItem(sessionCacheKey(activeSessionId));
       if (raw) {
         const cached = JSON.parse(raw) as {
           plan?: Section[];
@@ -389,32 +478,89 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
 
     async function loadSession() {
       try {
-        const res = await fetch(`/api/session?id=${sessionId}`);
-        if (!res.ok) return;
+        const res = await fetch(`/api/session?id=${activeSessionId}`);
+        await requireSuccessfulResponse(res, 'Could not reload your plan.');
         const data = await res.json();
         if (data.session) {
-          setCurrentSection(data.session.current_section ?? 'family');
-          const completed = (data.session.sections_completed ?? []) as Section[];
-          sectionsCompletedRef.current = completed;
-          setSectionsCompleted(completed);
+          if (data.session.status === 'completed') {
+            navigateToSummary(activeSessionId);
+            return;
+          }
+
+          const storedCompleted = (data.session.sections_completed ?? []) as Section[];
           resumeHandleRef.current = data.session.gemini_resume_handle ?? null;
+
           // DB onboarding wins over localStorage (survives device switches) and
           // means we don't need to re-persist it.
           if (data.session.onboarding) {
             onboardingRef.current = data.session.onboarding as OnboardingAnswers;
             onboardingPersistedRef.current = true;
           }
-          if (data.session.goals) {
-            goalsRef.current = data.session.goals as SessionGoals;
-            setInputMethod((data.session.goals as SessionGoals).inputMethod);
-          }
-          // A stored plan is authoritative for a returning session — don't
-          // recompute or overwrite it on connect.
-          if (data.session.section_plan?.length) {
-            const storedPlan = resolvePlan(data.session.section_plan as Section[]);
-            planRef.current = storedPlan;
-            setSectionPlan(storedPlan);
-            planPersistedRef.current = true;
+
+          const storedGoals = data.session.goals
+            ? (data.session.goals as SessionGoals)
+            : goalsRef.current;
+          const storedPlan = data.session.section_plan?.length
+            ? resolvePlan(data.session.section_plan as Section[])
+            : storedGoals?.modules ?? null;
+          const resolvedPlan = buildSectionPlan(
+            onboardingRef.current ?? undefined,
+            storedPlan,
+          );
+          const completed = storedCompleted.filter((section) =>
+            resolvedPlan.includes(section),
+          );
+          const storedCurrent = data.session.current_section as Section | undefined;
+          const resolvedCurrent =
+            storedCurrent && resolvedPlan.includes(storedCurrent)
+              ? storedCurrent
+              : resolvedPlan.find((section) => !completed.includes(section)) ??
+                resolvedPlan[resolvedPlan.length - 1] ??
+                'family';
+          const resolvedGoals: SessionGoals = {
+            preset: storedGoals?.preset ?? null,
+            modules: resolvedPlan,
+            inputMethod: storedGoals?.inputMethod,
+          };
+
+          planRef.current = resolvedPlan;
+          planPersistedRef.current = true;
+          goalsRef.current = resolvedGoals;
+          sectionsCompletedRef.current = completed;
+          currentSectionRef.current = resolvedCurrent;
+          setSectionPlan(resolvedPlan);
+          setSectionsCompleted(completed);
+          setCurrentSection(resolvedCurrent);
+          setInputMethod(resolvedGoals.inputMethod);
+
+          const planChanged =
+            JSON.stringify(storedPlan) !== JSON.stringify(resolvedPlan);
+          const progressChanged =
+            JSON.stringify(storedCompleted) !== JSON.stringify(completed) ||
+            storedCurrent !== resolvedCurrent;
+          if (
+            !data.session.section_plan?.length ||
+            planChanged ||
+            progressChanged ||
+            (!data.session.onboarding && onboardingRef.current)
+          ) {
+            const persistResponse = await fetch('/api/session', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: activeSessionId,
+                onboarding: onboardingRef.current ?? undefined,
+                sectionPlan: resolvedPlan,
+                goals: resolvedGoals,
+                sectionsCompleted: completed,
+                currentSection: resolvedCurrent,
+              }),
+            });
+            await requireSuccessfulResponse(
+              persistResponse,
+              'Could not save your tailored plan.',
+            );
+            if (onboardingRef.current) onboardingPersistedRef.current = true;
           }
         }
         if (data.decisions?.length) {
@@ -424,12 +570,17 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         if (data.recentTranscript?.length) {
           setTranscript(data.recentTranscript);
         }
+      } catch (error) {
+        console.error('Could not reload session:', error);
+        setOperationError(
+          'We could not reload your plan. Check your connection and try again.',
+        );
       } finally {
         setIsSessionReady(true);
       }
     }
     void loadSession();
-  }, [sessionId]);
+  }, [navigateToSummary, requireSuccessfulResponse, sessionId]);
 
   // Keep a lightweight snapshot in localStorage so returning to a session
   // paints answers/progress/chat instantly before the DB round-trip.
@@ -481,7 +632,13 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
           onboardingRef.current ?? undefined,
           goalsRef.current?.modules ?? null,
         );
+        const computedGoals: SessionGoals = {
+          preset: goalsRef.current?.preset ?? null,
+          modules: computedPlan,
+          inputMethod: goalsRef.current?.inputMethod,
+        };
         planRef.current = computedPlan;
+        goalsRef.current = computedGoals;
         setSectionPlan(computedPlan);
         planPersistedRef.current = true;
         if (sid) {
@@ -491,7 +648,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
             body: JSON.stringify({
               sessionId: sid,
               sectionPlan: computedPlan,
-              goals: goalsRef.current ?? { preset: null, modules: computedPlan },
+              goals: computedGoals,
             }),
           });
         }
@@ -547,35 +704,13 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       };
       gemini.onSessionComplete = () => {
         if (!sid) return;
-        void (async () => {
-          try {
-            clearOperationError();
-            const response = await fetch('/api/session', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sessionId: sid, status: 'completed' }),
-            });
-            await requireSuccessfulResponse(
-              response,
-              'Could not complete this session.',
-            );
-            if (!sessionCompletedTrackedRef.current) {
-              sessionCompletedTrackedRef.current = true;
-              captureAnalyticsEvent('session_completed', {
-                session_id: sid,
-                trigger: 'model',
-              });
-            }
-            stopVoiceTransport();
-            router.push(`/summary/${sid}`);
-          } catch (error) {
-            console.error('Could not complete voice session:', error);
-            setOperationError(
-              'Your answers are still here, but we could not finish saving the session. Please try again.',
-            );
-            setVoiceState('error');
-          }
-        })();
+        void completeSessionPersistently(sid, 'model').catch((error) => {
+          console.error('Could not complete voice session:', error);
+          setOperationError(
+            'Your answers are still here, but we could not finish saving the session. Please try again.',
+          );
+          setVoiceState('error');
+        });
       };
 
       recorder.onData = (base64Pcm: string) => {
@@ -602,14 +737,11 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       setVoiceState('error');
     }
   }, [
-    clearOperationError,
+    completeSessionPersistently,
     handleToolCall,
     isMicMuted,
     persistOnboarding,
-    requireSuccessfulResponse,
-    router,
     saveTranscript,
-    stopVoiceTransport,
   ]);
 
   // -----------------------------------------------------------------------
@@ -732,32 +864,14 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
     const sid = sessionIdRef.current;
     if (!sid) throw new Error('Session is not ready yet');
     try {
-      clearOperationError();
-      const response = await fetch('/api/session', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: sid,
-          sectionsCompleted: planRef.current,
-          currentSection: planRef.current[planRef.current.length - 1],
-          status: 'completed',
-        }),
-      });
-      await requireSuccessfulResponse(response, 'Could not complete this plan.');
-      sectionsCompletedRef.current = planRef.current;
-      setSectionsCompleted(planRef.current);
-      captureAnalyticsEvent('guided_plan_completed', {
-        section_count: planRef.current.length,
-        decision_count: decisionsRef.current.length,
-      });
-      router.push(`/summary/${sid}`);
+      await completeSessionPersistently(sid, 'guided');
     } catch (error) {
       setOperationError(
         'Your answer was saved, but we could not finish the plan. Please try again.',
       );
       throw error;
     }
-  }, [clearOperationError, requireSuccessfulResponse, router]);
+  }, [completeSessionPersistently]);
 
   const selectInputMethod = useCallback(
     async (method: NonNullable<SessionGoals['inputMethod']>) => {
@@ -765,9 +879,17 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       if (method === 'guided') {
         stopVoiceTransport();
       }
+      const safePlan = buildSectionPlan(
+        onboardingRef.current ?? undefined,
+        planRef.current,
+      );
+      if (JSON.stringify(safePlan) !== JSON.stringify(planRef.current)) {
+        planRef.current = safePlan;
+        setSectionPlan(safePlan);
+      }
       const goals: SessionGoals = {
         preset: goalsRef.current?.preset ?? null,
-        modules: planRef.current,
+        modules: safePlan,
         inputMethod: method,
       };
       const sid = sessionIdRef.current;
@@ -776,7 +898,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
           const response = await fetch('/api/session', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, goals }),
+            body: JSON.stringify({ sessionId: sid, goals, sectionPlan: safePlan }),
           });
           await requireSuccessfulResponse(
             response,
@@ -827,27 +949,40 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // sync with the click. If paused/idle, the section is stored and applied via
   // resumeContext when the user reconnects.
   // -----------------------------------------------------------------------
-  const jumpToSection = useCallback((section: Section) => {
+  const jumpToSection = useCallback(async (section: Section) => {
     if (section === currentSectionRef.current) return;
-    currentSectionRef.current = section;
-    setCurrentSection(section);
+    clearOperationError();
+    try {
+      const sid = sessionIdRef.current;
+      if (sid) {
+        const response = await fetch('/api/session', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: sid, currentSection: section }),
+        });
+        await requireSuccessfulResponse(
+          response,
+          'Could not save your new section.',
+        );
+      }
 
-    const sid = sessionIdRef.current;
-    if (sid) {
-      void fetch('/api/session', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: sid, currentSection: section }),
-      });
-    }
+      currentSectionRef.current = section;
+      setCurrentSection(section);
 
-    // Steer the live model (no-op if the WS is closed — resumeContext handles it).
-    if (clientRef.current) {
-      // Cut any in-flight speech so the switch feels instant.
-      playerRef.current?.stop();
-      clientRef.current.sendSectionJump(SECTION_LABELS[section]);
+      // Steer the live model (no-op if the WS is closed — resumeContext handles it).
+      if (clientRef.current) {
+        // Cut any in-flight speech so the switch feels instant.
+        playerRef.current?.stop();
+        clientRef.current.sendSectionJump(SECTION_LABELS[section]);
+      }
+    } catch (error) {
+      console.error('Could not jump to section:', error);
+      setOperationError(
+        'We could not save your new section. Check your connection and try again.',
+      );
+      throw error;
     }
-  }, []);
+  }, [clearOperationError, requireSuccessfulResponse]);
 
   // -----------------------------------------------------------------------
   // Save current progress and redirect to home (section-break or user pause).
@@ -926,28 +1061,14 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
     }
 
     try {
-      clearOperationError();
-      const response = await fetch('/api/session', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: sid, status: 'completed' }),
-      });
-      await requireSuccessfulResponse(response, 'Could not complete this session.');
-      if (!sessionCompletedTrackedRef.current) {
-        sessionCompletedTrackedRef.current = true;
-        captureAnalyticsEvent('session_completed', {
-          session_id: sid,
-          trigger: 'user',
-        });
-      }
-      router.push(`/summary/${sid}`);
+      await completeSessionPersistently(sid, 'user');
     } catch (error) {
       console.error('Could not finish session:', error);
       setOperationError(
         'Your answers are still here, but we could not finish saving the session. Please try again.',
       );
     }
-  }, [clearOperationError, requireSuccessfulResponse, router, stopVoiceTransport]);
+  }, [completeSessionPersistently, stopVoiceTransport]);
 
   // -----------------------------------------------------------------------
   // Auto-reconnect on unexpected disconnect

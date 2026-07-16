@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { generateAllDocuments } from "@/lib/documents/generator";
+import { pickPlanDocuments, resolvePlan } from "@/lib/sections/plan";
+import type { Section } from "@/types";
 
 /**
  * POST /api/documents
  * Generate all estate planning documents for a completed session.
  *
  * Body: { sessionId: string }
- * Returns: { documents: Record<DocType, string> }
+ * Returns only the documents included in the session's tailored plan.
  */
 export async function POST(request: NextRequest) {
   const { userId } = await auth();
@@ -79,7 +81,11 @@ export async function POST(request: NextRequest) {
   }
 
   // Generate all documents
-  const documents = generateAllDocuments(decisions ?? []);
+  const sectionPlan = resolvePlan(session.section_plan as Section[] | null);
+  const documents = pickPlanDocuments(
+    generateAllDocuments(decisions ?? [], { sectionPlan }),
+    sectionPlan
+  );
 
   return NextResponse.json({ documents });
 }

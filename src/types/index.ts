@@ -19,7 +19,7 @@ export const SECTIONS: Section[] = [
 
 export const SECTION_LABELS: Record<Section, string> = {
   family: "Family Snapshot",
-  guardianship: "Guardianship",
+  guardianship: "Minor-Child Guardianship",
   assets: "Assets & Property",
   healthcare: "Healthcare Wishes",
   executor: "Executor & POA",
@@ -38,7 +38,7 @@ export type DocType =
 
 export const DOC_TYPE_LABELS: Record<DocType, string> = {
   will: "Last Will & Testament",
-  guardianship: "Guardianship Designation",
+  guardianship: "Minor-Child Guardianship Designation",
   medical_poa: "Medical Power of Attorney",
   durable_poa: "Durable Power of Attorney",
   hipaa: "HIPAA Authorization",
@@ -143,11 +143,23 @@ export interface Session {
 
 export interface OnboardingQuizAnswers {
   planning_for?: string;
-  children?: string;
+  children?: OnboardingChildStatus;
   texas?: string;
   priority?: string;
   completedAt?: string;
 }
+
+export type ChildStatus =
+  | "minor_children"
+  | "adult_children"
+  | "minor_and_adult_children"
+  | "expecting"
+  | "no_children";
+
+/** Values used before the adult-child option was added. */
+export type LegacyChildStatus = "have_kids" | "no_kids";
+
+export type OnboardingChildStatus = ChildStatus | LegacyChildStatus;
 
 /** What the user chose to cover in the "what do you need" onboarding step. */
 export interface SessionGoals {

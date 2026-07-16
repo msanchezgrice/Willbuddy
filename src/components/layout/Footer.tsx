@@ -64,7 +64,7 @@ export function Footer() {
           </span>
           <span className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5" />
-            ~45 min session
+            ~15 min plan
           </span>
         </div>
         <p className="text-xs text-[#9B8E7E] mt-8">

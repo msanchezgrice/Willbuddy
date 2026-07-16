@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 
   const plan = resolvePlan(session.section_plan as Section[] | null);
   const planDocs = pickPlanDocuments(
-    generateAllDocuments(decisions ?? []),
+    generateAllDocuments(decisions ?? [], { sectionPlan: plan }),
     plan
   );
 

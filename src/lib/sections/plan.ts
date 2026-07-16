@@ -1,5 +1,9 @@
 import type { DocType, OnboardingQuizAnswers, Section } from "@/types";
 import { SECTIONS } from "@/types";
+import {
+  childStatusIncludesMinor,
+  minorChildGuardianshipIsAvailable,
+} from "@/lib/family/children";
 
 /**
  * Canonical ordering of every module. A session's plan is always a subset of
@@ -23,18 +27,25 @@ interface ModuleRule {
 
 /**
  * Which modules belong in a plan by default, based on onboarding.
- * Guardianship is only default-on for people with (or expecting) kids — others
- * can still add it later via the "what do you need" step.
+ * Child guardianship is only relevant when a minor child is present or expected.
  */
 export const MODULE_RULES: Record<Section, ModuleRule> = {
   family: { required: true, defaultOn: () => true },
   guardianship: {
-    defaultOn: (o) => o?.children === "have_kids" || o?.children === "expecting",
+    defaultOn: (o) => childStatusIncludesMinor(o?.children),
   },
   assets: { defaultOn: () => true },
   healthcare: { defaultOn: () => true },
   executor: { defaultOn: () => true },
 };
+
+export function sectionIsAvailable(
+  section: Section,
+  onboarding?: OnboardingQuizAnswers,
+): boolean {
+  if (section !== "guardianship") return true;
+  return minorChildGuardianshipIsAvailable(onboarding?.children);
+}
 
 /** Map the onboarding "priority" answer to the module it corresponds to. */
 export function priorityToSection(priority?: string): Section | null {
@@ -73,7 +84,9 @@ export function buildSectionPlan(
   const base =
     selected && selected.length > 0 ? selected : defaultModules(onboarding);
 
-  const set = new Set<Section>(base);
+  const set = new Set<Section>(
+    base.filter((section) => sectionIsAvailable(section, onboarding)),
+  );
   set.add("family"); // required, no matter what
 
   const ordered: Section[] = ["family"];
@@ -160,13 +173,13 @@ export const PLAN_PRESETS: PlanPreset[] = [
     id: "essentials",
     label: "New-parent essentials",
     description:
-      "Guardianship, will, healthcare directives & powers of attorney — the full plan most parents need.",
+      "Minor-child guardianship, will, healthcare directives & powers of attorney.",
     modules: ["family", "guardianship", "assets", "healthcare", "executor"],
   },
   {
     id: "guardianship",
-    label: "Just guardianship",
-    description: "Name who would raise your kids — fast.",
+    label: "Just minor-child guardianship",
+    description: "Name who would raise a child under 18.",
     modules: ["family", "guardianship"],
   },
   {
@@ -178,7 +191,7 @@ export const PLAN_PRESETS: PlanPreset[] = [
   {
     id: "full",
     label: "Full estate plan",
-    description: "Everything WillBuddy covers, start to finish.",
+    description: "Every WillBuddy module that applies to your family.",
     modules: ["family", "guardianship", "assets", "healthcare", "executor"],
   },
 ];

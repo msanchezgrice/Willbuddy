@@ -35,6 +35,7 @@ export default async function SummaryPage({ params, searchParams }: Props) {
     .from("sessions")
     .select("*")
     .eq("id", sessionId)
+    .eq("user_id", userId)
     .single();
 
   if (!session) {

@@ -71,7 +71,9 @@ test("completion and summary copy work for either input method", async () => {
   ]);
 
   assert.match(provider, /status: 'completed'/);
-  assert.match(provider, /router\.push\(`\/summary\/\$\{sid\}`\)/);
+  assert.match(provider, /router\.replace\(destination\)/);
+  assert.match(provider, /window\.location\.assign\(destination\)/);
+  assert.match(provider, /for \(let attempt = 0; attempt < 2; attempt \+= 1\)/);
   assert.doesNotMatch(summary, /You sat down, talked it through/);
   assert.match(summary, /worked through the questions/i);
 });

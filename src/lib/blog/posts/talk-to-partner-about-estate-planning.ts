@@ -29,7 +29,7 @@ When you understand that the friction comes from these three pressures stacking 
 
 The single most common mistake is bringing this up in passing — in the car, during an argument about something else, or late at night when you're both depleted. Estate planning deserves a dedicated, low-stress window.
 
-Try this: schedule it like you'd schedule anything else that matters. "Can we spend 45 minutes Sunday morning talking through what happens to the kids and our stuff if something happened to us? I want us to be on the same page." Putting it on the calendar signals that it's important and gives your partner time to think rather than react.
+Try this: schedule it like you'd schedule anything else that matters. "Can we spend 15 minutes Sunday morning talking through what happens to the kids and our stuff if something happened to us? I want us to be on the same page." Putting it on the calendar signals that it's important and gives your partner time to think rather than react.
 
 Keep the first session short and bounded. You do not need to resolve everything in one sitting. In fact, you shouldn't try to.
 

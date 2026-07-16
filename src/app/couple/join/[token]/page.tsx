@@ -56,7 +56,7 @@ export default async function CoupleJoinPage({ params }: Props) {
             {primaryName} wants to plan your estate together
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-[#5A5550]">
-            You&apos;ll do your own 25-minute voice session, then we&apos;ll show you
+            You&apos;ll do your own 15-minute voice session, then we&apos;ll show you
             where you and {primaryName} agree and where you need to talk. No pressure,
             no lawyer clock ticking.
           </p>

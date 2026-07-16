@@ -51,12 +51,13 @@ export async function getDocumentsByShareToken(
     .order("created_at", { ascending: true });
 
   const allDecisions = (decisions as Decision[]) ?? [];
+  const sectionPlan = resolvePlan(session.section_plan as Section[] | null);
 
   return {
     ok: true,
     sessionId: doc.session_id,
     decisions: allDecisions,
-    documents: generateAllDocuments(allDecisions),
-    sectionPlan: resolvePlan(session.section_plan as Section[] | null),
+    documents: generateAllDocuments(allDecisions, { sectionPlan }),
+    sectionPlan,
   };
 }

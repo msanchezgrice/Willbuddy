@@ -1,6 +1,16 @@
-import type { Decision, FlaggedItem, Section, TranscriptEntry } from "@/types";
+import type {
+  Decision,
+  FlaggedItem,
+  OnboardingQuizAnswers,
+  Section,
+  TranscriptEntry,
+} from "@/types";
 import { SECTION_CONFIG } from "./sections";
 import { resolvePlan } from "@/lib/sections/plan";
+import {
+  childStatusDescription,
+  childStatusIncludesMinor,
+} from "@/lib/family/children";
 
 export interface ResumeContext {
   currentSection: Section;
@@ -11,12 +21,7 @@ export interface ResumeContext {
 }
 
 /** Answers collected during the pre-session onboarding quiz. */
-export interface OnboardingAnswers {
-  planning_for?: string; // 'couple' | 'individual'
-  children?: string; // 'have_kids' | 'expecting' | 'no_kids'
-  texas?: string; // 'yes' | 'no'
-  priority?: string; // 'guardianship' | 'assets' | 'healthcare' | 'getting_started'
-}
+export type OnboardingAnswers = OnboardingQuizAnswers;
 
 interface SystemPromptOptions {
   resumeContext?: ResumeContext;
@@ -32,12 +37,6 @@ const PRIORITY_LABELS: Record<string, string> = {
   getting_started: "just getting started — they weren't sure where to begin",
 };
 
-const CHILDREN_LABELS: Record<string, string> = {
-  have_kids: "they have children at home",
-  expecting: "they are expecting a child",
-  no_kids: "they do not have children yet",
-};
-
 /** Build the "what the user already told us" block from onboarding answers. */
 function buildOnboardingBlock(onboarding?: OnboardingAnswers): string {
   if (!onboarding) return "";
@@ -49,8 +48,9 @@ function buildOnboardingBlock(onboarding?: OnboardingAnswers): string {
     facts.push("They are planning as an individual (no partner in this plan).");
   }
 
-  if (onboarding.children && CHILDREN_LABELS[onboarding.children]) {
-    facts.push(CHILDREN_LABELS[onboarding.children] + ".");
+  const childrenDescription = childStatusDescription(onboarding.children);
+  if (childrenDescription) {
+    facts.push(childrenDescription + ".");
   }
 
   if (onboarding.texas === "yes") {
@@ -76,7 +76,7 @@ Before this conversation, the user answered a few quick questions. Use these fac
 
 ${facts.map((f) => `- ${f}`).join("\n")}
 
-Open warmly, briefly reflect back what you already know (e.g. "Since you mentioned you're in Texas with little ones at home..."), and steer toward what matters most to them first when it makes sense.
+Open warmly, briefly reflect back what you already know, and steer toward what matters most to them first when it makes sense. Never describe adult children as little ones or imply that they need someone to raise them.
 `;
 }
 
@@ -162,6 +162,18 @@ Do NOT re-ask questions they've already answered unless they want to change some
   }
 
   const onboardingBlock = buildOnboardingBlock(onboarding);
+  const adultChildrenOnly = onboarding?.children === "adult_children";
+  const childApplicabilityBlock = `
+## Children and Guardianship Applicability (CRITICAL)
+
+- "Children" includes grown children for family, beneficiary, distribution, and inheritance conversations.
+- The Guardianship module and Guardianship Designation document in WillBuddy are ONLY for a minor child (under 18) or an expected child.
+- If the user has adult children only, do NOT ask who would raise them, do NOT ask for a primary or backup child guardian, and do NOT suggest a minor-child Guardianship Designation.
+- Adult guardianship for an incapacitated adult is a separate legal process. Do not substitute that topic for WillBuddy's minor-child guardianship module.
+- If ages are unclear and guardianship is in the agenda, confirm that at least one child is under 18 before asking guardian questions.
+${adultChildrenOnly ? "- This user selected adult children only. Guardianship questions are not applicable and must be skipped." : ""}
+${onboarding?.children && !childStatusIncludesMinor(onboarding.children) ? "- The saved child status does not involve a minor child, so never introduce the child-guardianship module." : ""}
+`;
 
   return `You are WillBuddy, a warm and knowledgeable estate planning coach helping ${audience} create their estate plan in Texas.
 
@@ -176,15 +188,15 @@ All documents generated from this conversation will be positioned as "draft docu
 - Use natural conversational language. Speak in full, complete sentences.
 - IMPORTANT: Speak at a relaxed pace. Do NOT rush through questions.
 - IMPORTANT: Always speak in English. The users speak English.
-- Before each new section, give a brief 2-3 sentence introduction explaining what the section covers and why it matters. For example: "Now let's talk about guardianship. This is about choosing who would raise your children if something happened to both of you. It's one of the most important decisions you'll make today, and there's no wrong answer."
+- Before each new section, give a brief 2-3 sentence introduction explaining what the section covers and why it matters. Only introduce minor-child guardianship when it appears in TODAY'S SESSION AGENDA.
 - After each answer, acknowledge what they said before moving on. For example: "That makes a lot of sense. Your sister sounds like a great choice." Then pause before the next question.
-- For the guardianship section: speak more slowly, acknowledge the emotional weight. Say something like "Take your time with this one. It's a big question, and it's completely normal to find it hard."
+- For a minor-child guardianship section that is actually in the agenda: speak more slowly and acknowledge the emotional weight.
 - For healthcare wishes: frame as "giving your family clarity" not "planning for death."
 - Between sections, provide a transition. For example: "Great, we've covered the family basics. Now let's move on to something a bit heavier, but really important: guardianship."
 
 ## How You Work
 - ALWAYS speak in complete, natural sentences. Never give one-word responses.
-- Start the session with a warm welcome. Introduce yourself, then explain what you'll cover using TODAY'S SESSION AGENDA below (name the actual modules and their count — do not assume five). Set expectations for timing (~5-10 minutes per module). For example: "Hi there! I'm WillBuddy, and I'm going to walk you through your estate plan today. We'll cover [the modules in the agenda]. Let's start with the easy stuff."
+- Start the session with a warm welcome. Introduce yourself, then explain what you'll cover using TODAY'S SESSION AGENDA below (name the actual modules and their count — do not assume five). Set expectations for timing: about 15 minutes total, with most modules taking 4 minutes or less. For example: "Hi there! I'm WillBuddy, and I'm going to walk you through your estate plan today. We'll cover [the modules in the agenda]. Most sections take four minutes or less, and the whole plan is about fifteen minutes. Let's start with the easy stuff."
 - Ask questions ONE AT A TIME. Wait for the user's response before continuing.
 - After each answer, acknowledge it warmly, then use the recordDecision tool to capture the structured decision.
 - If the user seems unsure or conflicted, say something reassuring and use flagForReview to note it. For example: "That's totally fine, you don't have to decide right now. We'll flag this so you can think about it and discuss with your attorney."
@@ -273,7 +285,7 @@ Examples of good pacing:
 - Never give specific legal advice. Say things like "many families choose..." or "your attorney can advise on..."
 - If the user asks a question you can't answer, say "That's a great question for your attorney."
 - At the end: congratulate them warmly. "You just did something most families never do. You've made decisions that will give your family clarity and protection. The next step is to take these drafts to a Texas estate planning attorney for review and finalization."
-${onboardingBlock}${resumeBlock}
+${childApplicabilityBlock}${onboardingBlock}${resumeBlock}
 
 Begin by greeting ${isCouple ? "the couple" : "them"} warmly and starting with the ${firstLabel} section (unless resuming).`;
 }

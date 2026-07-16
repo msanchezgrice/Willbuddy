@@ -1,20 +1,13 @@
-import type { Decision, DocType } from "@/types";
+import type { Decision, DocType, Section } from "@/types";
 import { generateWillText } from "./templates/will";
 import { generateGuardianshipText } from "./templates/guardianship";
 import { generateMedicalPoaText } from "./templates/medical-poa";
 import { generateDurablePoaText } from "./templates/durable-poa";
 import { generateHipaaText } from "./templates/hipaa";
 
-/**
- * Map of document types to their generator functions.
- */
-const generators: Record<DocType, (decisions: Decision[]) => string> = {
-  will: generateWillText,
-  guardianship: generateGuardianshipText,
-  medical_poa: generateMedicalPoaText,
-  durable_poa: generateDurablePoaText,
-  hipaa: generateHipaaText,
-};
+export interface DocumentGenerationOptions {
+  sectionPlan?: Section[];
+}
 
 /**
  * Which decision keys are required for each document type.
@@ -26,7 +19,7 @@ const requiredKeys: Record<DocType, { section: string; key: string; label: strin
     { section: "executor", key: "executor", label: "Executor" },
     { section: "executor", key: "backup_executor", label: "Backup executor" },
     { section: "assets", key: "distribution", label: "Asset distribution wishes" },
-    { section: "assets", key: "inheritance_age", label: "Inheritance age for minors" },
+    { section: "assets", key: "inheritance_age", label: "Age-based inheritance preference" },
   ],
   guardianship: [
     { section: "family", key: "full_name", label: "Your full name" },
@@ -56,14 +49,18 @@ const requiredKeys: Record<DocType, { section: string; key: string; label: strin
  * Generate all 5 document texts from the user's decisions.
  */
 export function generateAllDocuments(
-  decisions: Decision[]
+  decisions: Decision[],
+  options: DocumentGenerationOptions = {}
 ): Record<DocType, string> {
+  const includeMinorChildGuardianship =
+    options.sectionPlan?.includes("guardianship") ?? true;
+
   return {
-    will: generators.will(decisions),
-    guardianship: generators.guardianship(decisions),
-    medical_poa: generators.medical_poa(decisions),
-    durable_poa: generators.durable_poa(decisions),
-    hipaa: generators.hipaa(decisions),
+    will: generateWillText(decisions, { includeMinorChildGuardianship }),
+    guardianship: generateGuardianshipText(decisions),
+    medical_poa: generateMedicalPoaText(decisions),
+    durable_poa: generateDurablePoaText(decisions),
+    hipaa: generateHipaaText(decisions),
   };
 }
 

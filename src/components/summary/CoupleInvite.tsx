@@ -85,9 +85,9 @@ export function CoupleInvite({
         Invite your partner to compare answers
       </h2>
       <p className="mt-3 text-sm leading-relaxed text-[#5A5550]">
-        Send them a link. They&apos;ll do their own 25-minute session, then
+        Send them a link. They&apos;ll do their own 15-minute session, then
         we&apos;ll show you where you agree and where to talk it through. No
-        45-minute marathon, no lawyer clock.
+        long appointment, no lawyer clock.
       </p>
 
       {error && (

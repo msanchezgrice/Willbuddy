@@ -23,13 +23,13 @@ export function renderInviteEmail({
 }: InviteParams): RenderedEmail {
   const subject = `${fromName} wants to plan your estate with you`;
   const preheader =
-    "Do your own 25-minute session, then compare answers together.";
+    "Do your own 15-minute session, then compare answers together.";
 
   const text = `${fromName} started an estate plan on WillBuddy and wants you to do your part.
 
-You'll each answer the same questions in your own private voice session (about 25 minutes), then we'll show you where you agree and where you need to talk.
+You'll each answer the same questions in your own private voice session (about 15 minutes), then we'll show you where you agree and where you need to talk.
 
-No lawyer clock, no 45-minute marathon. Take your time.
+No lawyer clock, no long appointment. Take your time.
 
 Start here: ${inviteUrl}
 
@@ -43,10 +43,10 @@ ${appUrl}`;
         <strong>${escape(fromName)}</strong> started an estate plan on WillBuddy and wants you to do your part.
       </p>
       <p style="font-size: 16px; line-height: 1.6; color: #5A5550; margin: 0 0 16px;">
-        You'll each answer the same questions in your own private voice session (about 25 minutes), then we'll show you where you agree and where you need to talk.
+        You'll each answer the same questions in your own private voice session (about 15 minutes), then we'll show you where you agree and where you need to talk.
       </p>
       <p style="font-size: 16px; line-height: 1.6; color: #5A5550; margin: 0 0 24px;">
-        No lawyer clock, no 45-minute marathon. Take your time.
+        No lawyer clock, no long appointment. Take your time.
       </p>
       ${button("Start my session", inviteUrl)}
     `,
@@ -164,11 +164,11 @@ export function renderIdleEmail({
     daysIdle >= 14
       ? "Life gets busy — your estate plan is still here"
       : "Pick up where you left off?";
-  const preheader = "20 minutes now and it's done forever.";
+  const preheader = "A few more minutes and your plan is ready to review.";
 
   const text = `Your estate plan is waiting.
 
-It's been ${daysIdle} days. Taking 20 more minutes now means your family has real clarity — and you never have to think about this again.
+It's been ${daysIdle} days. Picking up where you left off now means your family has real clarity — and you never have to start over.
 
 Resume: ${resumeUrl}
 
@@ -182,7 +182,7 @@ ${appUrl}`;
         Your estate plan is waiting.
       </p>
       <p style="font-size: 16px; line-height: 1.6; color: #5A5550; margin: 0 0 24px;">
-        It's been ${daysIdle} days. Taking 20 more minutes now means your family has real clarity — and you never have to think about this again.
+        It's been ${daysIdle} days. Picking up where you left off now means your family has real clarity — and you never have to start over.
       </p>
       ${button("Resume my plan", resumeUrl)}
     `,

@@ -1,6 +1,11 @@
 export type ReadinessProfile = {
   planningFor: "individual" | "couple";
-  children: "minor_children" | "adult_children" | "no_children";
+  children:
+    | "minor_children"
+    | "adult_children"
+    | "minor_and_adult_children"
+    | "expecting"
+    | "no_children";
   texas: "yes" | "no";
   priority: "guardianship" | "assets" | "healthcare" | "getting_started";
 };
@@ -84,7 +89,11 @@ export function getApplicableReadinessItems(
   profile: ReadinessProfile
 ): ReadinessItem[] {
   const items = [...BASE_ITEMS];
-  if (profile.children === "minor_children") {
+  if (
+    profile.children === "minor_children" ||
+    profile.children === "minor_and_adult_children" ||
+    profile.children === "expecting"
+  ) {
     items.push(GUARDIAN_ITEM);
   }
 

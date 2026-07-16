@@ -65,9 +65,23 @@ test("guardian nomination is applicable only when minor children are present", (
     texas: "yes",
     priority: "getting_started",
   });
+  const withAdultChildrenOnly = getApplicableReadinessItems({
+    planningFor: "individual",
+    children: "adult_children",
+    texas: "yes",
+    priority: "guardianship",
+  });
+  const withMixedAges = getApplicableReadinessItems({
+    planningFor: "couple",
+    children: "minor_and_adult_children",
+    texas: "yes",
+    priority: "guardianship",
+  });
 
   assert.ok(withMinors.some((item) => item.id === "guardian"));
   assert.ok(!withoutMinors.some((item) => item.id === "guardian"));
+  assert.ok(!withAdultChildrenOnly.some((item) => item.id === "guardian"));
+  assert.ok(withMixedAges.some((item) => item.id === "guardian"));
 });
 
 test("readiness score uses only applicable items and prioritizes missing essentials", () => {

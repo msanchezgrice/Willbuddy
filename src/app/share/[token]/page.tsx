@@ -70,11 +70,10 @@ export default async function SharePage({ params }: Props) {
   const allDecisions: Decision[] = (decisions as Decision[]) ?? [];
 
   // Generate documents, scoped to the session's tailored plan.
-  const documents = generateAllDocuments(allDecisions);
+  const sectionPlan = resolvePlan(session.section_plan as Section[] | null);
+  const documents = generateAllDocuments(allDecisions, { sectionPlan });
   const completeness = getDocumentCompleteness(allDecisions);
-  const planDocTypes = docsForPlan(
-    resolvePlan(session.section_plan as Section[] | null)
-  );
+  const planDocTypes = docsForPlan(sectionPlan);
 
   // Group decisions by section
   const decisionsBySection: Record<string, Decision[]> = {};

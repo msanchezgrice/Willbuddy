@@ -9,14 +9,24 @@ export interface SectionConfig {
   emotionalGuidance?: string;
 }
 
+export const TOTAL_PLAN_ESTIMATED_MINUTES = 15;
+export const MAX_SECTION_ESTIMATED_MINUTES = 4;
+
+export function estimatedPlanMinutes(sectionCount: number): number {
+  return Math.min(
+    TOTAL_PLAN_ESTIMATED_MINUTES,
+    Math.max(0, sectionCount) * MAX_SECTION_ESTIMATED_MINUTES,
+  );
+}
+
 export const SECTION_CONFIG: Record<Section, SectionConfig> = {
   family: {
     label: "Family Snapshot",
     description: "Basic information about your family",
-    estimatedMinutes: 5,
+    estimatedMinutes: MAX_SECTION_ESTIMATED_MINUTES,
     questions: [
       "What are your and your partner's full legal names?",
-      "How many children do you have, and what are their names and ages?",
+      "How many children do you have, including grown children, and what are their names and ages?",
       "What state do you live in?",
       "Are you currently married?",
     ],
@@ -27,9 +37,9 @@ export const SECTION_CONFIG: Record<Section, SectionConfig> = {
     ],
   },
   guardianship: {
-    label: "Guardianship",
-    description: "Who would raise your children",
-    estimatedMinutes: 10,
+    label: "Minor-Child Guardianship",
+    description: "Who would raise a child under 18",
+    estimatedMinutes: MAX_SECTION_ESTIMATED_MINUTES,
     questions: [
       "If something happened to both of you, who would you want to raise your children?",
       "Does this person share your values on education, discipline, and lifestyle?",
@@ -49,26 +59,26 @@ export const SECTION_CONFIG: Record<Section, SectionConfig> = {
   assets: {
     label: "Assets & Property",
     description: "What you own and how to distribute it",
-    estimatedMinutes: 10,
+    estimatedMinutes: MAX_SECTION_ESTIMATED_MINUTES,
     questions: [
       "Do you own real estate? Is it in one name or both?",
       "Do you have retirement accounts, investment accounts, or savings?",
       "Do you own a business or have business interests?",
       "Do you have digital assets like crypto, domains, or valuable online accounts?",
       "How would you like your assets distributed?",
-      "At what age should your children receive their inheritance outright?",
+      "Should any beneficiary's inheritance be held until a certain age?",
     ],
     contextTips: [
       "We don't need exact dollar amounts, just categories.",
       "Life insurance and retirement accounts pass by beneficiary designation, not through a will.",
-      "Many parents choose ages 21-25 for full inheritance to ensure maturity.",
-      "A trust can manage assets for minor children until they reach the age you set.",
+      "Some families use age-based trusts for younger beneficiaries; others choose outright distribution.",
+      "An attorney can help tailor beneficiary trusts for minor or adult beneficiaries.",
     ],
   },
   healthcare: {
     label: "Healthcare Wishes",
     description: "Medical decisions if you're incapacitated",
-    estimatedMinutes: 10,
+    estimatedMinutes: MAX_SECTION_ESTIMATED_MINUTES,
     questions: [
       "Who should make medical decisions for you if you can't make them yourself?",
       "And who should make medical decisions for your partner?",
@@ -87,7 +97,7 @@ export const SECTION_CONFIG: Record<Section, SectionConfig> = {
   executor: {
     label: "Executor & POA",
     description: "Who handles your affairs",
-    estimatedMinutes: 10,
+    estimatedMinutes: MAX_SECTION_ESTIMATED_MINUTES,
     questions: [
       "Who do you trust to carry out your wishes and handle the legal and financial paperwork?",
       "Who would be the backup if your first choice can't serve?",
