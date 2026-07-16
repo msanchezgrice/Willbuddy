@@ -92,11 +92,11 @@ export default function TexasIntestacyCalculatorPage() {
               Estate-planning tools
             </Link>
           </nav>
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[#5B7A5E] md:text-xs">
+          <p className="hidden font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-[#7F7467] md:block">
             Texas Estates Code Chapter 201
           </p>
           <h1 className="mt-1 max-w-4xl font-[family-name:var(--font-heading)] text-2xl font-bold leading-tight text-[#2D2A26] md:mt-4 md:text-6xl">
-            Who inherits in Texas without a will?
+            Who could inherit your home and savings in Texas if you die without a will?
           </h1>
           <p className="mt-2 text-sm font-semibold text-[#304733] md:mt-4 md:text-base">
             Free · No signup · See the simplified map in about two minutes
@@ -111,15 +111,15 @@ export default function TexasIntestacyCalculatorPage() {
             by the WillBuddy Editorial Team on July 13, 2026. Not attorney-reviewed.
             WillBuddy is not a law firm and does not provide legal advice or determine heirship.
           </p>
-          <p className="mt-1 text-xs text-[#6F655A] md:hidden">
-            Educational only · Not legal advice
-          </p>
         </div>
       </section>
 
       <section id="calculator" className="px-3 py-3 sm:px-6 md:py-16" aria-label="Texas intestacy calculator">
         <div className="mx-auto max-w-6xl">
           <TexasIntestacyCalculator />
+          <p className="mt-2 text-center text-xs text-[#6F655A] md:hidden">
+            Educational only · Not legal advice
+          </p>
         </div>
       </section>
 
