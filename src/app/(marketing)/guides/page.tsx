@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CircleDollarSign } from "lucide-react";
+import { ArrowRight, BookOpen, CircleDollarSign, ListChecks } from "lucide-react";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -17,6 +17,13 @@ const guides = [
       "Understand creation, funding, probate, incapacity planning, maintenance, and when a trust conversation may be worthwhile.",
     href: "/guides/living-trust-texas",
     icon: BookOpen,
+  },
+  {
+    title: "Fund a Texas living trust step by step",
+    description:
+      "Work through deeds, accounts, beneficiary designations, business interests, proof, and maintenance with a structured Texas checklist.",
+    href: "/guides/living-trust-funding-checklist-texas",
+    icon: ListChecks,
   },
   {
     title: "What a living trust may cost in Texas",

@@ -74,6 +74,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: absoluteUrl("/guides/living-trust-funding-checklist-texas"),
+      lastModified: new Date("2026-07-21T00:00:00.000Z"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: absoluteUrl("/guides/living-trust-cost-texas"),
       lastModified,
       changeFrequency: "monthly",
