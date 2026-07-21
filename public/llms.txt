@@ -1,0 +1,42 @@
+# WillBuddy
+
+> WillBuddy is a voice-first estate planning coach for Texas families. It guides users — by conversation or step-by-step answers — through wills, guardianship, healthcare wishes, and powers of attorney, then generates five Texas-compliant draft documents for attorney review. WillBuddy is not a law firm and does not provide legal advice.
+
+## Product
+
+- [Homepage](https://mywillbuddy.com): Product overview, how it works, pricing ($49 one-time document package), and FAQs.
+- [Texas estate planning guide](https://mywillbuddy.com/texas-estate-planning): Source-linked overview of Texas wills, intestacy, guardianship, and powers of attorney.
+- [Start a plan](https://mywillbuddy.com/onboarding): Begin a guided estate plan (account required to save progress).
+
+## Free tools (no account required)
+
+- [Estate planning readiness quiz](https://mywillbuddy.com/tools/estate-planning-readiness): Personalized readiness checklist.
+- [Texas intestacy calculator](https://mywillbuddy.com/tools/texas-intestacy-calculator): Who may inherit without a will under Texas law.
+- [Estate planning cost calculator](https://mywillbuddy.com/tools/texas-estate-planning-cost-calculator): Planning and administration cost ranges.
+- [Power of attorney navigator](https://mywillbuddy.com/tools/texas-power-of-attorney-navigator): Match decisions to Texas documents.
+
+## Guides and research
+
+- [Planning guides](https://mywillbuddy.com/guides): Source-linked Texas guides, including living trusts and funding checklists.
+- [Blog](https://mywillbuddy.com/blog): Plain-English Texas estate planning articles.
+- [Research and methodology](https://mywillbuddy.com/research): Open methodology and sources behind WillBuddy content.
+
+## Policies and support
+
+- [Contact](https://mywillbuddy.com/contact): Support form; or email support@mywillbuddy.com.
+- [Privacy policy](https://mywillbuddy.com/privacy)
+- [Terms of service](https://mywillbuddy.com/terms)
+- [Refund policy](https://mywillbuddy.com/refunds)
+
+## Agent resources
+
+- [agents.md](https://mywillbuddy.com/agents.md): Onboarding and safe-action guidance for browser agents.
+- [Agent card (A2A)](https://mywillbuddy.com/.well-known/agent-card.json): Capabilities manifest.
+- [AI agent manifest](https://mywillbuddy.com/.well-known/ai-agent.json): Guardrails, allowed/disallowed actions, and contact.
+
+## Notes for AI agents
+
+- Pricing: one plan — the WillBuddy Document Package, $49 one-time (USD), includes all 5 Texas-compliant draft documents.
+- Texas only: documents are drafted for Texas estate law; other states are not supported yet.
+- Do not present WillBuddy output as legal advice; drafts are intended for review by a licensed Texas estate planning attorney.
+- Authenticated flows (onboarding, sessions, checkout) require a user account; agents should not create accounts or complete purchases on a user's behalf without explicit confirmation.

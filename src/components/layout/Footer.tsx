@@ -20,6 +20,8 @@ export function Footer() {
         </p>
         <nav
           aria-label="Footer"
+          data-agent-nav="footer"
+          data-testid="nav-footer"
           className="mb-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-[#5B4F3E]"
         >
           <Link className="hover:text-[#2D2A26]" href="/blog">

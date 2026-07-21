@@ -56,6 +56,8 @@ export function ContactForm() {
   return (
     <form
       onSubmit={onSubmit}
+      data-testid="contact-form"
+      data-agent-form="contact"
       className="space-y-5 rounded-2xl border border-[#E8E0D6] bg-white p-6 shadow-sm md:p-8"
     >
       <div>
@@ -130,6 +132,8 @@ export function ContactForm() {
         className="w-full rounded-full bg-[#5B7A5E] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#5B7A5E]/20 transition hover:bg-[#4A6A4D] disabled:cursor-not-allowed disabled:opacity-60"
         type="submit"
         disabled={pending}
+        data-testid="contact-submit"
+        data-agent-action="submit-contact-form"
       >
         {pending ? "Sending..." : "Send message"}
       </button>

@@ -57,6 +57,8 @@ export function StartPlanButton({
         type="button"
         onClick={start}
         disabled={loading}
+        data-testid="cta-start-plan"
+        data-agent-action="start-plan"
         className={cn(
           "inline-flex items-center justify-center gap-2 rounded-full bg-[#5B7A5E] px-8 py-3.5 font-semibold text-white shadow-lg shadow-[#5B7A5E]/25 transition-all hover:-translate-y-0.5 hover:bg-[#4A6A4D] disabled:opacity-60",
           className
