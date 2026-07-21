@@ -13,6 +13,30 @@ const libreBaskerville = Libre_Baskerville({
   display: "swap",
 });
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  logo: `${siteConfig.url}/brand/willbuddy-wordmark.svg`,
+  description: siteConfig.description,
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    email: "support@mywillbuddy.com",
+    url: `${siteConfig.url}/contact`,
+  },
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  description: siteConfig.description,
+  publisher: { "@type": "Organization", name: siteConfig.name },
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
@@ -88,6 +112,18 @@ export default function RootLayout({
           />
         </head>
         <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#2D2A26]">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c"),
+            }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c"),
+            }}
+          />
           <Script id="meta-pixel" strategy="afterInteractive">
             {`!function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?

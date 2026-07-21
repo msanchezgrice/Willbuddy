@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
+import { siteConfig } from "@/lib/site";
 import {
   Mic,
   ClipboardCheck,
@@ -27,6 +28,14 @@ function HeroSection({ isAuthed }: { isAuthed: boolean }) {
         <h1 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl md:text-5xl font-bold text-[#2D2A26] mb-6 leading-tight tracking-tight">
           Talk it through or answer step by step.
         </h1>
+        <p className="mx-auto mb-6 max-w-xl text-base leading-relaxed text-[#5B4F3E]">
+          WillBuddy is a guided estate-planning tool for Texas families. In
+          about 15 minutes, by voice or step-by-step answers, you decide
+          guardianship, wills, healthcare wishes, and powers of attorney. For
+          a one-time $49, you get five Texas-compliant draft documents to
+          review with a licensed attorney. WillBuddy is not a law firm and
+          does not provide legal advice.
+        </p>
         <p className="text-lg md:text-xl text-[#5B4F3E] mb-4 leading-relaxed max-w-xl mx-auto">
           WillBuddy is an AI coach that walks you and your partner through
           wills, guardianship, healthcare wishes, and powers of attorney —
@@ -41,6 +50,8 @@ function HeroSection({ isAuthed }: { isAuthed: boolean }) {
             event="continue_cta_clicked"
             eventProperties={{ location: "hero", label: "Continue your plan" }}
             className={CTA_PRIMARY_CLASS}
+            data-testid="cta-hero-continue"
+            data-agent-action="continue-plan"
           >
             Continue your plan
           </TrackedLink>
@@ -59,6 +70,8 @@ function HeroSection({ isAuthed }: { isAuthed: boolean }) {
                   answer: "couple",
                 }}
                 className="flex-1 rounded-2xl border border-[#5B7A5E] bg-[#5B7A5E] px-6 py-4 font-semibold text-white shadow-lg shadow-[#5B7A5E]/20 transition-all hover:-translate-y-0.5 hover:bg-[#4A6A4D]"
+                data-testid="cta-hero-couple"
+                data-agent-action="start-plan"
               >
                 Me &amp; my partner
               </TrackedLink>
@@ -71,6 +84,8 @@ function HeroSection({ isAuthed }: { isAuthed: boolean }) {
                   answer: "individual",
                 }}
                 className="flex-1 rounded-2xl border-2 border-[#5B7A5E] bg-white px-6 py-4 font-semibold text-[#5B7A5E] transition-all hover:-translate-y-0.5 hover:bg-[#5B7A5E]/5"
+                data-testid="cta-hero-individual"
+                data-agent-action="start-plan"
               >
                 Just me
               </TrackedLink>
@@ -404,7 +419,7 @@ function PricingSection({ isAuthed }: { isAuthed: boolean }) {
   ];
 
   return (
-    <section className="px-6 py-20 md:py-28">
+    <section id="pricing" className="px-6 py-20 md:py-28">
       <div className="max-w-xl mx-auto text-center">
         <h2 className="font-[family-name:var(--font-heading)] text-2xl md:text-3xl font-bold text-[#2D2A26] mb-4">
           One price. Everything included.
@@ -444,6 +459,8 @@ function PricingSection({ isAuthed }: { isAuthed: boolean }) {
                 label: "Continue your plan",
               }}
               className={CTA_PRICING_CLASS}
+              data-testid="cta-pricing-continue"
+              data-agent-action="continue-plan"
             >
               Continue your plan
             </TrackedLink>
@@ -453,6 +470,8 @@ function PricingSection({ isAuthed }: { isAuthed: boolean }) {
               event="signup_cta_clicked"
               eventProperties={{ location: "pricing", label: "Start for Free" }}
               className={CTA_PRICING_CLASS}
+              data-testid="cta-pricing-start"
+              data-agent-action="start-plan"
             >
               Start for Free
             </TrackedLink>
@@ -464,10 +483,130 @@ function PricingSection({ isAuthed }: { isAuthed: boolean }) {
           starting from scratch. WillBuddy does the preparation so your
           attorney&apos;s time is spent on review, not discovery.
         </p>
+
+        <div className="mt-8 overflow-x-auto rounded-2xl border border-[#E8E0D6] bg-white text-left">
+          <table className="min-w-full divide-y divide-[#E8E0D6] text-sm">
+            <caption className="sr-only">
+              WillBuddy pricing compared with a typical attorney-prepared
+              estate plan
+            </caption>
+            <thead className="bg-[#F0EBE4] text-[#2D2A26]">
+              <tr>
+                <th scope="col" className="px-5 py-4 font-semibold">
+                  Option
+                </th>
+                <th scope="col" className="px-5 py-4 font-semibold">
+                  Typical cost
+                </th>
+                <th scope="col" className="px-5 py-4 font-semibold">
+                  What you get
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#E8E0D6] text-[#5B4F3E]">
+              <tr>
+                <th
+                  scope="row"
+                  className="px-5 py-4 font-medium text-[#2D2A26]"
+                >
+                  WillBuddy document package
+                </th>
+                <td className="px-5 py-4">$49 one-time</td>
+                <td className="px-5 py-4">
+                  Five Texas-compliant draft documents, full answer history,
+                  and a shareable link for your attorney
+                </td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="px-5 py-4 font-medium text-[#2D2A26]"
+                >
+                  Attorney starting from scratch
+                </th>
+                <td className="px-5 py-4">$1,000 &ndash; $2,000 (typical)</td>
+                <td className="px-5 py-4">
+                  Full drafting and legal advice; WillBuddy handles the
+                  preparation so attorney time goes to review
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );
 }
+
+const FAQ_ITEMS = [
+  {
+    question: "Is this legal advice?",
+    answer:
+      "No. WillBuddy generates draft documents based on your conversation, but it is not a law firm and does not provide legal advice. Your documents should be reviewed, finalized, and executed with a licensed Texas estate planning attorney.",
+  },
+  {
+    question: "What states do you support?",
+    answer:
+      "Texas only, right now. Estate law varies significantly by state, and we built WillBuddy to be deeply accurate for Texas families first. We plan to expand to other states in the future.",
+  },
+  {
+    question: "How long does it take?",
+    answer:
+      "Plan on about 15 minutes total, whether you talk or type. Most sections take 4 minutes or less, and you can skip around, pause, or come back anytime — your session saves automatically.",
+  },
+  {
+    question: "Can I do this alone?",
+    answer:
+      "Absolutely. WillBuddy works for individuals too. The guided plan adapts based on whether you're planning solo or with a partner.",
+  },
+  {
+    question: "What if I need to come back later?",
+    answer:
+      "Sessions save automatically. Close the tab, come back tomorrow, pick up right where you left off. No work is lost.",
+  },
+  {
+    question: "Do I still need a lawyer?",
+    answer:
+      "Yes. WillBuddy creates draft documents, but a licensed attorney should review them for accuracy, ensure they meet your specific circumstances, and supervise proper execution (signing, witnessing, notarization) under Texas law.",
+  },
+  {
+    question: "Is my information secure?",
+    answer:
+      "Yes. Your conversations and documents are encrypted in transit and at rest. We never use your personal information to train AI models.",
+  },
+  {
+    question: "What if I change my mind about a decision?",
+    answer:
+      "You can edit any decision before generating your final documents. After the guided plan, WillBuddy shows you a full summary where you can review and adjust anything.",
+  },
+];
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_ITEMS.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: { "@type": "Answer", text: faq.answer },
+  })),
+};
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "WillBuddy Document Package",
+  description:
+    "Five Texas-compliant draft estate planning documents — last will and testament, guardianship designation, medical power of attorney, durable power of attorney, and HIPAA authorization — generated from a guided plan and intended for attorney review.",
+  brand: { "@type": "Brand", name: "WillBuddy" },
+  url: siteConfig.url,
+  offers: {
+    "@type": "Offer",
+    price: "49.00",
+    priceCurrency: "USD",
+    availability: "https://schema.org/InStock",
+    url: siteConfig.url,
+  },
+};
 
 function FAQItem({
   question,
@@ -490,49 +629,6 @@ function FAQItem({
 }
 
 function FAQSection() {
-  const faqs = [
-    {
-      question: "Is this legal advice?",
-      answer:
-        "No. WillBuddy generates draft documents based on your conversation, but it is not a law firm and does not provide legal advice. Your documents should be reviewed, finalized, and executed with a licensed Texas estate planning attorney.",
-    },
-    {
-      question: "What states do you support?",
-      answer:
-        "Texas only, right now. Estate law varies significantly by state, and we built WillBuddy to be deeply accurate for Texas families first. We plan to expand to other states in the future.",
-    },
-    {
-      question: "How long does it take?",
-      answer:
-        "Plan on about 15 minutes total, whether you talk or type. Most sections take 4 minutes or less, and you can skip around, pause, or come back anytime — your session saves automatically.",
-    },
-    {
-      question: "Can I do this alone?",
-      answer:
-        "Absolutely. WillBuddy works for individuals too. The guided plan adapts based on whether you're planning solo or with a partner.",
-    },
-    {
-      question: "What if I need to come back later?",
-      answer:
-        "Sessions save automatically. Close the tab, come back tomorrow, pick up right where you left off. No work is lost.",
-    },
-    {
-      question: "Do I still need a lawyer?",
-      answer:
-        "Yes. WillBuddy creates draft documents, but a licensed attorney should review them for accuracy, ensure they meet your specific circumstances, and supervise proper execution (signing, witnessing, notarization) under Texas law.",
-    },
-    {
-      question: "Is my information secure?",
-      answer:
-        "Yes. Your conversations and documents are encrypted in transit and at rest. We never use your personal information to train AI models.",
-    },
-    {
-      question: "What if I change my mind about a decision?",
-      answer:
-        "You can edit any decision before generating your final documents. After the guided plan, WillBuddy shows you a full summary where you can review and adjust anything.",
-    },
-  ];
-
   return (
     <section className="px-6 py-20 md:py-28 bg-[#F0EBE4]/50">
       <div className="max-w-2xl mx-auto">
@@ -540,7 +636,7 @@ function FAQSection() {
           Common questions
         </h2>
         <div className="bg-white border border-[#E8E0D6] rounded-2xl px-6 md:px-8 divide-y-0">
-          {faqs.map((faq) => (
+          {FAQ_ITEMS.map((faq) => (
             <FAQItem
               key={faq.question}
               question={faq.question}
@@ -559,6 +655,18 @@ export default async function LandingPage() {
 
   return (
     <main className="flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <HeroSection isAuthed={isAuthed} />
       <TrustBar />
       <ResourcesSection />

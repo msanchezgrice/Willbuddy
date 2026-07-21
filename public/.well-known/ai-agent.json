@@ -1,0 +1,34 @@
+{
+  "name": "WillBuddy",
+  "description": "Voice-first estate planning coach for Texas families. Generates Texas-compliant draft estate planning documents for attorney review. Not a law firm; does not provide legal advice.",
+  "url": "https://mywillbuddy.com",
+  "version": "1.0.0",
+  "contact": "support@mywillbuddy.com",
+  "documentation": "https://mywillbuddy.com/agents.md",
+  "agent_card": "https://mywillbuddy.com/.well-known/agent-card.json",
+  "guardrails": {
+    "allowed_actions": [
+      "Browse public marketing pages, guides, blog posts, and research",
+      "Use the free tools under /tools/* (no account required)",
+      "Read public pricing and product information",
+      "Summarize or cite public content with attribution to mywillbuddy.com"
+    ],
+    "disallowed_actions": [
+      "Creating an account or signing in on behalf of a user without explicit user direction",
+      "Starting or completing a purchase (Stripe checkout) without explicit user confirmation",
+      "Submitting the contact form with a user's sensitive estate-planning details",
+      "Accessing or guessing authenticated routes (/session, /summary, /share, /couple) that belong to other users",
+      "Presenting WillBuddy output as legal advice or as final, executed legal documents"
+    ],
+    "confirmation_required_actions": [
+      "purchase",
+      "account-creation",
+      "form-submission"
+    ],
+    "rate_expectations": {
+      "requests_per_minute": 30,
+      "notes": "Public pages only; authenticated API routes require a user session. Crawl politely and honor robots.txt."
+    },
+    "contact": "support@mywillbuddy.com"
+  }
+}
