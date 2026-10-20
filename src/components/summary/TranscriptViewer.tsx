@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { readOwnedTranscript } from "@/lib/session-children-client";
 import type { TranscriptEntry } from "@/types";
 
 interface TranscriptViewerProps {
@@ -13,8 +13,7 @@ export function TranscriptViewer({ sessionId }: TranscriptViewerProps) {
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const supabase = createClient();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (expanded && entries.length === 0) {
@@ -25,16 +24,14 @@ export function TranscriptViewer({ sessionId }: TranscriptViewerProps) {
 
   async function loadTranscript() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("transcript_entries")
-      .select("*")
-      .eq("session_id", sessionId)
-      .order("timestamp", { ascending: true });
-
-    if (!error && data) {
-      setEntries(data as TranscriptEntry[]);
+    setErrorMessage(null);
+    try {
+      setEntries(await readOwnedTranscript(sessionId));
+    } catch {
+      setErrorMessage("We could not load your transcript. Close and reopen this panel to try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   const filteredEntries = searchQuery
@@ -108,7 +105,9 @@ export function TranscriptViewer({ sessionId }: TranscriptViewerProps) {
 
             {/* Messages */}
             <div className="max-h-[500px] overflow-y-auto p-4 space-y-3">
-              {loading ? (
+              {errorMessage ? (
+                <p role="alert" className="py-6 text-center text-sm text-red-700">{errorMessage}</p>
+              ) : loading ? (
                 <div className="text-center py-12 text-[#9B8E7E]">
                   Loading transcript...
                 </div>

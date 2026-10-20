@@ -17,7 +17,7 @@ import {
   type TranscriptEntry,
   type VoiceState,
 } from '@/types';
-import { createClient } from '@/lib/supabase/client';
+import { appendOwnedTranscript, saveOwnedDecision, updateOwnedDecision } from '@/lib/session-children-client';
 import { VOICE_UNAVAILABLE_MESSAGE } from '@/lib/voice-unavailable';
 import { captureAnalyticsEvent } from '@/lib/analytics/client';
 import { buildSectionPlan, resolvePlan } from '@/lib/sections/plan';
@@ -113,7 +113,6 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const recorderRef = useRef<AudioRecorder | null>(null);
   const playerRef = useRef<AudioPlayer | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const supabase = useRef(createClient());
 
   // Refs mirror state so async callbacks (wired once into the Gemini client)
   // always read the latest values instead of a stale closure snapshot. This is
@@ -280,15 +279,8 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
     async (entry: TranscriptEntry) => {
       const sid = sessionIdRef.current;
       if (!sid) return;
-      await supabase.current
-        .from('transcript_entries')
-        .upsert({
-          id: entry.id,
-          session_id: sid,
-          role: entry.role,
-          content: entry.content,
-          timestamp: entry.timestamp,
-        });
+      const saved = await appendOwnedTranscript(sid, entry);
+      setTranscript((prev) => prev.map((item) => item.id === entry.id ? saved : item));
     },
     [],
   );
@@ -300,24 +292,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
     async (decision: Decision) => {
       const sid = sessionIdRef.current;
       if (!sid) throw new Error('Session is not ready yet');
-      const { error } = await supabase.current
-        .from('decisions')
-        .upsert(
-          {
-            id: decision.id,
-            session_id: sid,
-            section: decision.section,
-            key: decision.key,
-            value: decision.value,
-            reasoning: decision.reasoning,
-            user_confirmed: decision.user_confirmed,
-            confidence: decision.confidence,
-            created_at: decision.created_at,
-            updated_at: decision.updated_at,
-          },
-          { onConflict: 'id' },
-        );
-      if (error) throw error;
+      return saveOwnedDecision(sid, decision);
     },
     [],
   );
@@ -531,7 +506,9 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
         timestamp: new Date().toISOString(),
       };
       setTranscript((prev) => [...prev, entry]);
-      saveTranscript(entry);
+      void saveTranscript(entry).catch(() => {
+        setOperationError('We could not save that message. Please try again.');
+      });
 
       clientRef.current.sendText(text);
     },
@@ -543,22 +520,17 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // -----------------------------------------------------------------------
   const updateDecision = useCallback(
     async (decisionId: string, newValue: string) => {
-      const now = new Date().toISOString();
       if (sessionId) {
-        const { error } = await supabase.current
-          .from('decisions')
-          .update({ value: newValue, updated_at: now })
-          .eq('id', decisionId);
-        if (error) {
+        try {
+          const saved = await updateOwnedDecision(sessionId, decisionId, { value: newValue });
+          setDecisions((prev) => prev.map((d) => d.id === decisionId ? saved : d));
+        } catch (error) {
           setOperationError('We could not save that edit. Please try again.');
           throw error;
         }
+        return;
       }
-      setDecisions((prev) =>
-        prev.map((d) =>
-          d.id === decisionId ? { ...d, value: newValue, updated_at: now } : d
-        )
-      );
+      throw new Error('Session is not ready yet');
     },
     [sessionId],
   );
@@ -597,12 +569,12 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
 
       try {
         clearOperationError();
-        await saveDecision(decision);
+        const saved = await saveDecision(decision);
         const next = existing
           ? decisionsRef.current.map((item) =>
-              item.section === section && item.key === key ? decision : item,
+              item.section === section && item.key === key ? saved : item,
             )
-          : [...decisionsRef.current, decision];
+          : [...decisionsRef.current, saved];
         decisionsRef.current = next;
         setDecisions(next);
         captureAnalyticsEvent('guided_plan_answer_saved', {

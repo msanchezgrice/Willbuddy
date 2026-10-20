@@ -94,7 +94,7 @@ test("guided saves only advance after persistence and surface failures", async (
     read("src/components/session/GuidedPlanFlow.tsx"),
   ]);
 
-  assert.match(provider, /const \{ error \} = await supabase\.current[\s\S]*if \(error\) throw error/);
+  assert.doesNotMatch(provider, /\.from\(['"]decisions['"]\)/);
   assert.match(provider, /if \(!response\.ok\)[\s\S]*throw new Error/);
   assert.match(guided, /role="alert"/);
   assert.match(guided, /catch \(error\)/);

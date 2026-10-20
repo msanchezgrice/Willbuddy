@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { confirmOwnedDecisions, updateOwnedDecision } from "@/lib/session-children-client";
 import type { Decision, Section } from "@/types";
 import { SECTIONS, SECTION_LABELS } from "@/types";
 
@@ -15,8 +15,7 @@ export function DecisionEditor({ decisions, sessionId }: DecisionEditorProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const supabase = createClient();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Group decisions by section
   const decisionsBySection: Record<Section, Decision[]> = {} as Record<Section, Decision[]>;
@@ -34,59 +33,42 @@ export function DecisionEditor({ decisions, sessionId }: DecisionEditorProps) {
 
   async function saveEdit(decisionId: string) {
     setSaving(true);
-    const { error } = await supabase
-      .from("decisions")
-      .upsert(
-        { id: decisionId, value: editValue, updated_at: new Date().toISOString() },
-        { onConflict: "id" }
-      );
-
-    if (!error) {
-      setLocalDecisions((prev) =>
-        prev.map((d) =>
-          d.id === decisionId ? { ...d, value: editValue, updated_at: new Date().toISOString() } : d
-        )
-      );
+    setErrorMessage(null);
+    try {
+      const saved = await updateOwnedDecision(sessionId, decisionId, { value: editValue });
+      setLocalDecisions((prev) => prev.map((d) => d.id === decisionId ? saved : d));
+      setEditingId(null);
+    } catch {
+      setErrorMessage("We could not save that edit. Please try again.");
+    } finally {
+      setSaving(false);
     }
-    setEditingId(null);
-    setSaving(false);
   }
 
   async function toggleConfirmed(decisionId: string, currentValue: boolean) {
     const newValue = !currentValue;
-    const { error } = await supabase
-      .from("decisions")
-      .upsert(
-        { id: decisionId, user_confirmed: newValue, updated_at: new Date().toISOString() },
-        { onConflict: "id" }
-      );
-
-    if (!error) {
-      setLocalDecisions((prev) =>
-        prev.map((d) =>
-          d.id === decisionId ? { ...d, user_confirmed: newValue } : d
-        )
-      );
+    setSaving(true);
+    setErrorMessage(null);
+    try {
+      const saved = await updateOwnedDecision(sessionId, decisionId, { userConfirmed: newValue });
+      setLocalDecisions((prev) => prev.map((d) => d.id === decisionId ? saved : d));
+    } catch {
+      setErrorMessage("We could not confirm that decision. Please try again.");
+    } finally {
+      setSaving(false);
     }
   }
 
   async function confirmAll() {
     setSaving(true);
-    const ids = localDecisions.filter((d) => !d.user_confirmed).map((d) => d.id);
-
-    for (const id of ids) {
-      await supabase
-        .from("decisions")
-        .upsert(
-          { id, user_confirmed: true, updated_at: new Date().toISOString() },
-          { onConflict: "id" }
-        );
+    setErrorMessage(null);
+    try {
+      setLocalDecisions(await confirmOwnedDecisions(sessionId));
+    } catch {
+      setErrorMessage("We could not confirm your decisions. Please try again.");
+    } finally {
+      setSaving(false);
     }
-
-    setLocalDecisions((prev) =>
-      prev.map((d) => ({ ...d, user_confirmed: true }))
-    );
-    setSaving(false);
   }
 
   function getConfidenceBadge(confidence: Decision["confidence"]) {
@@ -114,6 +96,7 @@ export function DecisionEditor({ decisions, sessionId }: DecisionEditorProps) {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
+      {errorMessage && <p role="alert" className="mb-4 text-sm text-red-700">{errorMessage}</p>}
       <div className="flex items-center justify-between mb-8">
         <h2 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[#5B4F3E]">
           Your Decisions
@@ -151,6 +134,7 @@ export function DecisionEditor({ decisions, sessionId }: DecisionEditorProps) {
                       <input
                         type="checkbox"
                         checked={decision.user_confirmed}
+                        disabled={saving}
                         onChange={() => toggleConfirmed(decision.id, decision.user_confirmed)}
                         className="w-4 h-4 rounded border-[#E8E0D6] text-[#5B7A5E] focus:ring-[#5B7A5E] cursor-pointer"
                       />
