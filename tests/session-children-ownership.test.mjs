@@ -318,6 +318,26 @@ test('guided provider stores the canonical server decision rather than its tempo
   assert.equal(decisionsRef.current[0].id, DA); assert.equal(visible[0].id, DA);
 });
 
+test('concurrent first guided saves merge one canonical natural-key answer after both replies', async () => {
+  const decisionsRef = { current: [] }, pending = [], renders = [];
+  const save = componentFunction('src/components/voice/VoiceProvider.tsx', 'saveGuidedDecision', {
+    sessionIdRef: { current: A }, decisionsRef, crypto: { randomUUID: () => 'temporary-browser-id' },
+    clearOperationError() {}, saveDecision: () => new Promise((resolve) => pending.push(resolve)),
+    setDecisions(value) { renders.push(value); }, captureAnalyticsEvent() {}, setOperationError: forbidden,
+  }, true);
+  const first = save({ section: 'family', key: 'full_name', value: 'First fixture' });
+  const second = save({ section: 'family', key: 'full_name', value: 'Second fixture' });
+  assert.equal(pending.length, 2, 'Both calls must start before either response');
+  pending[0]({ id: DA, session_id: A, section: 'family', key: 'full_name', value: 'First fixture' });
+  await first;
+  pending[1]({ id: DA, session_id: A, section: 'family', key: 'full_name', value: 'Second fixture' });
+  await second;
+  assert.equal(decisionsRef.current.length, 1);
+  assert.equal(decisionsRef.current[0].id, DA);
+  assert.equal(decisionsRef.current[0].value, 'Second fixture');
+  assert.equal(renders.at(-1).length, 1);
+});
+
 test('guided UI does not advance, complete or change sections after a rejected save', async () => {
   const errors = [], progress = [];
   const proceed = componentFunction('src/components/session/GuidedPlanFlow.tsx', 'continueFlow', {

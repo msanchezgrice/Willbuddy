@@ -570,11 +570,17 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       try {
         clearOperationError();
         const saved = await saveDecision(decision);
-        const next = existing
-          ? decisionsRef.current.map((item) =>
+        // Another save may have completed while this one was pending. Merge
+        // against the latest natural key, not the pre-request presence check.
+        const currentDecisions = decisionsRef.current;
+        const savedAlreadyPresent = currentDecisions.some(
+          (item) => item.section === section && item.key === key,
+        );
+        const next = savedAlreadyPresent
+          ? currentDecisions.map((item) =>
               item.section === section && item.key === key ? saved : item,
             )
-          : [...decisionsRef.current, saved];
+          : [...currentDecisions, saved];
         decisionsRef.current = next;
         setDecisions(next);
         captureAnalyticsEvent('guided_plan_answer_saved', {
