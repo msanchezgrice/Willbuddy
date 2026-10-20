@@ -13,6 +13,7 @@ import { useVoice } from '@/components/voice/VoiceProvider';
 import { SECTION_LABELS } from '@/types';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { VOICE_UNAVAILABLE_MESSAGE } from '@/lib/voice-unavailable';
 
 function SessionLayout() {
   const {
@@ -73,15 +74,15 @@ function SessionLayout() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() => chooseInputMethod('voice')}
-              className="min-h-44 rounded-3xl border-2 border-[#5B7A5E] bg-[#F4F7F3] p-6 text-left transition hover:-translate-y-0.5 hover:shadow-md"
+              disabled
+              className="min-h-44 cursor-not-allowed rounded-3xl border-2 border-[#D8CDBF] bg-[#F4F7F3] p-6 text-left opacity-70"
             >
               <span className="block font-[family-name:var(--font-heading)] text-xl font-bold text-[#2D2A26]">
                 Talk it through
               </span>
               <span className="mt-3 block text-sm leading-relaxed text-[#5B4F3E]">
-                Have a guided voice conversation with context and follow-up
-                questions.
+                  Voice is temporarily unavailable. Choose step-by-step planning
+                  to continue with your answers.
               </span>
             </button>
             <button
@@ -98,6 +99,28 @@ function SessionLayout() {
               </span>
             </button>
           </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (inputMethod === 'voice') {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center bg-[#FAF8F5] px-5 py-10">
+        <section className="w-full max-w-2xl rounded-3xl border border-[#D8CDBF] bg-[#FDFCFA] p-6 sm:p-10">
+          <h1 className="font-[family-name:var(--font-heading)] text-3xl text-[#2D2A26]">
+            Voice is temporarily unavailable
+          </h1>
+          <p className="mt-4 leading-relaxed text-[#5B4F3E]">{VOICE_UNAVAILABLE_MESSAGE}</p>
+          <p className="mt-3 text-sm text-[#5B4F3E]">Your existing answers stay in the same plan.</p>
+          {operationError && <p role="alert" className="mt-4 text-red-700">{operationError}</p>}
+          <button
+            type="button"
+            onClick={() => chooseInputMethod('guided')}
+            className="mt-6 min-h-12 rounded-full bg-[#5B7A5E] px-6 font-semibold text-white"
+          >
+            Continue step by step
+          </button>
         </section>
       </main>
     );

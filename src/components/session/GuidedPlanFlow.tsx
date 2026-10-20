@@ -134,7 +134,6 @@ export default function GuidedPlanFlow() {
     saveGuidedDecision,
     completeGuidedSession,
     saveAndExit,
-    selectInputMethod,
     jumpToSection,
     operationError,
     isSessionReady,
@@ -327,29 +326,6 @@ export default function GuidedPlanFlow() {
     }
   }
 
-  async function switchToVoice() {
-    if (saving) return;
-    setSaving(true);
-    setErrorMessage(null);
-    try {
-      if (value.trim()) {
-        await saveGuidedDecision({
-          section: question.section,
-          key: question.key,
-          value: value.trim(),
-          reasoning,
-        });
-      }
-      await selectInputMethod('voice');
-    } catch (error) {
-      console.error('Could not switch to voice:', error);
-      setErrorMessage(
-        'We could not save this answer or switch methods. Please try again.',
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
 
   return (
     <main className="min-h-[100dvh] bg-[#FAF8F5] px-4 py-5 sm:px-6 sm:py-8">
@@ -357,11 +333,10 @@ export default function GuidedPlanFlow() {
         <header className="mb-5 flex items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => void switchToVoice()}
-            disabled={saving}
-            className="min-h-11 rounded-full px-3 text-sm font-semibold text-[#5B7A5E] hover:bg-[#F0EBE4]"
+            disabled
+            className="min-h-11 cursor-not-allowed rounded-full px-3 text-sm font-semibold text-[#9B8E7E]"
           >
-            Switch to voice
+            Voice temporarily unavailable
           </button>
           <button
             type="button"

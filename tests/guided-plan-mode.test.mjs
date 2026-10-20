@@ -8,7 +8,7 @@ const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 const read = (relativePath) =>
   readFile(path.join(repoRoot, relativePath), "utf8");
 
-test("session offers equivalent voice and step-by-step input modes", async () => {
+test("session keeps step-by-step planning available during the voice pause", async () => {
   const [page, provider, guided] = await Promise.all([
     read("src/app/session/[id]/page.tsx"),
     read("src/components/voice/VoiceProvider.tsx"),
@@ -21,7 +21,7 @@ test("session offers equivalent voice and step-by-step input modes", async () =>
   assert.match(provider, /saveGuidedDecision/);
   assert.match(provider, /guided_plan_answer_saved/);
   assert.match(guided, /QuizProgress/);
-  assert.match(guided, /Switch to voice/);
+  assert.match(guided, /Voice temporarily unavailable/);
   assert.match(guided, /same private plan as the voice conversation/i);
 });
 

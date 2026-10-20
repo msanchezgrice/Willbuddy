@@ -18,6 +18,7 @@ import {
   type VoiceState,
 } from '@/types';
 import { createClient } from '@/lib/supabase/client';
+import { VOICE_UNAVAILABLE_MESSAGE } from '@/lib/voice-unavailable';
 import { captureAnalyticsEvent } from '@/lib/analytics/client';
 import { buildSectionPlan, resolvePlan } from '@/lib/sections/plan';
 import type { SessionGoals } from '@/types';
@@ -98,7 +99,7 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const [sectionsCompleted, setSectionsCompleted] = useState<Section[]>([]);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [decisions, setDecisions] = useState<Decision[]>([]);
-  const [sessionId, setSessionId] = useState<string | null>(initialSessionId ?? null);
+  const [sessionId] = useState<string | null>(initialSessionId ?? null);
   const [isSessionReady, setIsSessionReady] = useState(!initialSessionId);
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -128,7 +129,6 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   const goalsRef = useRef<SessionGoals | null>(null);
   const planRef = useRef<Section[]>(sectionPlan);
   const planPersistedRef = useRef(false);
-  const sessionStartedTrackedRef = useRef(false);
   const sessionCompletedTrackedRef = useRef(false);
 
   useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
@@ -273,18 +273,6 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
     }
   }, []);
 
-  // Persist onboarding answers onto the session row once we have both.
-  const persistOnboarding = useCallback(() => {
-    const sid = sessionIdRef.current;
-    if (!sid || !onboardingRef.current || onboardingPersistedRef.current) return;
-    onboardingPersistedRef.current = true;
-    void fetch('/api/session', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: sid, onboarding: onboardingRef.current }),
-    });
-  }, []);
-
   // -----------------------------------------------------------------------
   // Persist transcript entry to Supabase
   // -----------------------------------------------------------------------
@@ -332,106 +320,6 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
       if (error) throw error;
     },
     [],
-  );
-
-  // -----------------------------------------------------------------------
-  // Handle tool calls from Gemini (save_decision, etc.)
-  // -----------------------------------------------------------------------
-  const handleToolCall = useCallback(
-    (name: string, args: Record<string, unknown>) => {
-      if (name === 'recordDecision') {
-        const now = new Date().toISOString();
-        const decision: Decision = {
-          id: crypto.randomUUID(),
-          session_id: sessionIdRef.current ?? '',
-          section: (args.section as string) as Decision['section'],
-          key: args.key as string,
-          value: args.value as string,
-          reasoning: (args.reasoning as string | undefined) ?? null,
-          user_confirmed: false,
-          confidence: (args.confidence as string as Decision['confidence']) ?? 'decisive',
-          created_at: now,
-          updated_at: now,
-        };
-        void (async () => {
-          try {
-            await saveDecision(decision);
-            setDecisions((prev) => {
-              const idx = prev.findIndex(
-                (d) => d.section === decision.section && d.key === decision.key,
-              );
-              if (idx >= 0) {
-                const next = [...prev];
-                next[idx] = decision;
-                decisionsRef.current = next;
-                return next;
-              }
-              const next = [...prev, decision];
-              decisionsRef.current = next;
-              return next;
-            });
-          } catch (error) {
-            console.error('Could not save voice decision:', error);
-            setOperationError('We could not save that answer. Please retry before continuing.');
-          }
-        })();
-      }
-
-      if (name === 'updateProgress') {
-        const section = args.section as Section;
-        const nextSection = args.nextSection as Section | undefined;
-        void (async () => {
-          try {
-            // Merge with previously completed sections rather than overwriting.
-            const mergedCompleted = [
-              ...new Set([...sectionsCompletedRef.current, section]),
-            ];
-            const sid = sessionIdRef.current;
-            if (!sid) throw new Error('Session is not ready yet');
-            const response = await fetch('/api/session', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                sessionId: sid,
-                sectionsCompleted: mergedCompleted,
-                currentSection: nextSection ?? section,
-              }),
-            });
-            await requireSuccessfulResponse(
-              response,
-              'Could not save section progress.',
-            );
-            sectionsCompletedRef.current = mergedCompleted;
-            setSectionsCompleted(mergedCompleted);
-            // Show the section breakpoint only after progress is durable.
-            if (nextSection) {
-              setCompletedSection(section);
-              setPendingNextSection(nextSection);
-              setPauseReason('section');
-              setIsPaused(true);
-              stopVoiceTransport();
-            }
-          } catch (error) {
-            console.error('Could not save section progress:', error);
-            setOperationError(
-              'We could not save this section, so your plan has not advanced. Please try again.',
-            );
-          }
-        })();
-      }
-
-      if (name === 'flagForReview') {
-        const sid = sessionIdRef.current;
-        if (sid) {
-          void supabase.current.from('flagged_items').insert({
-            session_id: sid,
-            topic: args.topic as string,
-            reason: args.reason as string,
-          });
-        }
-      }
-    },
-    [requireSuccessfulResponse, saveDecision, stopVoiceTransport],
   );
 
   // -----------------------------------------------------------------------
@@ -608,141 +496,10 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
   // Connect to Gemini Live
   // -----------------------------------------------------------------------
   const connect = useCallback(async () => {
-    if (clientRef.current) return;
-    setVoiceState('connecting');
-
-    try {
-      // Fetch ephemeral token
-      const res = await fetch('/api/gemini/token', { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to fetch Gemini token');
-      const { token, sessionId: newSessionId } = await res.json();
-      const sid = newSessionId ?? sessionIdRef.current;
-      // Update the ref SYNCHRONOUSLY so callbacks wired below persist correctly,
-      // even before the setSessionId re-render lands.
-      if (sid) sessionIdRef.current = sid;
-      if (newSessionId) setSessionId(newSessionId);
-
-      // Persist onboarding answers onto the session (once).
-      persistOnboarding();
-
-      // Compute the tailored section plan (once). A plan loaded from the DB for
-      // a returning session already set planPersistedRef, so we won't overwrite.
-      if (!planPersistedRef.current) {
-        const computedPlan = buildSectionPlan(
-          onboardingRef.current ?? undefined,
-          goalsRef.current?.modules ?? null,
-        );
-        const computedGoals: SessionGoals = {
-          preset: goalsRef.current?.preset ?? null,
-          modules: computedPlan,
-          inputMethod: goalsRef.current?.inputMethod,
-        };
-        planRef.current = computedPlan;
-        goalsRef.current = computedGoals;
-        setSectionPlan(computedPlan);
-        planPersistedRef.current = true;
-        if (sid) {
-          void fetch('/api/session', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId: sid,
-              sectionPlan: computedPlan,
-              goals: computedGoals,
-            }),
-          });
-        }
-      }
-
-      // Dynamically import so the modules are only loaded client-side
-      const { GeminiLiveClient: GeminiCls } = await import('@/lib/gemini/client');
-      const { AudioRecorder: RecorderCls } = await import('@/lib/gemini/audio-recorder');
-      const { AudioPlayer: PlayerCls } = await import('@/lib/gemini/audio-player');
-
-      // Build resume context from the latest data (refs avoid stale closures).
-      const priorDecisions = decisionsRef.current;
-      const resumeContext = priorDecisions.length > 0 ? {
-        currentSection: currentSectionRef.current,
-        sectionsCompleted: sectionsCompletedRef.current,
-        decisions: priorDecisions,
-        flaggedItems: [],
-        recentTranscript: transcriptRef.current.slice(-10),
-      } : undefined;
-
-      const gemini = new GeminiCls({
-        apiKey: token,
-        sessionId: sid ?? '',
-        resumeHandle: resumeHandleRef.current,
-        resumeContext,
-        onboarding: onboardingRef.current ?? undefined,
-        sectionPlan: planRef.current,
-      });
-      const recorder = new RecorderCls();
-      const player = new PlayerCls();
-
-      // Wire up event handlers
-      gemini.onStateChange = (state: VoiceState) => setVoiceState(state);
-      gemini.onTranscript = (entry: TranscriptEntry) => {
-        setTranscript((prev) => [...prev, entry]);
-        saveTranscript(entry);
-      };
-      gemini.onToolCall = handleToolCall;
-      gemini.onSectionChange = (section: Section) => {
-        currentSectionRef.current = section;
-        setCurrentSection(section);
-      };
-      gemini.onAudioData = (base64Audio: string) => player.play(base64Audio);
-      gemini.onSessionHandle = (handle: string) => {
-        resumeHandleRef.current = handle;
-        if (sid) {
-          void fetch('/api/session', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, geminiResumeHandle: handle }),
-          });
-        }
-      };
-      gemini.onSessionComplete = () => {
-        if (!sid) return;
-        void completeSessionPersistently(sid, 'model').catch((error) => {
-          console.error('Could not complete voice session:', error);
-          setOperationError(
-            'Your answers are still here, but we could not finish saving the session. Please try again.',
-          );
-          setVoiceState('error');
-        });
-      };
-
-      recorder.onData = (base64Pcm: string) => {
-        if (!isMicMuted) gemini.sendAudio(base64Pcm);
-      };
-      recorder.onPermissionDenied = () => setVoiceState('mic_denied');
-
-      await gemini.connect();
-      await recorder.start();
-
-      clientRef.current = gemini;
-      recorderRef.current = recorder;
-      playerRef.current = player;
-
-      setVoiceState('listening');
-
-      // Funnel: fire session_started once per mounted session.
-      if (!sessionStartedTrackedRef.current) {
-        sessionStartedTrackedRef.current = true;
-        captureAnalyticsEvent('session_started', { session_id: sid ?? undefined });
-      }
-    } catch (err) {
-      console.error('Voice connect error:', err);
-      setVoiceState('error');
-    }
-  }, [
-    completeSessionPersistently,
-    handleToolCall,
-    isMicMuted,
-    persistOnboarding,
-    saveTranscript,
-  ]);
+    stopVoiceTransport();
+    setVoiceState('error');
+    setOperationError(VOICE_UNAVAILABLE_MESSAGE);
+  }, [stopVoiceTransport]);
 
   // -----------------------------------------------------------------------
   // Disconnect
@@ -875,6 +632,12 @@ export default function VoiceProvider({ children, sessionId: initialSessionId }:
 
   const selectInputMethod = useCallback(
     async (method: NonNullable<SessionGoals['inputMethod']>) => {
+      if (method === 'voice') {
+        stopVoiceTransport();
+        setVoiceState('error');
+        setOperationError(VOICE_UNAVAILABLE_MESSAGE);
+        return;
+      }
       clearOperationError();
       if (method === 'guided') {
         stopVoiceTransport();
