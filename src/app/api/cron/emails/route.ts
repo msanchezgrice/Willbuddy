@@ -21,10 +21,10 @@ import { getAppUrl } from "@/lib/resend";
  */
 export async function GET(request: NextRequest) {
   // Auth guard: Vercel cron sends "Authorization: Bearer $CRON_SECRET" when
-  // CRON_SECRET is set as an env var.
+  // CRON_SECRET is set as an env var. Missing/blank configuration denies access.
   const expected = process.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization") ?? "";
-  if (expected && authHeader !== `Bearer ${expected}`) {
+  if (!expected?.trim() || authHeader !== `Bearer ${expected}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
