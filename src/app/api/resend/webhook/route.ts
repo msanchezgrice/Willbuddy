@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   const toAddresses = event.data.to ?? [];
   if (!shouldForwardInbound(toAddresses)) {
-    return NextResponse.json({ ok: true, skipped: "not_target_inbox", to: toAddresses });
+    return NextResponse.json({ ok: true, skipped: "not_target_inbox" });
   }
 
   const forwardTo = getInboundForwardTo();
